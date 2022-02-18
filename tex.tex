@@ -1,0 +1,203 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{silence}
+\usepackage{polski}
+\usepackage{parskip}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+%\usepackage{pgfplots}
+%\pgfplotsset{compat=1.16}
+\usepackage{newunicodechar}
+\usepackage{etoolbox}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{stmaryrd}
+\usepackage[dvipsnames]{xcolor}
+\setcounter{secnumdepth}{0}
+
+\title{}
+\author{}
+\date{\vspace{-4ex}}
+
+\DeclareMathOperator{\im}{Im}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\Lin}{Lin}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\Char}{char}
+\newcommand{\Do}{\textsf{do\,}}
+\newcommand{\Free}{\textrm{-}\mathrm{free}}
+\newcommand{\Obs}{\mathrm{Obs}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\inner}[2]{( #1 \, | \, #2)}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\modulus}[1]{\left| #1 \right|}
+\newcommand{\abs}{\modulus}
+\newtheorem{theorem}{Twierdzenie}
+\newtheorem{lemat}{Lemat}
+\newcommand{\ol}{\overline}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\diag}{diag}
+\newcommand{\+}{\enspace}
+\newcommand{\sump}{\sideset{}{'}{∑}} % sum prime
+\newcommand{\sumb}{\sideset{}{"}{∑}} % sum bis
+\newcommand{\gr}{\textcolor{ForestGreen}}
+
+\newunicodechar{∅}{\emptyset} % Digr /0
+\newunicodechar{∞}{\infty} % Digr 00
+\newunicodechar{∂}{\partial} % Digr dP
+\newunicodechar{α}{\alpha}
+\newunicodechar{β}{\beta}
+\newunicodechar{ξ}{\xi} % Digr c*
+\newunicodechar{δ}{\delta} % Digr d*
+\newunicodechar{ε}{\varepsilon}
+\newunicodechar{φ}{\varphi}
+\newunicodechar{θ}{\theta} % Digr h*
+\newunicodechar{κ}{\kappa}
+\newunicodechar{λ}{\lambda}
+\newunicodechar{μ}{\mu}
+\newunicodechar{π}{\pi}
+\newunicodechar{ψ}{\psi}
+\newunicodechar{ρ}{\rho}
+\newunicodechar{σ}{\sigma}
+\newunicodechar{τ}{\tau}
+\newunicodechar{ω}{\omega}
+\newunicodechar{η}{\eta} % Digr y*
+\newunicodechar{ζ}{\zeta} % Digr z*
+\newunicodechar{Δ}{\Delta}
+\newunicodechar{Γ}{\Gamma}
+\newunicodechar{Λ}{\Lambda}
+\newunicodechar{Θ}{\Theta}
+\newunicodechar{Φ}{\Phi} % Digr F*
+\newunicodechar{Π}{\Pi}
+\newunicodechar{Ψ}{\Psi} % digr Q*
+\newunicodechar{Σ}{\Sigma} % digr S*
+\newunicodechar{Ω}{\Omega} % digr W*
+\newunicodechar{ℕ}{\N} % Digr NN 8469 nonstandard
+\newunicodechar{ℤ}{\Z} % Digr ZZ 8484 nonstandard
+\newunicodechar{ℚ}{\Q} % Digr QQ 8474 nonstandard
+\newunicodechar{ℝ}{\R} % Digr RR 8477 nonstandard
+\newunicodechar{ℂ}{\C} % Digr CC 8450 nonstandard
+\newunicodechar{∑}{\sum}
+\newunicodechar{∏}{\prod}
+\newunicodechar{∫}{\int}
+\newunicodechar{∓}{\mp}
+\newunicodechar{⌈}{\lceil} % Digr <7
+\newunicodechar{⌉}{\rceil} % Digr >7
+\newunicodechar{⌊}{\lfloor} % Digr 7<
+\newunicodechar{⌋}{\rfloor} % Digr 7>
+\newunicodechar{≅}{\cong} % Digr ?=
+\newunicodechar{≡}{\equiv} % Digr 3=
+\newunicodechar{◁}{\triangleleft} % Digr Tl
+\newunicodechar{▷}{\triangleright} % Digr Tr
+\newunicodechar{≤}{\le}
+\newunicodechar{≥}{\ge}
+\newunicodechar{≪}{\ll} % Digr <*
+\newunicodechar{≫}{\gg} % Digr *>
+\newunicodechar{≠}{\ne}
+\newunicodechar{⊆}{\subseteq} % Digr (_
+\newunicodechar{⊇}{\supseteq} % Digr _)
+\newunicodechar{⊂}{\subset} % Digr (C
+\newunicodechar{⊃}{\supset} % Digr C)
+\newunicodechar{∩}{\cap} % Digr (U
+\newunicodechar{∖}{\setminus} % Digr -\ 8726 nonstandard
+\newunicodechar{∪}{\cup} % Digr )U
+\newunicodechar{∼}{\sim} % Digr ?1
+\newunicodechar{≈}{\approx} % Digr ?2
+\newunicodechar{∈}{\in} % Digr (-
+\newunicodechar{∋}{\ni} % Digr -)
+\newunicodechar{∇}{\nabla} % Digr NB
+\newunicodechar{∃}{\exists} % Digr TE
+\newunicodechar{∀}{\forall} % Digr FA
+\newunicodechar{∧}{\wedge} % Digr AN
+\newunicodechar{∨}{\vee} % Digr OR
+\newunicodechar{⊥}{\bot} % Digr -T
+\newunicodechar{⊢}{\vdash} % Digr \- 8866 nonstandard
+\newunicodechar{⊨}{\models} % Digr \= 8872 nonstandard
+\newunicodechar{⊤}{\top} % Digr TO 8868 nonstandard
+\newunicodechar{⇒}{\implies} % Digr =>
+\newunicodechar{⊸}{\multimap} % Digr #> nonstandard
+\newunicodechar{⇐}{\impliedby} % Digr <=
+\newunicodechar{⇔}{\iff} % Digr ==
+\newunicodechar{↔}{\leftrightarrow} % Digr <>
+\newunicodechar{↦}{\mapsto} % Digr T> 8614 nonstandard
+\newunicodechar{∘}{\circ} % Digr Ob
+\newunicodechar{⊕}{\oplus} % Digr O+ 8853
+\newunicodechar{⊗}{\otimes} % Digr OX 8855
+\newunicodechar{⟦}{\llbracket} % Digr [[ 10214 nonstandard (needs pkg stmaryrd)
+\newunicodechar{⟧}{\rrbracket} % Digr ]] 10215 nonstandard
+
+
+% cursed
+\WarningFilter{newunicodechar}{Redefining Unicode}
+\newunicodechar{·}{\ifmmode\cdot\else\textperiodcentered\fi} % Digr .M
+\newunicodechar{×}{\ifmmode\times\else\texttimes\fi} % Digr *X
+\newunicodechar{→}{\ifmmode\rightarrow\else\textrightarrow\fi} % Digr ->
+\newunicodechar{←}{\ifmmode\leftarrow\else\textleftarrow\fi} % Digr ->
+\newunicodechar{⟨}{\ifmmode\langle\else\textlangle\fi} % Digr LA 10216 nonstandard
+\newunicodechar{⟩}{\ifmmode\rangle\else\textrangle\fi} % Digr RA 10217 nonstandard
+\newunicodechar{…}{\ifmmode\dots\else\textellipsis\fi} % Digr .,
+\newunicodechar{±}{\ifmmode\pm\else\textpm\fi} % Digr +-
+\newunicodechar{¬}{\ifmmode\lnot\else\textlnot\fi} % Digr NO
+
+\begin{document}
+
+\maketitle
+
+\begin{align*}
+	⟦\mathsf{T}⟧ &= \mathcal{P}(\mathsf{Val}) = \mathsf{Type}\\
+	⟦\mathsf{E}⟧=⟦\mathsf{R}⟧ &= \mathcal{P}(\mathsf{Exp}×ℕ×\mathsf{Type})\\
+\end{align*}
+
+\begin{align*}
+	\Obs = \{ e \mid e →^* v \}
+\end{align*}
+
+% typing ???
+
+\begin{align*}
+	\mathcal{E}⟦τ/ε⟧_η &=
+	\{ t \mid ∀K∈\mathcal{K}⟦τ/ε⟧_η.\, K[t] ∈ \Obs \} \\
+	\mathcal{K}⟦τ/ε⟧_η &=
+	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ε⟧_η.\, K[s] ∈ \Obs\} \\
+	\mathcal{S}⟦τ/ε⟧_η &=
+	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ε⟧_η ∧ n\Free(K) ∧ ∀e∈μ.\, K[e]∈\mathcal{E}⟦τ/ε⟧_η\} \\
+\end{align*}
+\begin{align*}
+	⟦τ_1 →_ε τ_2⟧_η &=
+	\{ t \mid ∀v∈⟦τ_1⟧.\, t\,v ∈ \mathcal{E}⟦τ_2/ε⟧_η \} \\
+	⟦∀α::κ.\,τ⟧_η &=
+	\{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
+	⟦α⟧_η &= η(α) \\
+	\\
+	⟦τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_η \mid v∈⟦τ_1⟧_η \} \\
+	⟦∀α::κ.\,ε⟧_η &= \{t \mid ∃μ∈⟦κ⟧.\, t∈⟦ε⟧_{[α↦μ]η} \} \\
+	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(v, n+1, μ) \mid (v, n, μ)∈⟦ρ⟧_η \}
+\end{align*}
+
+\begin{align*}
+	\mathcal{E}⟦τ/ε⟧_η\gr{(X)} &=
+	\{ t \mid ∀K∈\mathcal{K}⟦τ/ε⟧_η\gr{(X)}.\, K[t] ∈ \Obs \} \\
+	\mathcal{K}⟦τ/ε⟧_η\gr{(X)} &=
+	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ε⟧_η\gr{(X)}.\, K[s] ∈ \Obs\} \\
+	\mathcal{S}⟦τ/ε⟧_η\gr{(X)} &=
+	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ε⟧_η ∧ n\Free(K) ∧ ∀e∈μ.\, K[e]∈\gr{X}\}
+	% substituting X removes the dependence on τ
+	% maybe termination requires no \mathcal{S}?
+\end{align*}
+
+\iffalse
+\begin{align*}
+	\abs{τ_1 →_ε τ_2} &= \abs{τ_1} + \abs{ε} + \abs{τ_2}
+	\abs{∀α::κ.\,τ} &= 1 + \abs{τ} \\
+	\abs{α} &= 1 \\
+\end{align*}
+\fi
+
+\end{document}
