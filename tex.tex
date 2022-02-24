@@ -152,28 +152,31 @@
 
 \begin{align*}
 	⟦\mathsf{T}⟧ &= \mathcal{P}(\mathsf{Val}) = \mathsf{Type}\\
-	⟦\mathsf{E}⟧=⟦\mathsf{R}⟧ &= \mathcal{P}(\mathsf{Exp}×ℕ×\mathsf{Type})\\
+	⟦\mathsf{E}⟧=⟦\mathsf{R}⟧ &= \mathcal{P}(\mathsf{Exp}×ℕ×\mathsf{Type}) = \mathsf{Eff}\\
 \end{align*}
 
 \begin{align*}
-	\Obs = \{ e \mid e →^* v \}
+	\Obs = \{ e \mid ∃v.\, e →^* v \}
 \end{align*}
 
 % typing ???
 
 \begin{align*}
-	\mathcal{E}⟦τ/ε⟧_η &=
-	\{ t \mid ∀K∈\mathcal{K}⟦τ/ε⟧_η.\, K[t] ∈ \Obs \} \\
-	\mathcal{K}⟦τ/ε⟧_η &=
-	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ε⟧_η.\, K[s] ∈ \Obs\} \\
-	\mathcal{S}⟦τ/ε⟧_η &=
-	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ε⟧_η ∧ n\Free(K) ∧ ∀e∈μ.\, K[e]∈\mathcal{E}⟦τ/ε⟧_η\} \\
+	\mathcal{E}⟦τ/ρ⟧_η &=
+	\{ t \mid ∀K∈\mathcal{K}⟦τ/ρ⟧_η.\, K[t] ∈ \Obs \} \\
+	\mathcal{K}⟦τ/ρ⟧_η &=
+	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ρ⟧_η.\, K[s] ∈ \Obs\} \\
+	\mathcal{S}⟦τ/ρ⟧_η &=
+	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η ∧ n\Free(K) ∧ ∀e∈μ.\, K[e]∈\mathcal{E}⟦τ/ρ⟧_η\} \\
 \end{align*}
+%
 \begin{align*}
-	⟦τ_1 →_ε τ_2⟧_η &=
-	\{ t \mid ∀v∈⟦τ_1⟧.\, t\,v ∈ \mathcal{E}⟦τ_2/ε⟧_η \} \\
-	⟦∀α::κ.\,τ⟧_η &=
-	\{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
+	%⟦τ_1 →_ρ τ_2⟧_η
+	%&= \{ t \mid ∀v∈⟦τ_1⟧.\, t\,v ∈ \mathcal{E}⟦τ_2/ρ⟧_η \} \\
+	⟦τ_1 →_ρ τ_2⟧_η
+	&= \{ λx.\,t \mid ∀v∈⟦τ_1⟧.\, [x↦v]t ∈ \mathcal{E}⟦τ_2/ρ⟧_η \} \\
+	⟦∀α::κ.\,τ⟧_η
+	&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
 	⟦α⟧_η &= η(α) \\
 	\\
 	⟦τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_η \mid v∈⟦τ_1⟧_η \} \\
@@ -182,22 +185,26 @@
 \end{align*}
 
 \begin{align*}
-	\mathcal{E}⟦τ/ε⟧_η\gr{(X)} &=
-	\{ t \mid ∀K∈\mathcal{K}⟦τ/ε⟧_η\gr{(X)}.\, K[t] ∈ \Obs \} \\
-	\mathcal{K}⟦τ/ε⟧_η\gr{(X)} &=
-	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ε⟧_η\gr{(X)}.\, K[s] ∈ \Obs\} \\
-	\mathcal{S}⟦τ/ε⟧_η\gr{(X)} &=
-	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ε⟧_η ∧ n\Free(K) ∧ ∀e∈μ.\, K[e]∈\gr{X}\}
+	\mathcal{E}⟦τ/ρ⟧_η\gr{(X)} &=
+	\{ t \mid ∀K∈\mathcal{K}⟦τ/ρ⟧_η\gr{(X)}.\, K[t] ∈ \Obs \} \\
+	\mathcal{K}⟦τ/ρ⟧_η\gr{(X)} &=
+	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ρ⟧_η\gr{(X)}.\, K[s] ∈ \Obs\} \\
+	\mathcal{S}⟦τ/ρ⟧_η\gr{(X)} &=
+	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η ∧ n\Free(K) ∧ ∀e∈μ.\, K[e]∈\gr{X}\}
 	% substituting X removes the dependence on τ
 	% maybe termination requires no \mathcal{S}?
 \end{align*}
 
 \iffalse
 \begin{align*}
-	\abs{τ_1 →_ε τ_2} &= \abs{τ_1} + \abs{ε} + \abs{τ_2}
+	\abs{τ_1 →_ρ τ_2} &= \abs{τ_1} + \abs{ρ} + \abs{τ_2}
 	\abs{∀α::κ.\,τ} &= 1 + \abs{τ} \\
 	\abs{α} &= 1 \\
 \end{align*}
 \fi
-
+\begin{align*}
+	\mathcal{C}⟦τ_1/ρ_1 \rightsquigarrow τ_2/ρ_2⟧_η =
+	\{E \mid\ & ∀v∈⟦τ_1⟧_η.\,E[v]∈\mathcal{E}⟦τ_2/ρ_2⟧_η \ ∧ \\
+			& ∀e∈\mathcal{S}⟦τ_1/ρ_1⟧_η.\, E[e]∈\mathcal{E}⟦τ_2/ρ_2⟧_η \}
+\end{align*}
 \end{document}
