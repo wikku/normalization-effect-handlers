@@ -1,13 +1,10 @@
-\documentclass[a4paper, 12pt]{article}
+\documentclass[a4paper, 12pt]{report}
 \usepackage[utf8]{inputenc}
 \usepackage{silence}
-\usepackage{polski}
 \usepackage{parskip}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{mathtools}
 \usepackage{enumitem}
-%\usepackage{pgfplots}
-%\pgfplotsset{compat=1.16}
 \usepackage{newunicodechar}
 \usepackage{etoolbox}
 \usepackage[margin=1.2in]{geometry}
@@ -15,38 +12,26 @@
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{stmaryrd}
+\usepackage{microtype}
 \usepackage[dvipsnames]{xcolor}
 \setcounter{secnumdepth}{0}
 
-\title{}
-\author{}
+\title{Polymorphic algebraic effects: theoretical properties and implementation}
+\author{Wiktor Kuchta}
 \date{\vspace{-4ex}}
 
-\DeclareMathOperator{\im}{Im}
-\DeclareMathOperator{\rank}{rank}
-\DeclareMathOperator{\Lin}{Lin}
-\DeclareMathOperator{\sgn}{sgn}
-\DeclareMathOperator{\Char}{char}
 \newcommand{\Do}{\textsf{do\,}}
 \newcommand{\Free}{\textrm{-}\mathrm{free}}
 \newcommand{\Obs}{\mathrm{Obs}}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\Z}{\mathbb{Z}}
-\newcommand{\Q}{\mathbb{Q}}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\C}{\mathbb{C}}
-\newcommand{\inner}[2]{( #1 \, | \, #2)}
 \newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
 \newcommand{\modulus}[1]{\left| #1 \right|}
 \newcommand{\abs}{\modulus}
-\newtheorem{theorem}{Twierdzenie}
-\newtheorem{lemat}{Lemat}
 \newcommand{\ol}{\overline}
 \DeclareMathOperator{\tr}{tr}
 \DeclareMathOperator{\diag}{diag}
 \newcommand{\+}{\enspace}
-\newcommand{\sump}{\sideset{}{'}{∑}} % sum prime
-\newcommand{\sumb}{\sideset{}{"}{∑}} % sum bis
 \newcommand{\gr}{\textcolor{ForestGreen}}
 
 \newunicodechar{∅}{\emptyset} % Digr /0
@@ -81,9 +66,6 @@
 \newunicodechar{Ω}{\Omega} % digr W*
 \newunicodechar{ℕ}{\N} % Digr NN 8469 nonstandard
 \newunicodechar{ℤ}{\Z} % Digr ZZ 8484 nonstandard
-\newunicodechar{ℚ}{\Q} % Digr QQ 8474 nonstandard
-\newunicodechar{ℝ}{\R} % Digr RR 8477 nonstandard
-\newunicodechar{ℂ}{\C} % Digr CC 8450 nonstandard
 \newunicodechar{∑}{\sum}
 \newunicodechar{∏}{\prod}
 \newunicodechar{∫}{\int}
@@ -150,6 +132,47 @@
 
 \maketitle
 
+\chapter{Introduction}
+A programming language needs to be more than just a lambda calculus,
+capable only of functional abstraction and evaluation of expressions.
+Programs need to have an effect on the outside world and, thinking more locally,
+in our programs we would like to have fragments which do not merely reduce to a value in isolation,
+but affect the surrounding code in interesting ways.
+This is what we call computational effects, the typical examples of which are:
+input/output, mutable state, exceptions, nondeterminism, and coroutines.
+
+Today, we are at the mercy of programming language designers to include the
+effects we would like to use and make sure that they all interact with
+each other well.
+In recent years, however, a new approach, called \textit{algebraic effects}, has emerged.
+Algebraic effects allow programmers to express all the usual computational effects as library code
+and use them in the usual direct style (as opposed to eg. monadic encodings,
+which do not always play well with the rest of the language and aren't easily composed).
+These implementations of effects are instances of one concept and hence interact
+with each other predictably.
+
+More concretely, algebraic effects may be thought of as resumable exceptions.
+We can \textit{perform an operation}, just as we can raise an exception in a typical programming language.
+The operation is then handled by the nearest enclosing \textit{handler} for the specific operation.
+The handler receives the value given at perform-point and also,
+unlike normal exception handlers,
+a \textit{continuation}, a first-class functional value representing the rest
+of the code to execute inside the handler from the perform-point.
+By calling the continuation with a value we can resume at the perform-point,
+as if performing the operation evaluated to the value.
+But more interestingly, we can resume multiple times, or never, or store the continuation for later use.
+
+This access to the continuation, while powerful, might also be a recipe for disaster.
+That's why languages with algebraic effects typically have
+\textit{type-and-effect systems},
+not only tracking the type of value an expression might evaluate to, but also
+what kind of effects it may perform on the way.
+
+
+\chapter{The logical relation}
+The logical relation is adapted from \cite{hwc} with a few changes:
+our relation is unary, we additionally have polymorphic effects, we don't have type lambdas.
+
 \begin{align*}
 	⟦\mathsf{T}⟧ &= \mathcal{P}(\mathsf{Val}) = \mathsf{Type}\\
 	⟦\mathsf{E}⟧=⟦\mathsf{R}⟧ &= \mathcal{P}(\mathsf{Exp}×ℕ×\mathsf{Type}) = \mathsf{Eff}\\
@@ -177,9 +200,9 @@
 	&= \{ λx.\,t \mid ∀v∈⟦τ_1⟧.\, [x↦v]t ∈ \mathcal{E}⟦τ_2/ρ⟧_η \} \\
 	⟦∀α::κ.\,τ⟧_η
 	&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
-	⟦α⟧_η &= η(α) \\
+	⟦α⟧_η &= \{ v \mid ∀K. (∀u∈η(α). K[u]∈\Obs) ⇒ K[v]∈\Obs \} \\
 	\\
-	⟦τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_η \mid v∈⟦τ_1⟧_η \} \\
+	⟦τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_η) \mid v∈⟦τ_1⟧_η \} \\
 	⟦∀α::κ.\,ε⟧_η &= \{t \mid ∃μ∈⟦κ⟧.\, t∈⟦ε⟧_{[α↦μ]η} \} \\
 	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(v, n+1, μ) \mid (v, n, μ)∈⟦ρ⟧_η \}
 \end{align*}
@@ -191,20 +214,9 @@
 	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ρ⟧_η\gr{(X)}.\, K[s] ∈ \Obs\} \\
 	\mathcal{S}⟦τ/ρ⟧_η\gr{(X)} &=
 	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η ∧ n\Free(K) ∧ ∀e∈μ.\, K[e]∈\gr{X}\}
-	% substituting X removes the dependence on τ
-	% maybe termination requires no \mathcal{S}?
 \end{align*}
 
-\iffalse
-\begin{align*}
-	\abs{τ_1 →_ρ τ_2} &= \abs{τ_1} + \abs{ρ} + \abs{τ_2}
-	\abs{∀α::κ.\,τ} &= 1 + \abs{τ} \\
-	\abs{α} &= 1 \\
-\end{align*}
-\fi
-\begin{align*}
-	\mathcal{C}⟦τ_1/ρ_1 \rightsquigarrow τ_2/ρ_2⟧_η =
-	\{K \mid\ & ∀v∈⟦τ_1⟧_η.\,K[v]∈\mathcal{E}⟦τ_2/ρ_2⟧_η \ ∧ \\
-			& ∀e∈\mathcal{S}⟦τ_1/ρ_1⟧_η.\, K[e]∈\mathcal{E}⟦τ_2/ρ_2⟧_η \}
-\end{align*}
+\bibliographystyle{plain}
+\bibliography{refs}
+
 \end{document}
