@@ -137,7 +137,7 @@ A programming language needs to be more than just a lambda calculus,
 capable only of functional abstraction and evaluation of expressions.
 Programs need to have an effect on the outside world and, thinking more locally,
 in our programs we would like to have fragments which do not merely reduce to a value in isolation,
-but affect the surrounding code in interesting ways.
+but affect the execution of surrounding code in interesting ways.
 This is what we call computational effects, the typical examples of which are:
 input/output, mutable state, exceptions, nondeterminism, and coroutines.
 
@@ -147,12 +147,13 @@ each other well.
 In recent years, however, a new approach, called \textit{algebraic effects}, has emerged.
 Algebraic effects allow programmers to express all the usual computational effects as library code
 and use them in the usual direct style (as opposed to eg. monadic encodings,
-which do not always play well with the rest of the language and aren't easily composed).
+which do not always play well with the rest of the language and do not compose easily).
 These implementations of effects are instances of one concept and hence interact
 with each other predictably.
 
 More concretely, algebraic effects may be thought of as resumable exceptions.
-We can \textit{perform an operation}, just as we can raise an exception in a typical programming language.
+We can \textit{perform} an \textit{operation},
+just as we can raise an exception in a typical high-level programming language.
 The operation is then handled by the nearest enclosing \textit{handler} for the specific operation.
 The handler receives the value given at perform-point and also,
 unlike normal exception handlers,
@@ -163,15 +164,30 @@ as if performing the operation evaluated to the value.
 But more interestingly, we can resume multiple times, or never, or store the continuation for later use.
 
 This access to the continuation, while powerful, might also be a recipe for disaster.
-That's why languages with algebraic effects typically have
+That is why languages with algebraic effects typically have
 \textit{type-and-effect systems},
 not only tracking the type of value an expression might evaluate to, but also
 what kind of effects it may perform on the way.
 
+[todo segue]
+
+We will study the deep handler calculus and type-and-effect system formulated
+in \cite{fscd19}.
+It is a refreshingly minimal language---the call-by-value lambda calculus with a few extensions
+to be able to express the essence of algebraic effects.
+There is only one unnamed universal operation, written $\Do v$.
+To be able to simulate calculi with named effects (and more),
+the \textit{lift} operator, written $[e]$, is introduced.
+When performing operations in code enclosed by lift,
+the nearest handler will be skipped and the operation will be handled by the next one instead.
+Naturally, the operator composes, so multiple enclosing lifts means multiple handlers skipped.
+Interestingly, the effect-tracking system is structural,
+we do not have any concept of predefined or user-defined (named) signatures of effects.
+Finally, the language includes polymorphic expressions and polymorphic operations.
 
 \chapter{The logical relation}
 The logical relation is adapted from \cite{hwc} with a few changes:
-our relation is unary, we additionally have polymorphic effects, we don't have type lambdas.
+our relation is unary, we additionally have polymorphic effects, we do not have type lambdas.
 
 \begin{align*}
 	⟦\mathsf{T}⟧ &= \mathcal{P}(\mathsf{Val}) = \mathsf{Type}\\
