@@ -20,7 +20,8 @@
 \author{Wiktor Kuchta}
 \date{\vspace{-4ex}}
 
-\newcommand{\Do}{\textsf{do\,}}
+\newcommand{\Do}{\textsf{do\;}}
+\newcommand{\Handle}{\textsf{handle\;}}
 \newcommand{\Free}{\textrm{-}\mathrm{free}}
 \newcommand{\Obs}{\mathrm{Obs}}
 \newcommand{\N}{\mathbb{N}}
@@ -34,6 +35,9 @@
 \newcommand{\+}{\enspace}
 \newcommand{\gr}{\textcolor{ForestGreen}}
 
+
+\newunicodechar{│}{\mid} % Digr vv
+\newunicodechar{□}{\square} % Digr OS
 \newunicodechar{∅}{\emptyset} % Digr /0
 \newunicodechar{∞}{\infty} % Digr 00
 \newunicodechar{∂}{\partial} % Digr dP
@@ -44,6 +48,7 @@
 \newunicodechar{ε}{\varepsilon}
 \newunicodechar{φ}{\varphi}
 \newunicodechar{θ}{\theta} % Digr h*
+\newunicodechar{ι}{\iota} % Digr i*
 \newunicodechar{κ}{\kappa}
 \newunicodechar{λ}{\lambda}
 \newunicodechar{μ}{\mu}
@@ -169,21 +174,57 @@ That is why languages with algebraic effects typically have
 not only tracking the type of value an expression might evaluate to, but also
 what kind of effects it may perform on the way.
 
-[todo segue]
+This work will study a particular formal language equipped with algebraic effects.
+Although most results in the domain of programming languages depend crucially on the exact calculus and type system used,
+we hope that the results, ideas, and techniques may apply elsewhere.
+This should not seem far-fetched,
+as the paper which introduced the language \cite{fscd19} is exactly about
+interexpressibility with other systems.
+
+Possibly the most interesting result of this work is a potentially novel use of coinduction
+in the method of logical relations.
+It allowed us to get rid of step-indexing in the definition of the logical relation and
+ultimately prove termination of the language.
+This may seem surprising, as coinduction is connotated primarily with infinite processes.
+
+[todo other contributions]
+
+I would like to thank Dariusz Biernacki, Filip Sieczkowski, and Piotr Polesiuk
+for their help with this work.
+
+\chapter{The language}
 
 We will study the deep handler calculus and type-and-effect system formulated
 in \cite{fscd19}.
 It is a refreshingly minimal language---the call-by-value lambda calculus with a few extensions
 to be able to express the essence of algebraic effects.
-There is only one unnamed universal operation, written $\Do v$.
+There is only one unnamed universal operation, performed $\Do v$.
 To be able to simulate calculi with named effects (and more),
 the \textit{lift} operator, written $[e]$, is introduced.
-When performing operations in code enclosed by lift,
+When operations are performed inside the expression $e$ enclosed by lift,
 the nearest handler will be skipped and the operation will be handled by the next one instead.
 Naturally, the operator composes, so multiple enclosing lifts means multiple handlers skipped.
 Interestingly, the effect-tracking system is structural,
 we do not have any concept of predefined or user-defined (named) signatures of effects.
 Finally, the language includes polymorphic expressions and polymorphic operations.
+
+\begin{align*}
+	\textrm{TVar} ∋ α,β,…       &                    \\%&\textrm{(type variables)}\\
+	\textrm{Var} ∋ f,r,x,y,…    &                    \\%&\textrm{(variables)}\\
+	\textrm{Kind} ∋ κ           &::=
+		T │ E │ R \\%&\textrm{(kinds)}\\
+	\textrm{Types} ∋ σ,τ,ε,ρ &::=
+		α │ τ→_ρτ │ ∀α::κ.\,τ │ ι │ ε · ρ
+		\\%&\textrm{(types and rows)}\\
+	\textrm{Val} ∋ v            &::= x │ λ x .\,t \\%&\textrm{(values)}\\
+	\textrm{Exp} ∋ e            &::=
+		v │ e\;e │ [e] │ \Do v │ \Handle e\;\{x,r.\,e;x.\,e\}
+		\\%&\textrm{(expressions)}\\
+	\textrm{ECont} ∋ K          &::=
+		□ │ K\;e │ v\;K │ [K] │ \Handle K\;\{x,r.\,e;x.\,e\}
+		\\%&\textrm{(evaluation contexts)}
+\end{align*}
+
 
 \chapter{The logical relation}
 The logical relation is adapted from \cite{hwc} with a few changes:
