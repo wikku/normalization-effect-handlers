@@ -33,9 +33,12 @@
 \newcommand{\Handle}{\textsf{handle\;}}
 \newcommand{\Lift}[1]{\boldsymbol{[}#1\boldsymbol{]}}
 \newcommand{\subst}[2]{\{#1/#2\}}
-\newcommand{\T}{\mathsf{T}}
-\newcommand{\E}{\mathsf{E}}
-\newcommand{\R}{\mathsf{R}}
+\newcommand{\E}{\mathcal{E}}
+\newcommand{\K}{\mathcal{K}}
+\renewcommand{\S}{\mathcal{S}}
+\newcommand{\kT}{\mathsf{T}}
+\newcommand{\kE}{\mathsf{E}}
+\newcommand{\kR}{\mathsf{R}}
 \newcommand{\Free}{\textrm{-}\mathrm{free}}
 \newcommand{\Obs}{\mathrm{Obs}}
 \newcommand{\N}{\mathbb{N}}
@@ -70,6 +73,7 @@
 \newunicodechar{ι}{\iota} % Digr i*
 \newunicodechar{κ}{\kappa}
 \newunicodechar{μ}{\mu}
+\newunicodechar{ν}{\nu}
 \newunicodechar{π}{\pi}
 \newunicodechar{ψ}{\psi}
 \newunicodechar{ρ}{\rho}
@@ -232,11 +236,11 @@ Finally, the language features polymorphic expressions and polymorphic operation
 	\textrm{TVar} ∋ α,β,…       &                    \\%&\textrm{(type variables)}\\
 	\textrm{Var} ∋ f,r,x,y,…    &                    \\%&\textrm{(variables)}\\
 	\textrm{Kind} ∋ κ           &::=
-		\T │ \E │ \R \\%&\textrm{(kinds)}\\
+		\kT │ \kE │ \kR \\%&\textrm{(kinds)}\\
 	\textrm{Typelike} ∋ σ,τ,ε,ρ &::=
 		α │ τ→_ρτ │ ∀α::κ.\,τ │ ι │ ε · ρ
 		\\%&\textrm{(types and rows)}\\
-	\textrm{Val} ∋ v            &::= x │ λ x .\,t \\%&\textrm{(values)}\\
+	\textrm{Val} ∋ v,u          &::= x │ λ x .\,t \\%&\textrm{(values)}\\
 	\textrm{Exp} ∋ e            &::=
 		v │ e\;e │ \Lift{e} │ \Do v │ \Handle e\,\{x,r.\,e;\,x.\,e\}
 		\\%&\textrm{(expressions)}\\
@@ -298,24 +302,24 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		{Δ ⊢ α ∷ κ}
 
 	\inferrule
-		{Δ ⊢ τ_1 ∷ \T \\ Δ ⊢ ρ ∷ \R \\ Δ ⊢ τ_2 ∷ \T}
-		{Δ ⊢ τ_1 →_ρ τ_2 ∷ \T}
+		{Δ ⊢ τ_1 ∷ \kT \\ Δ ⊢ ρ ∷ \kR \\ Δ ⊢ τ_2 ∷ \kT}
+		{Δ ⊢ τ_1 →_ρ τ_2 ∷ \kT}
 
 	\inferrule
-		{Δ, α :: κ ⊢ τ ∷ \T}
-		{Δ ⊢ ∀α::κ.\, τ ∷ \T}
+		{Δ, α :: κ ⊢ τ ∷ \kT}
+		{Δ ⊢ ∀α::κ.\, τ ∷ \kT}
 
 	\inferrule
 		{ }
-		{Δ ⊢ ι ∷ \R}
+		{Δ ⊢ ι ∷ \kR}
 
 	\inferrule
-		{Δ ⊢ ε ∷ \E \\ Δ ⊢ ρ ∷ \R}
-		{Δ ⊢ ε · ρ ∷ \R}
+		{Δ ⊢ ε ∷ \kE \\ Δ ⊢ ρ ∷ \kR}
+		{Δ ⊢ ε · ρ ∷ \kR}
 
 	\inferrule
-		{Δ,Δ' ⊢ τ_1 ∷ \T \\ Δ,Δ' ⊢ τ_2 ∷ \T}
-		{Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \E}
+		{Δ,Δ' ⊢ τ_1 ∷ \kT \\ Δ,Δ' ⊢ τ_2 ∷ \kT}
+		{Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
 
 	Δ ⊢ δ ∷ Δ' ⇔ \dom(δ) = \dom(Δ') ∧ ∀α∈\dom(δ).\, Δ ⊢ δ(α) ∷ Δ'(α)
 \end{mathpar}
@@ -342,7 +346,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		%\textsc{(S-ForAll)}
 
 	\inferrule
-		{Δ ⊢ ρ ∷ \R}
+		{Δ ⊢ ρ ∷ \kR}
 		{Δ ⊢ ι <: ρ}
 		%\textsc{(S-Empty)}
 
@@ -361,7 +365,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		{Δ;Γ ⊢ x : τ ╱ ι}
 
 	\inferrule
-		{Δ ⊢ τ_1 ∷ \T \\ Δ;Γ, x:τ_1 ⊢ e : τ_2 ╱ ρ}
+		{Δ ⊢ τ_1 ∷ \kT \\ Δ;Γ, x:τ_1 ⊢ e : τ_2 ╱ ρ}
 		{Δ;Γ ⊢ λx.\,e : τ_1 →_ρ τ_2 ╱ ι}
 
 	\inferrule
@@ -369,7 +373,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		{Δ;Γ ⊢ e_1\,e_2 : τ_2 ╱ ρ}
 
 	\inferrule
-		{Δ ⊢ ε ∷ \E \\ Δ;Γ ⊢ e : τ ╱ ρ}
+		{Δ ⊢ ε ∷ \kE \\ Δ;Γ ⊢ e : τ ╱ ρ}
 		{Δ;Γ ⊢ \Lift{e} : τ ╱ ε·ρ}
 
 	\inferrule
@@ -385,7 +389,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		{Δ;Γ ⊢ e : τ_2 ╱ ρ_2}
 
 	\inferrule
-		{Δ;Γ ⊢ v : δ(τ_1) ╱ ι \\ Δ ⊢ δ ∷ Δ' \\ Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \E}
+		{Δ;Γ ⊢ v : δ(τ_1) ╱ ι \\ Δ ⊢ δ ∷ Δ' \\ Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
 		{Δ;Γ ⊢ \Do v : δ(τ_2) ╱ (Δ'.\, τ_1 \Rightarrow τ_2)}
 
 	\inferrule
@@ -408,8 +412,8 @@ our relation is unary, we additionally have polymorphic effects, we do not have 
 First, we define the spaces of \textit{semantic types} and \textit{semantic effects},
 which are also the interpretations of the appropriate kinds:
 \begin{align*}
-	⟦\T⟧ &= \mathcal{P}(\textrm{Val}) = \mathsf{Type},\\
-	⟦\E⟧=⟦\R⟧ &= \mathcal{P}(\textrm{Exp}×ℕ×\mathsf{Type}) = \mathsf{Eff}.
+	⟦\kT⟧ &= \mathcal{P}(\textrm{Val}) = \mathsf{Type},\\
+	⟦\kE⟧=⟦\kR⟧ &= \mathcal{P}(\textrm{Exp}×ℕ×\mathsf{Type}) = \mathsf{Eff}.
 \end{align*}
 Semantic types are simply sets of closed values.
 Semantic effects are sets of triples, which aim to describe a situation
@@ -421,6 +425,7 @@ and the semantic type of values we can call the resumption with.
 
 Logical relations can be used to establish various properties.
 Here, we choose termination to a value as our \textit{observation}:
+% TODO: "good"
 \begin{align*}
 	\Obs = \{ e \mid ∃v.\, e →^* v \}.
 \end{align*}
@@ -430,9 +435,9 @@ We parameterize the definitions by a mapping $η$ from type variables to
 semantic types or effects.
 \begin{align*}
 	%⟦τ_1 →_ρ τ_2⟧_η
-	%&= \{ t \mid ∀v∈⟦τ_1⟧.\, t\,v ∈ \mathcal{E}⟦τ_2/ρ⟧_η \} \\
+	%&= \{ t \mid ∀v∈⟦τ_1⟧.\, t\,v ∈ \E⟦τ_2/ρ⟧_η \} \\
 	⟦τ_1 →_ρ τ_2⟧_η
-	 &= \{ λx.\,e \mid ∀v∈⟦τ_1⟧_η.\, e\subst{v}{x} ∈ \mathcal{E}⟦τ_2/ρ⟧_η \} \\
+	 &= \{ λx.\,e \mid ∀v∈⟦τ_1⟧_η.\, e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η \} \\
 	⟦∀α::κ.\,τ⟧_η
 	&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
 	⟦α⟧_η &= \{ v \mid ∀K.\, (∀u∈η(α).\, K[u]∈\Obs) ⇒ K[v]∈\Obs \} \\
@@ -444,26 +449,27 @@ semantic types or effects.
 \end{align*}
 
 By adapting the definitions from \cite{hwc} we end up with the following equations
-defining the sets good expressions, contexts, and control-stuck terms:
+we wish to hold
+defining the sets of good expressions, contexts, and control-stuck terms:
 \begin{align*}
-	\mathcal{E}⟦τ/ρ⟧_η &=
-	\{ e \mid ∀K∈\mathcal{K}⟦τ/ρ⟧_η.\, K[e] ∈ \Obs \} \\
-	\mathcal{K}⟦τ/ρ⟧_η &=
-	\{ K \mid ∀v∈ ⟦τ⟧_η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ρ⟧_η.\, K[s] ∈ \Obs\} \\
-	\mathcal{S}⟦τ/ρ⟧_η &=
-	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈\mathcal{E}⟦τ/ρ⟧_η\}
+	\E⟦τ/ρ⟧_η &=
+	\{ e \mid ∀K∈\K⟦τ/ρ⟧_η.\, K[e] ∈ \Obs \} \\
+	\K⟦τ/ρ⟧_η &=
+	\{ K \mid ∀v∈ ⟦τ⟧_η.\, K[v] ∈ \Obs ∧ ∀s∈\S⟦τ/ρ⟧_η.\, K[s] ∈ \Obs\} \\
+	\S⟦τ/ρ⟧_η &=
+	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈\E⟦τ/ρ⟧_η\}
 \end{align*}
 This, however, does not immediately define anything yet,
-due to the recursive occurence of $\mathcal{E}⟦τ/ρ⟧_η$.
+due to the recursive occurence of $\E⟦τ/ρ⟧_η$.
 
 
 \iffalse
 \begin{align*}
-	\mathcal{E}⟦τ/ρ⟧_η\gr{(X)} &=
-	\{ e \mid ∀K∈\mathcal{K}⟦τ/ρ⟧_η\gr{(X)}.\, K[e] ∈ \Obs \} \\
-	\mathcal{K}⟦τ/ρ⟧_η\gr{(X)} &=
-	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}⟦τ/ρ⟧_η\gr{(X)}.\, K[s] ∈ \Obs\} \\
-	\mathcal{S}⟦τ/ρ⟧_η\gr{(X)} &=
+	\E⟦τ/ρ⟧_η\gr{(X)} &=
+	\{ e \mid ∀K∈\K⟦τ/ρ⟧_η\gr{(X)}.\, K[e] ∈ \Obs \} \\
+	\K⟦τ/ρ⟧_η\gr{(X)} &=
+	\{ K \mid ∀v∈ ⟦τ⟧ _η.\, K[v] ∈ \Obs ∧ ∀s∈\S⟦τ/ρ⟧_η\gr{(X)}.\, K[s] ∈ \Obs\} \\
+	\S⟦τ/ρ⟧_η\gr{(X)} &=
 	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈\gr{X}\}
 \end{align*}
 \fi
@@ -472,94 +478,164 @@ We untangle the recursion firstly by abstracting out the recursive occurence as 
 and secondly by noticing that we do not need the exact interpretations of types and effects,
 any semantic type and effect will do.
 \begin{align*}
-	\mathcal{E}(μ,ξ,X) &=
-	\{ e \mid ∀K∈\mathcal{K}(μ,ξ,X).\, K[e] ∈ \Obs \} \\
-	\mathcal{K}(μ,ξ,X) &=
-	\{ K \mid ∀v∈μ.\, K[v] ∈ \Obs ∧ ∀s∈\mathcal{S}(ξ,X).\, K[s] ∈ \Obs\} \\
-	\mathcal{S}(\_,ξ,X) &=
+	\E(μ,ξ)(X) &=
+	\{ e \mid ∀K∈\K(μ,ξ)(X).\, K[e] ∈ \Obs \} \\
+	\K(μ,ξ)(X) &=
+	\{ K \mid ∀v∈μ.\, K[v] ∈ \Obs ∧ ∀s∈\S(μ,ξ)(X).\, K[s] ∈ \Obs\} \\
+	\S(\_,ξ)(X) &=
 	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈ξ ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X\}
 \end{align*}
 
-We note that $\mathcal{E}(μ,ξ,X)$ is non-decreasing as a function of $X$,
+We note that $\E(μ,ξ)$ is non-decreasing,
 i.e. it is a monotone function on the complete lattice of the powerset of $\mathrm{Exp}$ ordered by inclusion.
 Hence, by the Knaster-Tarski theorem, it has a greatest fixed point, % TODO cite
-which we denote $\mathcal{E}(μ,ξ)$.
-Moreover, the theorem states that this is exactly the greatest prefixpoint, i.e.
-$$\mathcal{E}(μ,ξ) = \bigcup \{X ⊆ \mathrm{Exp} │ X ⊆ \mathcal{E}(μ,ξ,X)\}.$$
-This is the argument $X$ we wanted, so we plug it in and set
-$\mathcal{K}(μ,ξ) = \mathcal{K}(μ,ξ,\mathcal{E}(μ,ξ))$ and
-$\mathcal{S}(μ,ξ) = \mathcal{S}(μ,ξ,\mathcal{E}(μ,ξ))$.
+which we denote $ν\E(μ,ξ)$.
+Moreover, the theorem states that it is specified by the following join:
+% no consensus on pre/post ...
+$$ν\E(μ,ξ) = \bigcup \{X ⊆ \mathrm{Exp} │ X ⊆ \E(μ,ξ)(X)\}.$$
+%This is the argument $X$ we wanted, so we plug it in and set
+%$\K(μ,ξ) = \K(μ,ξ,\E(μ,ξ))$ and
+%$\S(μ,ξ) = \S(μ,ξ,\E(μ,ξ))$.
 
 Now, it remains to plug in the interpretations of types as the semantic types:
 \begin{align*}
-\mathcal{E}⟦τ/ρ⟧_η &= \mathcal{E}(⟦τ⟧_η,⟦ρ⟧_η), \\
-\mathcal{K}⟦τ/ρ⟧_η &= \mathcal{K}(⟦τ⟧_η,⟦ρ⟧_η), \\
-\mathcal{S}⟦τ/ρ⟧_η &= \mathcal{S}(⟦τ⟧_η,⟦ρ⟧_η).
+\E⟦τ/ρ⟧_η &= ν\E(⟦τ⟧_η,⟦ρ⟧_η), \\
+\K⟦τ/ρ⟧_η &= \K(⟦τ⟧_η,⟦ρ⟧_η)(\E⟦τ/ρ⟧_η), \\
+\S⟦τ/ρ⟧_η &= \S(⟦τ⟧_η,⟦ρ⟧_η)(\E⟦τ/ρ⟧_η).
 \end{align*}
 
-The interpretations of types and effects are defined by structural induction
-(in the case of the arrow type
-we can treat $τ_2/ρ$ as a subterm of $τ_1 →_ρ τ_2$,
-just written in a different notation).
+Only now we can finally say that the interpretations of types and effects are defined by structural induction.
+%(in the case of the arrow type
+%we can treat $τ_2/ρ$ as a subterm of $τ_1 →_ρ τ_2$,
+%just written in a different notation).
 
 \section{Basic properties}
 \begin{lemma}[Coinduction principle]\label{coinduction}
-If $X ⊆ \mathcal{E}(μ,ξ,X)$ then $X ⊆ \mathcal{E}(μ,ξ)$.
+If $X ⊆ \E(μ,ξ)(X)$ then $X ⊆ ν\E(μ,ξ)$.
 \end{lemma}
 \begin{proof}
 Follows directly from the definition.
 \end{proof}
 
-\begin{lemma}[Monotonicity]\label{monotonicity}
-If $μ_1 ⊆ μ_2$ and $ξ_1 ⊆ ξ_2$, then $\mathcal{E}(μ_1,ξ_1) ⊆ \mathcal{E}(μ_2,ξ_2)$.
+\begin{lemma}[Strong coinduction]\label{strong-coinduction}
+	If $X ⊆ \E(μ,ξ)(X∪ν\E(μ,ξ))$, then $X ⊆ ν\E(μ,ξ)$.
 \end{lemma}
 \begin{proof}
-It is easy to check that $\mathcal{E}(μ,ξ,X)$ is non-decreasing as a function
-of $μ$ and $ξ$.
-So if $μ_1 ⊆ μ_2$ and $ξ_1 ⊆ ξ_2$, then
-$X ⊆ \mathcal{E}(μ_1,ξ_1,X)$ implies $X ⊆ \mathcal{E}(μ_2,ξ_2,X)$.
+	We have $ν\E(μ,ξ) = \E(μ,ξ)(ν\E(μ,ξ)) ⊆ \E(μ,ξ)(X∪ν\E(μ,ξ))$.
+	Summing with the assumption we obtain
+	$X∪ν\E(μ,ξ) ⊆ \E(μ,ξ)(X∪ν\E(μ,ξ))$, which is what we want by \cref{coinduction}.
+\end{proof}
+To reduce notational burden in proofs by strong coinduction,
+we introduce the shorthand
+$\E⟦τ/ρ⟧_η^{∪Y}$ to mean $\E(⟦τ⟧_η,⟦ρ⟧_η)(Y∪\E⟦τ/ρ⟧_η)$.
+Similarly,
+$\K⟦τ/ρ⟧_η^{∪Y}$ means $\K(⟦τ⟧_η,⟦ρ⟧_η)(Y∪\E⟦τ/ρ⟧_η)$ and
+$\S⟦τ/ρ⟧_η^{∪Y}$ means $\S(⟦τ⟧_η,⟦ρ⟧_η)(Y∪\E⟦τ/ρ⟧_η)$.
+
+\begin{lemma}
+If $μ_1 ⊆ μ_2$ and $ξ_1 ⊆ ξ_2$,
+then
+\begin{align*}
+\S(μ_1,ξ_1)(X) &⊆ \S(μ_2,ξ_2)(X), \\
+\K(μ_1,ξ_1)(X) &⊇ \K(μ_2,ξ_2)(X), \\
+\E(μ_1,ξ_1)(X) &⊆ \E(μ_2,ξ_2)(X).
+\end{align*}
+\end{lemma}
+
+\begin{lemma}\label{monotonicity}
+If $μ_1 ⊆ μ_2$ and $ξ_1 ⊆ ξ_2$, then $ν\E(μ_1,ξ_1) ⊆ ν\E(μ_2,ξ_2)$.
+\end{lemma}
+\begin{proof}
+By \cref{monotonicity} and transitivity
+if $μ_1 ⊆ μ_2$ and $ξ_1 ⊆ ξ_2$, then
+$X ⊆ \E(μ_1,ξ_1)(X)$ implies $X ⊆ \E(μ_2,ξ_2)(X)$.
 Therefore
-$\{X ⊆ \mathrm{Exp} │ X ⊆ \mathcal{E}(μ_1,ξ_1,X)\}
-⊆\{X ⊆ \mathrm{Exp} │ X ⊆ \mathcal{E}(μ_2,ξ_2,X)\}$
-and
-$\bigcup \{X ⊆ \mathrm{Exp} │ X ⊆ \mathcal{E}(μ_1,ξ_1,X)\}
-⊆\bigcup \{X ⊆ \mathrm{Exp} │ X ⊆ \mathcal{E}(μ_2,ξ_2,X)\}$.
+$$\{X ⊆ \mathrm{Exp} │ X ⊆ \E(μ_1,ξ_1)(X)\}
+⊆\{X ⊆ \mathrm{Exp} │ X ⊆ \E(μ_2,ξ_2)(X)\},$$
+$$\bigcup \{X ⊆ \mathrm{Exp} │ X ⊆ \E(μ_1,ξ_1)(X)\}
+⊆\bigcup \{X ⊆ \mathrm{Exp} │ X ⊆ \E(μ_2,ξ_2)(X)\}.$$
 \end{proof}
 
 \begin{lemma}\label{empty-context}
-	The empty context $□$ is in $\mathcal{K}(μ,∅)$.
+	For any semantic type $μ$ we have $□ ∈ \K(μ,∅)$.
 \end{lemma}
 \begin{proof}
-	The set $\mathcal{S}(μ,∅)$ is empty and $μ$ is contained in $\Obs$.
+	The set $\S(μ,∅)$ is empty and $μ$ is contained in $\Obs$.
+\end{proof}
+
+\begin{lemma}[Value inclusion]\label{value-inclusion}
+	For any $τ$ and $ρ$ we have $⟦τ⟧_η ⊆ \E⟦τ/ρ⟧_η$.
+\end{lemma}
+\begin{proof}
+	Follows from the definition of $\E⟦τ/ρ⟧_η$ and $\K⟦τ/ρ⟧_η$.
 \end{proof}
 
 
+
 \section{Compatibility lemmas}
-We want to establish that $⊢ e : τ ╱ ι$ implies $e ∈ \mathcal{E}⟦τ/ι⟧$.
+We want to establish that $⊢ e : τ ╱ ι$ implies $e ∈ \E⟦τ/ι⟧$.
 Termination to a value will follow from \cref{empty-context}.
 
 For this purpose we will prove a semantic counterpart of each typing rule.
 First, we need to define a counterpart to the typing judgment.
 Unlike typing judgments, our relations are on closed terms only,
 so we get around that by using substitution.
-We define
-$$Δ;Γ ⊨ e : τ ╱ ρ ⇔ ∀η∈⟦Δ⟧.\, ∀γ∈⟦Γ⟧_η.\,γ(e) ∈ \mathcal{E}⟦τ/ρ⟧_η,$$
+We define semantic entailment as
+$$Δ;Γ ⊨ e : τ ╱ ρ ⇔ ∀η∈⟦Δ⟧.\, ∀γ∈⟦Γ⟧_η.\,γ(e) ∈ \E⟦τ/ρ⟧_η,$$
 where $⟦Δ⟧ = \{ η │ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}$ contains type-level mappings
-and $⟦Γ⟧_η = \{ γ │ ∀x:τ∈Γ.\,γ(x) ∈ ⟦α⟧_η\}$ contains expression-level
+and $⟦Γ⟧_η = \{ γ │ ∀x:τ∈Γ.\,γ(x) ∈ ⟦τ⟧_η\}$ contains expression-level
 variable substitutions.
 
 \subsection{Lambda calculus core}
 
-\begin{lemma}[Variable rule compatibility]
+\begin{lemma}[Variable compatibility]
 \end{lemma}
+\begin{proof}
+Assume $x : τ ∈ Γ$.
+We want to prove $Δ;Γ ⊨ x : τ ╱ ι$.
+Take any $η∈⟦Δ⟧$ and $γ∈⟦Γ⟧_η$.
+We want to show $γ(x) ∈ \E⟦τ/ι⟧_η$.
+From the definition of $⟦Γ⟧_η$
+we know that $γ(x) ∈ ⟦τ⟧_η$,
+so by \cref{value-inclusion} we have $γ(x) ∈ \E⟦τ/ι⟧_η$.
+\end{proof}
+
+\begin{lemma}[Abstraction compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ ⊢ τ_1 ∷ \kT$ and $Δ;Γ,x:τ_1 ⊨ e : τ_2 ╱ ρ$.
+% Note: kind assumption necessary so that τ_1 →_ρ τ_2 well formed
+We want to prove $Δ;Γ ⊨ λx.\,e : τ_1 →_ρ τ_2 ╱ ι$.
+Take any $η∈⟦Δ⟧$ and $γ∈⟦Γ⟧_η$.
+By \cref{value-inclusion} it suffices to show
+$γ(λx.\,e) = λx. γ(e) ∈ ⟦τ_1 →_ρ τ_2⟧_η$.
+So take any $v ∈ ⟦τ_1⟧_η.$
+% TODO: use of arrow interpretation; fragile
+We need to show $γ(e)\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η$.
+Let $γ' = γ'[x↦v]$.
+Then by $γ' ∈ ⟦Γ,x:τ_1⟧_η$, so $γ(e)\subst{v}{x} = γ'(e) ∈ \E⟦τ_2/ρ⟧_η.$
+\end{proof}
+
+\begin{lemma}[Application compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ;Γ ⊨ e_1 : τ_1 →_ρ τ_2 ╱ ρ$ and $Δ;Γ ⊨ e_2 : τ_1 ╱ ρ$.
+We want to show $Δ;Γ ⊨ e_1\;e_2 : τ_2 ╱ ρ$.
+Take any $η∈⟦Δ⟧$, $γ∈⟦Γ⟧_η$, and $K ∈ \K⟦τ_2/ρ⟧_η$.
+We want $K[γ(e_1)\;γ(e_2)] ∈ \Obs$.
+Let $K_1 = K[γ(e_1)\;□]$, then $K[γ(e_1)\;γ(e_2)] = K_1[γ(e_2)]$.
+It suffices to show that $K_1 ∈ \K⟦τ_1/ρ⟧_η$.
+
+Take any $e ∈ \S⟦τ_1/ρ⟧_η$.
+We want $K_1[e] = K[γ(e_2)\;e] ∈ \Obs$.
+Suffices to show that $γ(e_2)\;e ∈ \S⟦τ_2/ρ⟧_η$.
+\end{proof}
 
 \subsection{Effects}
 
 \subsection{Subtyping}
 
 \subsection{Polymorphism}
-
-
 
 \bibliographystyle{plain}
 \bibliography{refs}
