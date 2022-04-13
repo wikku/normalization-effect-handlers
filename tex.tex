@@ -196,6 +196,7 @@ That is why languages with algebraic effects typically have
 not only tracking the type of value an expression might evaluate to, but also
 what kind of effects it may perform on the way.
 
+\iffalse
 This work will study a particular formal language equipped with algebraic effects.
 Although most results in the domain of programming languages depend crucially on the exact calculus and type system used,
 we hope that the results, ideas, and techniques may apply elsewhere.
@@ -207,12 +208,14 @@ Possibly the most interesting result of this work is a potentially novel use of 
 in the method of logical relations.
 It allowed us to get rid of step-indexing in the definition of the logical relation and
 ultimately prove termination of the language.
-This may seem surprising, as coinduction is connotated primarily with infinite processes.
+This may sound surprising, as coinduction is connotated primarily with infinite processes.
 
 [todo other contributions]
 
 I would like to thank Dariusz Biernacki, Filip Sieczkowski, and Piotr Polesiuk
 for their help with this work.
+
+\fi
 
 \chapter{The language}
 % TODO name the language?
@@ -238,9 +241,9 @@ Finally, the language features polymorphic expressions and polymorphic operation
 	\textrm{Kind} ∋ κ           &::=
 		\kT │ \kE │ \kR \\%&\textrm{(kinds)}\\
 	\textrm{Typelike} ∋ σ,τ,ε,ρ &::=
-		α │ τ→_ρτ │ ∀α::κ.\,τ │ ι │ ε · ρ
+		α │ τ→_ρτ │ ∀α::κ.\,τ │ ι │ τ \Rightarrow τ │ ε · ρ
 		\\%&\textrm{(types and rows)}\\
-	\textrm{Val} ∋ v,u          &::= x │ λ x .\,t \\%&\textrm{(values)}\\
+	\textrm{Val} ∋ v,u          &::= x │ λx.\,e \\%&\textrm{(values)}\\
 	\textrm{Exp} ∋ e            &::=
 		v │ e\;e │ \Lift{e} │ \Do v │ \Handle e\,\{x,r.\,e;\,x.\,e\}
 		\\%&\textrm{(expressions)}\\
@@ -250,6 +253,9 @@ Finally, the language features polymorphic expressions and polymorphic operation
 \end{align*}
 \caption{Syntax.}
 \end{figure}
+
+% TODO inconsistent polytype and polyeffect syntax:
+% types have foralls one by one, operations have a forall for the whole Δ'
 
 \begin{figure}
 \begin{mathpar}
@@ -393,7 +399,9 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		{Δ;Γ ⊢ \Do v : δ(τ_2) ╱ (Δ'.\, τ_1 \Rightarrow τ_2)}
 
 	\inferrule
-		{Δ,Δ';Γ,x:τ_1,r:τ_2→_ρ τ_r ⊢ e_h : τ_r ╱ ρ \\ Δ;Γ, x:τ ⊢ e_r : τ_r ╱ ρ}
+		{Δ;Γ ⊢ e : τ ╱ (Δ'.\,τ_1 \Rightarrow τ_2) · ρ \\
+		Δ,Δ';Γ,x:τ_1,r:τ_2→_ρ τ_r ⊢ e_h : τ_r ╱ ρ \\
+		Δ;Γ, x:τ ⊢ e_r : τ_r ╱ ρ}
 		{Δ;Γ ⊢ \Handle e\;\{x,r.\,e_h;x.\,e_r\} : τ_r ╱ ρ}
 
 \end{mathpar}
@@ -404,8 +412,15 @@ Finally, the language features polymorphic expressions and polymorphic operation
 
 
 \chapter{The logical relation}
-The logical relation is adapted from \cite{hwc} with a few changes:
-our relation is unary, we additionally have polymorphic effects, we do not have type lambdas.
+[todo introduction to logical relations]
+
+The logical relation is adapted from \cite{hwc} with a few changes.
+Some changes are due to language differences:
+we have only one universal operation which simplifies the treatment of effects,
+polymorphism does not manifest at the expression level---we do not have type lambdas,
+and our operations can be polymorphic.
+Instead of a binary step-indexed relation,
+our goal is to build a unary relation without step-indexing.
 
 \section{Definition}
 
@@ -415,6 +430,7 @@ which are also the interpretations of the appropriate kinds:
 	⟦\kT⟧ &= \mathcal{P}(\textrm{Val}) = \mathsf{Type},\\
 	⟦\kE⟧=⟦\kR⟧ &= \mathcal{P}(\textrm{Exp}×ℕ×\mathsf{Type}) = \mathsf{Eff}.
 \end{align*}
+%TODO semantic types/effects are overapproximations of possible behaviors? or sth
 Semantic types are simply sets of closed values.
 Semantic effects are sets of triples, which aim to describe a situation
 in which an expression being evaluated performs an effect.
@@ -433,6 +449,7 @@ Here, we choose termination to a value as our \textit{observation}:
 We start with defining interpretations of types and effects.
 We parameterize the definitions by a mapping $η$ from type variables to
 semantic types or effects.
+
 \begin{align*}
 	%⟦τ_1 →_ρ τ_2⟧_η
 	%&= \{ t \mid ∀v∈⟦τ_1⟧.\, t\,v ∈ \E⟦τ_2/ρ⟧_η \} \\
@@ -440,8 +457,10 @@ semantic types or effects.
 	 &= \{ λx.\,e \mid ∀v∈⟦τ_1⟧_η.\, e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η \} \\
 	⟦∀α::κ.\,τ⟧_η
 	&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
-	⟦α⟧_η &= \{ v \mid ∀K.\, (∀u∈η(α).\, K[u]∈\Obs) ⇒ K[v]∈\Obs \} \\
-	\\
+	⟦α⟧_η &= \{ v \mid ∀K.\, (∀u∈η(α).\, K[u]∈\Obs) ⇒ K[v]∈\Obs \}
+\end{align*}
+
+\begin{align*}
 	⟦τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_η) \mid v∈⟦τ_1⟧_η \} \\
 	⟦∀α::κ.\,ε⟧_η &= \{t \mid ∃μ∈⟦κ⟧.\, t∈⟦ε⟧_{[α↦μ]η} \} \\
 	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(v, n+1, μ) \mid (v, n, μ)∈⟦ρ⟧_η \} \\
@@ -449,7 +468,7 @@ semantic types or effects.
 \end{align*}
 
 By adapting the definitions from \cite{hwc} we end up with the following equations
-we wish to hold
+we wish to solve,
 defining the sets of good expressions, contexts, and control-stuck terms:
 \begin{align*}
 	\E⟦τ/ρ⟧_η &=
@@ -459,9 +478,6 @@ defining the sets of good expressions, contexts, and control-stuck terms:
 	\S⟦τ/ρ⟧_η &=
 	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈\E⟦τ/ρ⟧_η\}
 \end{align*}
-This, however, does not immediately define anything yet,
-due to the recursive occurence of $\E⟦τ/ρ⟧_η$.
-
 
 \iffalse
 \begin{align*}
@@ -485,6 +501,14 @@ any semantic type and effect will do.
 	\S(\_,ξ)(X) &=
 	\{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈ξ ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X\}
 \end{align*}
+% TODO: monotonicity of \K \S w.r.t X
+
+\begin{lemma}
+	If $X_1⊆X_2$ then
+	$\S(\_,ξ)(X_1) ⊆ \S(\_,ξ)(X_2)$,
+	$\K(\_,ξ)(X_1) ⊇ \K(\_,ξ)(X_2)$,
+	and $\E(\_,ξ)(X_1) ⊆ \E(\_,ξ)(X_2)$.
+\end{lemma}
 
 We note that $\E(μ,ξ)$ is non-decreasing,
 i.e. it is a monotone function on the complete lattice of the powerset of $\mathrm{Exp}$ ordered by inclusion.
@@ -522,7 +546,7 @@ Follows directly from the definition.
 \end{lemma}
 \begin{proof}
 	We have $ν\E(μ,ξ) = \E(μ,ξ)(ν\E(μ,ξ)) ⊆ \E(μ,ξ)(X∪ν\E(μ,ξ))$.
-	Summing with the assumption we obtain
+	Combining with the lemma assumption we obtain
 	$X∪ν\E(μ,ξ) ⊆ \E(μ,ξ)(X∪ν\E(μ,ξ))$, which is what we want by \cref{coinduction}.
 \end{proof}
 To reduce notational burden in proofs by strong coinduction,
@@ -570,7 +594,12 @@ $$\bigcup \{X ⊆ \mathrm{Exp} │ X ⊆ \E(μ_1,ξ_1)(X)\}
 	Follows from the definition of $\E⟦τ/ρ⟧_η$ and $\K⟦τ/ρ⟧_η$.
 \end{proof}
 
-
+\begin{lemma}[Control-stuck inclusion]\label{stuck-inclusion}
+For any $τ$ and $ρ$ we have $\S⟦τ/ρ⟧_η ⊆ \E⟦τ/ρ⟧_η$.
+\end{lemma}
+\begin{proof}
+	Follows from the definition of $\E⟦τ/ρ⟧_η$ and $\K⟦τ/ρ⟧_η$.
+\end{proof}
 
 \section{Compatibility lemmas}
 We want to establish that $⊢ e : τ ╱ ι$ implies $e ∈ \E⟦τ/ι⟧$.
@@ -585,8 +614,6 @@ $$Δ;Γ ⊨ e : τ ╱ ρ ⇔ ∀η∈⟦Δ⟧.\, ∀γ∈⟦Γ⟧_η.\,γ(e) �
 where $⟦Δ⟧ = \{ η │ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}$ contains type-level mappings
 and $⟦Γ⟧_η = \{ γ │ ∀x:τ∈Γ.\,γ(x) ∈ ⟦τ⟧_η\}$ contains expression-level
 variable substitutions.
-
-\subsection{Lambda calculus core}
 
 \begin{lemma}[Variable compatibility]
 \end{lemma}
@@ -603,39 +630,221 @@ so by \cref{value-inclusion} we have $γ(x) ∈ \E⟦τ/ι⟧_η$.
 \begin{lemma}[Abstraction compatibility]
 \end{lemma}
 \begin{proof}
-Assume $Δ ⊢ τ_1 ∷ \kT$ and $Δ;Γ,x:τ_1 ⊨ e : τ_2 ╱ ρ$.
+Assume $Δ ⊢ {τ_1 ∷ \kT}$ and $Δ;Γ,{x:τ_1} ⊨ e : τ_2 ╱ ρ$.
 % Note: kind assumption necessary so that τ_1 →_ρ τ_2 well formed
-We want to prove $Δ;Γ ⊨ λx.\,e : τ_1 →_ρ τ_2 ╱ ι$.
+We want to prove $Δ;Γ ⊨ λx.\,e : {τ_1 →_ρ τ_2} ╱ ι$.
 Take any $η∈⟦Δ⟧$ and $γ∈⟦Γ⟧_η$.
 By \cref{value-inclusion} it suffices to show
-$γ(λx.\,e) = λx. γ(e) ∈ ⟦τ_1 →_ρ τ_2⟧_η$.
+$γ(λx.\,e) = λx.\,γ(e) ∈ ⟦τ_1 →_ρ τ_2⟧_η$.
 So take any $v ∈ ⟦τ_1⟧_η.$
 % TODO: use of arrow interpretation; fragile
 We need to show $γ(e)\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η$.
 Let $γ' = γ'[x↦v]$.
-Then by $γ' ∈ ⟦Γ,x:τ_1⟧_η$, so $γ(e)\subst{v}{x} = γ'(e) ∈ \E⟦τ_2/ρ⟧_η.$
+Then $γ' ∈ ⟦Γ,x:τ_1⟧_η$, so $γ(e)\subst{v}{x} = γ'(e) ∈ \E⟦τ_2/ρ⟧_η.$
 \end{proof}
 
 \begin{lemma}[Application compatibility]
 \end{lemma}
 \begin{proof}
-Assume $Δ;Γ ⊨ e_1 : τ_1 →_ρ τ_2 ╱ ρ$ and $Δ;Γ ⊨ e_2 : τ_1 ╱ ρ$.
-We want to show $Δ;Γ ⊨ e_1\;e_2 : τ_2 ╱ ρ$.
-Take any $η∈⟦Δ⟧$, $γ∈⟦Γ⟧_η$, and $K ∈ \K⟦τ_2/ρ⟧_η$.
-We want $K[γ(e_1)\;γ(e_2)] ∈ \Obs$.
-Let $K_1 = K[γ(e_1)\;□]$, then $K[γ(e_1)\;γ(e_2)] = K_1[γ(e_2)]$.
-It suffices to show that $K_1 ∈ \K⟦τ_1/ρ⟧_η$.
+%Assume $Δ;Γ ⊨ e_1 : τ_1 →_ρ τ_2 ╱ ρ$ and $Δ;Γ ⊨ e_2 : τ_1 ╱ ρ$.
+Fix any well-formed $Δ$ and $τ_1 →_ρ τ_2$.
+Take any $η∈⟦Δ⟧$.
+Let $Y = \{e_1\;e_2 │ e_1∈\E⟦τ_1 →_ρ τ_2/ρ⟧_η, e_2∈\E⟦τ_1/ρ⟧_η\}$.
+We want to show $Y ⊆ \E⟦τ_2/ρ⟧_η$.
+We will proceed by strong coinduction.
 
-Take any $e ∈ \S⟦τ_1/ρ⟧_η$.
-We want $K_1[e] = K[γ(e_2)\;e] ∈ \Obs$.
-Suffices to show that $γ(e_2)\;e ∈ \S⟦τ_2/ρ⟧_η$.
+We will show $Y ⊆ \E⟦τ_2/ρ⟧_η^{∪Y}.$
+Take any $e_1\;e_2∈Y$ and $K∈\K⟦τ_2/ρ⟧_η^{∪Y}$.
+We want to show $K[e_1\;e_2] ∈ \Obs.$
+Let $K_2 = K[□\;e_2]$.
+It suffices to show $K_2∈\K⟦τ_1 →_ρ τ_2/ρ⟧_η$.
+
+Take any $K'[\Do v] ∈ \S⟦τ_1 →_ρ τ_2/ρ⟧_η$.
+There exists $(v,n,μ) ∈ ⟦ρ⟧_η$ such that
+$n\Free(K')$ and
+for all $u∈μ$ we have
+$K'[u] ∈ \E⟦τ_1 →_ρ τ_2/ρ⟧_η$.
+We want $K[K'[\Do v]\;e_2] ∈ \Obs$.
+It suffices to show
+$K'[\Do v]\;e_2 ∈ \S⟦τ_2/ρ⟧_η^{∪Y}$.
+Which holds, since $n\Free(K'\;e_2)$ and for all $u∈μ$ we have $K'[u]\;e_2 ∈ Y$.
+
+Now take any $v=(λx.\,e) ∈ ⟦τ_1 →_ρ τ_2⟧_η.$
+By \cref{value-inclusion}, $v∈\E⟦τ_1 →_ρ τ_2/ρ⟧_η.$
+We want $K_2[v] = K[v\;e_2] ∈ \Obs$.
+It suffices to show that $K_v=K[v\;□] ∈ \K⟦τ_1/ρ⟧_η$.
+
+Take any $K'[\Do v'] ∈ \S⟦τ_1/ρ⟧_η$.
+There exists $(v',n,μ) ∈ ⟦ρ⟧_η$ such that
+$n\Free(K')$ and
+for all $u∈μ$ we have $K'[u] ∈ \E⟦τ_1/ρ⟧_η$.
+We want $K[v\;K'[\Do v']] ∈ \Obs$.
+It suffices to show
+$v\;K'[\Do v'] ∈ \S⟦τ_2/ρ⟧_η^{∪Y}$.
+Which holds, since $n\Free(v\;K')$ and for all $u∈μ$ we have $v\;K'[u] ∈ Y$.
+
+Finally, take any $u∈⟦τ_1⟧_η$.
+We want $K[v\;u] ∈ \Obs$.
+The expression reduces to $K[e\subst{u}{x}]$,
+where $e\subst{u}{x} ∈ \E⟦τ_2/ρ⟧_η$.
+Since $K ∈ \K⟦τ_2/ρ⟧_η^{∪Y} ⊆ \K⟦τ_2/ρ⟧_η$,
+$K[e\subst{u}{x}] ∈ \Obs$.
+
 \end{proof}
 
-\subsection{Effects}
+\begin{lemma}[Lift compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ ⊢ τ ∷ \kT$, $Δ ⊢ ε ∷ \kE$, and $Δ ⊢ ρ ∷ \kR$.
+Take any $η∈⟦Δ⟧$.
+Let $Y = \{\Lift{e} │ e∈\E⟦τ/ρ⟧_η \}$.
+We want to show $Y ⊆ \E⟦τ/ε·ρ⟧_η$.
+We will proceed by strong coinduction.
 
-\subsection{Subtyping}
+We will show $Y ⊆ \E⟦τ/ε·ρ⟧_η^{∪Y}$.
+Take any $\Lift{e} ∈ Y$ and $K ∈ \K⟦τ/ε·ρ⟧_η^{∪Y}$.
+We want to show $K[\Lift{e}] ∈ \Obs.$
+It suffices to show that $K[\Lift{□}] ∈ \K⟦τ/ρ⟧_η$.
 
-\subsection{Polymorphism}
+Take any $K'[\Do v] ∈ \S⟦τ/ρ⟧_η$.
+There exists $(v,n,μ) ∈ ⟦ρ⟧_η$ such that
+$n\Free(K')$ and
+for all $u∈μ$ we have
+$K'[u] ∈ \E⟦τ/ρ⟧_η$.
+We want $K[\Lift{K'[\Do v]}] ∈ \Obs$.
+It suffices to show that
+$\Lift{K'[\Do v]} ∈ \S⟦τ/ε·ρ⟧_η^{∪Y}$.
+Which holds,
+since $(v,n+1,μ)∈⟦ε·ρ⟧_η$, ${n+1}\Free(\Lift{K'})$,
+and for all $u∈μ$ we have $\Lift{K'[u]} ∈ Y$.
+
+Now take any $v ∈ ⟦τ⟧_η$.
+By \cref{value-inclusion}, $v ∈ \E⟦τ/ε·ρ⟧_η ⊆ \E⟦τ/ε·ρ⟧_η^{∪Y}$.
+We want to show $K[\Lift{v}] ∈ \Obs$.
+The expression reduces to $K[v]$,
+which is in $\Obs$ since $K∈\K⟦τ/ε·ρ⟧_η^{∪Y}$.
+\end{proof}
+
+\begin{lemma}[Handle compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ, Δ' ; Γ, x:τ_1, r:τ_2 →_ρ τ_r ⊨ e_h : τ_r ╱ ρ$,
+$Δ; Γ, x:τ ⊨ e_r : τ_r ╱ ρ$.
+$Δ; Γ ⊨ e : τ ╱ (Δ'.\,τ_1 \Rightarrow τ_2) · ρ$.
+Note that only $τ_1$ and $τ_2$ require $Δ'$ to be in context.
+%We want to show
+%$Δ;Γ ⊨ \Handle e\,\{x,r.\,e_h;\;x.\,e_r\} : τ_r ╱ ρ$.
+Let $h$ stand for $\{x,r.\,e_h;\,x.\,e_r\}$.
+Take any $η∈⟦Δ⟧$.
+Let $Y =
+\{\Handle e\,h
+│ e ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η\}$.
+% TODO the matter of γ
+We want to show $Y ⊆ \E⟦τ_r/ρ⟧_η$.
+We will proceed by strong coinduction.
+
+We will show $Y ⊆ \E⟦τ_r/ρ⟧_η^{∪Y}$.
+Take any $e' = \Handle e\,h ∈ Y$
+and $K∈\K⟦τ_r/ρ⟧_η^{∪Y}$.
+We want to show $K[e'] ∈ \Obs$.
+It suffices to show
+$K' = K[\Handle □\,h]
+ ∈ \K⟦τ / (Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
+
+Take any $v ∈ ⟦τ⟧_η$.
+The expression $K'[v]$ reduces to $K[e_r\subst{v}{x}]$.
+Which is in $\Obs$, since $e_r\subst{v}{x} ∈ \E⟦τ_r/ρ⟧_η$,
+and $K∈\K⟦τ_r/ρ⟧_η$.
+
+Now take any
+$K''[\Do v] ∈ \S⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
+There exist $(v,n,μ) ∈ ⟦(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$
+such that $n\Free(K'')$ and for all $u∈μ$ we have
+$K''[u] ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
+
+If $n=0$, then $K'[K''[\Do v]]$
+reduces to $K[e_h\subst{v}{x}\subst{v_c}{r}]$,
+where $v_c$ stands for $λz.\, \Handle K''[z]\,h$.
+We want to show that this is in $\Obs$, i.e.\ the expression
+plugged into $K$ is in $\E⟦τ_r/ρ⟧_η^{∪Y}$.
+From the interpretation of polymorphic effects, there exists
+$η'$ extending $η$ such that $(v,n,μ) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{η'}$.
+Therefore $v∈⟦τ_1⟧_{η'}$ and $μ=⟦τ_2⟧_{η'}$.
+We only need to show $v_c ∈ ⟦τ_2 →_ρ τ_r⟧_{η'}$.
+So take any $u∈⟦τ_2⟧_{η'}$.
+The application $v_c\;u$ reduces to $\Handle K''[u]\,h$.
+We know $K''[u] ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
+We want $\Handle K''[u]\,h ∈ \E⟦τ_r/ρ⟧_η$.
+
+If $n>0$, then
+it suffices to show that
+$\Handle K''[\Do v] \,h ∈ \S⟦τ_r/ρ⟧_η^{∪Y}$.
+Which holds,
+since
+$(v,n-1,μ)∈⟦ρ⟧_η$,
+${n-1}\Free(\Handle K'' \,h)$,
+and also $\Handle K''[u] \,h ∈ Y$.
+
+\end{proof}
+
+% Lemma: type substitution preserves well-kinding?
+
+% Ahmed LR: "compositionality"
+\begin{lemma} \label{subst-comp}
+	If $Δ$ and $Δ'$ disjoint, $Δ ⊢ δ ∷ Δ'$, $Δ,Δ' ⊢ τ ∷ κ$, $η∈⟦Δ⟧$,
+	$η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$,
+	then $⟦τ⟧_{η'} = ⟦δ(τ)⟧_η$.
+\end{lemma}
+\begin{proof}
+	By induction on the kinding rules.
+
+	If $τ=α ∈ Δ$, then both sides are equal to $η(α)$.
+
+	If $τ=α ∈ Δ'$, then equality follows from the definition of $η'$.
+
+	If $τ=ι$, then both sides are empty.
+
+	If $τ=∀α∷κ.\,τ' ∷ \kT$, then
+	$⟦τ⟧_{η'} = \bigcap \{⟦τ'⟧_{η'[α↦μ]} │ μ∈⟦κ⟧\}$
+	and
+	$⟦δ(τ)⟧_{η} = \bigcap \{⟦δ(τ')⟧_{η[α↦μ]} │ μ∈⟦κ⟧\}$,
+	which are equal by the inductive hypothesis.
+
+	If $τ=∀α∷κ.\,τ' ∷ \kE$, then as above but with unions instead of intersections.
+
+	If $τ=τ_1 \Rightarrow τ_2$,
+	then $⟦τ⟧_{η'} = \{(v,0,⟦τ_2⟧_{η'}) │ v∈⟦τ_1⟧_{η'}\}$
+	and $⟦δ(τ)⟧_{η} = \{(v,0,⟦δ(τ_2)⟧_{η}) │ v∈⟦δ(τ_1)⟧_{η}\}$,
+	which are equal by the inductive hypothesis.
+
+	If $τ=ε·ρ$,
+	then $⟦τ⟧_{η'} = ⟦ε⟧_{η'} ∪ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦ρ⟧_{η'} \}$
+	and $⟦δ(τ)⟧_{η} = ⟦δ(ε)⟧_{η} ∪ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦δ(ρ)⟧_{η} \}$,
+	which are equal by the inductive hypothesis.
+\end{proof}
+
+\begin{lemma}[Do compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ ⊢ δ ∷ Δ'$, $Δ⊢Δ'.\,τ_1→τ_2 ∷ \kE$.
+Take any $η ∈ ⟦Δ⟧$.
+Assume $v ∈ ⟦δ(τ_1)⟧_η$.
+% TODO: since the compatibility proofs for values (variable and lambda)
+% first show containment in the interpretation of values, this is enough
+% we could assume $v ∈ \E⟦δ(τ_1)⟧_η
+We want to show $\Do v ∈ \E⟦δ(τ_2)/(Δ'.\,τ_1 \Rightarrow τ_2)⟧_η$.
+
+By \cref{stuck-inclusion} it suffices to show
+$\Do v ∈ \S⟦δ(τ_2)/(Δ'.\,τ_1 \Rightarrow τ_2)⟧_η$.
+By taking the empty context in the definition of $\S$ and \cref{value-inclusion},
+it suffices to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦Δ'.\,τ_1 \Rightarrow τ_2⟧_η$.
+From the interpretation of polymorphic effects, it
+would be enough to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{η'}$,
+where $η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$ for all $α∈Δ'$.
+By the interpretation of operations, it remains to show
+$v ∈ ⟦τ_1⟧_{η'}$ and $⟦δ(τ_2)⟧_η = ⟦τ_2⟧_{η'}$.
+Which follows immediately from \cref{subst-comp}.
+\end{proof}
 
 \bibliographystyle{plain}
 \bibliography{refs}
