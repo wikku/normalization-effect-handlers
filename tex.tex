@@ -501,8 +501,8 @@ any semantic type and effect will do.
 \begin{lemma}
 	If $X_1⊆X_2$ then
 	$\S(\_,ξ)(X_1) ⊆ \S(\_,ξ)(X_2)$,
-	$\K(\_,ξ)(X_1) ⊇ \K(\_,ξ)(X_2)$,
-	and $\E(\_,ξ)(X_1) ⊆ \E(\_,ξ)(X_2)$.
+	$\K(μ,ξ)(X_1) ⊇ \K(μ,ξ)(X_2)$,
+	and $\E(μ,ξ)(X_1) ⊆ \E(μ,ξ)(X_2)$.
 \end{lemma}
 
 We note that $\E(μ,ξ)$ is non-decreasing,
@@ -743,23 +743,23 @@ Take any $e' = \Handle e\,h ∈ Y$
 and $K∈\K⟦τ_r/ρ⟧_η^{∪Y}$.
 We want to show $K[e'] ∈ \Obs$.
 It suffices to show
-$K' = K[\Handle □\,h]
+$K[\Handle □\,h]
  ∈ \K⟦τ / (Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
 
 Take any $v ∈ ⟦τ⟧_η$.
-The expression $K'[v]$ reduces to $K[e_r\subst{v}{x}]$.
-Which is in $\Obs$, since $e_r\subst{v}{x} ∈ \E⟦τ_r/ρ⟧_η$,
+The expression $K[\Handle v\;h]$ reduces to $K[e_r\subst{v}{x}]$.
+Which is in $\Obs$, since $e_r\subst{v}{x} ∈ \E⟦τ_r/ρ⟧_η$
 and $K∈\K⟦τ_r/ρ⟧_η$.
 
 Now take any
-$K''[\Do v] ∈ \S⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
+$K'[\Do v] ∈ \S⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
 There exist $(v,n,μ) ∈ ⟦(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$
-such that $n\Free(K'')$ and for all $u∈μ$ we have
-$K''[u] ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
+such that $n\Free(K')$ and for all $u∈μ$ we have
+$K'[u] ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
 
-If $n=0$, then $K'[K''[\Do v]]$
+If $n=0$, then $K[\Handle K'[\Do v]\,h]$
 reduces to $K[e_h\subst{v}{x}\subst{v_c}{r}]$,
-where $v_c$ stands for $λz.\, \Handle K''[z]\,h$.
+where $v_c$ stands for $λz.\, \Handle K'[z]\,h$.
 We want to show that this is in $\Obs$, i.e.\ the expression
 plugged into $K$ is in $\E⟦τ_r/ρ⟧_η^{∪Y}$.
 From the interpretation of polymorphic effects, there exists
@@ -767,9 +767,9 @@ $η'$ extending $η$ such that $(v,n,μ) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{η'}$.
 Therefore $v∈⟦τ_1⟧_{η'}$ and $μ=⟦τ_2⟧_{η'}$.
 We only need to show $v_c ∈ ⟦τ_2 →_ρ τ_r⟧_{η'}$.
 So take any $u∈⟦τ_2⟧_{η'}$.
-The application $v_c\;u$ reduces to $\Handle K''[u]\,h$.
-We know $K''[u] ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
-We want $\Handle K''[u]\,h ∈ \E⟦τ_r/ρ⟧_η$.
+The application $v_c\;u$ reduces to $\Handle K'[u]\,h$.
+We know $K'[u] ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$.
+We want $\Handle K'[u]\,h ∈ \E⟦τ_r/ρ⟧_η$.
 
 If $n>0$, then
 it suffices to show that
