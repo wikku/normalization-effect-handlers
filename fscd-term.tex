@@ -554,41 +554,18 @@ was already substituted.
 \begin{proof}
 Assume $Δ ⊢ τ ∷ \kT$, $Δ ⊢ ε ∷ \kE$, and $Δ ⊢ ρ ∷ \kR$.
 Take any $η∈⟦Δ⟧$.
-Let $Y = \{e │ \Lift{e} ∈ \E⟦τ/ε·ρ⟧_η\}$.
-We will show $\E⟦τ/ρ⟧_η ⊆ Y$ by showing $\E⟦τ/ρ⟧_η(Y) ⊆ Y$.
-Take any $e∈\E⟦τ/ρ⟧_η(Y)$.
+We will show that $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$ for any $e∈\E⟦τ/ρ⟧_η$ by induction on $e$.
 
-If $e →^* K[\Do v] ∈ \S⟦τ/ρ⟧_η(Y)$, then
-we have $(v, n, μ) ∈ ⟦ρ⟧_η$ such that $n\Free(K)$ and
-$∀u∈μ.\, K[u] ∈ Y$
-We have $(v, n+1, μ) ∈ ⟦ε·ρ⟧_η$, $n+1\Free(\Lift{K})$,
+If $e →^* K[\Do v]$ and there exists
+$(v, n, μ) ∈ ⟦ρ⟧_η$ such that $n\Free(K)$ and
+for all $u∈μ$ the induction hypothesis holds for $K[u]$,
+then we have $(v, n+1, μ) ∈ ⟦ε·ρ⟧_η$, $n+1\Free(\Lift{K})$,
 and $∀u∈μ.\, \Lift{K[u]} ∈ \E⟦τ/ε·ρ⟧_η$.
-So $\Lift{K[\Do v]} ∈ \S⟦τ/ε·ρ⟧_η$ and $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$
-by antireduction.
+So $\Lift{K[\Do v]} ∈ \S⟦τ/ε·ρ⟧_η$ and $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$ by antireduction.
 
 If $e →^* v ∈ ⟦τ⟧_η$, then
 $\Lift{e} →^* \Lift{v} → v$,
 so $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$.
-\end{proof}
-
-\begin{lemma}[Application to value compatibility]
-\end{lemma}
-\begin{proof}
-Fix any well-formed $Δ$ and $τ_1 →_ρ τ_2$.
-Take any $η∈⟦Δ⟧$ and $(λx.\,e) ∈ ⟦τ_1 →_ρ τ_2/ρ⟧_η$.
-Let $Y = \{ e │ (λx.\,e)\;e ∈ \E⟦τ_2/ρ⟧_η\}$.
-We will show $\E⟦τ_1/ρ⟧_η ⊆ Y$ by showing $\E⟦τ_1/ρ⟧_η(Y) ⊆ Y$.
-Take any $e_2 ∈ \E⟦τ_1/ρ⟧_η(Y)$.
-
-If $e_2 →^* K[\Do v] ∈ \S⟦τ_1/ρ⟧_η(Y)$, then
-there exists $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K)$ and for all $u∈μ$
-we have $K[u]∈Y$.
-Since $n\Free((λx.\,e)\;e)$ and for all $u∈μ$ we have $((λx.\,e)\;K[u] ∈ \E⟦τ_2/ρ⟧_η$,
-$(λx.\,e)\;K[\Do v] ∈ \S⟦τ_2/ρ⟧_η$ and by antireduction $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
-
-If $e_2 →^* v ∈ ⟦τ_1⟧_η$, then
-$(λx.\,e)\;e_2 →^* e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η$,
-so $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$ by antireduction.
 \end{proof}
 
 \begin{lemma}[Application compatibility]
@@ -597,19 +574,27 @@ so $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$ by antireduction.
 %Assume $Δ;Γ ⊨ e_1 : τ_1 →_ρ τ_2 ╱ ρ$ and $Δ;Γ ⊨ e_2 : τ_1 ╱ ρ$.
 Fix any well-formed $Δ$ and $τ_1 →_ρ τ_2$.
 Take any $η∈⟦Δ⟧$ and $e_2 ∈ \E⟦τ_1/ρ⟧_η$.
-Let $Y = \{e_1 │ e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η\}$.
-We will show $\E⟦τ_1 →_ρ τ_2/ρ⟧⊆Y$ by showing $\E⟦τ_1 →_ρ τ_2/ρ⟧_η(Y) ⊆ Y$.
-Take any $e_1 ∈ \E⟦τ_1 →_ρ τ_2/ρ⟧_η(Y)$.
+We will show $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$
+for any $e_1∈\E⟦τ_1→_ρ τ_2/ρ⟧_η$ by induction on $e_1$.
 
-If $e_1 →^* K_1[\Do v] ∈ \S⟦τ_1 →_ρ τ_2/ρ⟧_η(Y)$, then
+If $e_1 →^* K_1[\Do v]$ and
 there exists $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K_1)$ and for all $u∈μ$
-we have $K_1[u] ∈ Y$.
-Since $n\Free(K_1\;e_2)$ and for all $u∈μ$ we have $K_1[u]\;e_2 ∈ \E⟦τ_2/ρ⟧_η$,
-$K_1[\Do v]\;e_2 ∈ \S⟦τ_2/ρ⟧_η$ and by antireduction $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
+the inductive hypothesis holds for $K_1[u]$,
+then $K_1[\Do v]\;e_2 ∈ \S⟦τ_2/ρ⟧_η$, since $n\Free(K_1\;e_2)$.
+By antireduction $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
 
 Now assume $e_1 →^* (λx.\,e) ∈ ⟦τ_1 →_ρ τ_2/ρ⟧_η$.
-By the previous lemma $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$,
-so by antireduction $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
+We will show $(λx.\,e)\;e_2 ∈ \E⟦t_2/ρ⟧_η$ by induction on $e_2$
+and the claim will follow by antireduction.
+
+If $e_2 →^* K_2[\Do v]$ and
+there exists $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K_2)$ and for all $u∈μ$
+the inductive hypothesis holds for $K_2[u]$,
+then $(λx.\,e)\;K_2[\Do v] ∈ \S⟦τ_2/ρ⟧_η$, since $n\Free((λx.\,e)\;K_2)$.
+By antireduction $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
+
+If $e_2 →^* v ∈ ⟦τ_1⟧_η$, then
+$(λx.\,e)\;e_2 →^* (λx.\,e)\;v → e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η$.
 \end{proof}
 
 \begin{lemma}[Handle compatibility]
@@ -621,19 +606,18 @@ $Δ; x:τ ⊨ e_r : τ_r ╱ ρ$.
 %$Δ;Γ ⊨ \Handle e\,\{x,r.\,e_h;\;x.\,e_r\} : τ_r ╱ ρ$.
 Let $h$ stand for $\{x,r.\,e_h;\,x.\,e_r\}$.
 Take any $η∈⟦Δ⟧$.
-Let $Y = \{e │ \Handle e\,h ∈ \E⟦τ_r/ρ⟧_η\}$.
-We will show $\E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η ⊆ Y$
-by showing $\E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η(Y) ⊆ Y$.
+We will show $\Handle e\,h ∈ \E⟦τ_r/ρ⟧_η$ for all
+$e∈\E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$ by induction on $e$.
 Note that only $τ_1$ and $τ_2$ require $Δ'$ to be in context.
-Take $e ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η(Y)$.
 
 If $e →^* v ∈ ⟦τ⟧_η$,
 then $\Handle e\,h →^* e_r\subst{v}{x} ∈ \E⟦τ_r/ρ⟧_η$,
 so the claim follows by antireduction.
 
-If $e →^* K[\Do v] ∈ \S⟦τ/(Δ'.\,τ_0 \Rightarrow τ_2) · ρ⟧_η(Y)$,
-then we have $(v,n,μ) ∈ ⟦(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$
-such that $n\Free(K)$ and $∀u∈μ.\,K[u]∈Y$.
+Now assume $e →^* K[\Do v]$ and
+we have $(v,n,μ) ∈ ⟦(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$
+such that $n\Free(K)$ and
+for all $u∈μ$ the induction hypothesis holds for $K[u]$.
 
 If $n=0$, then $(v,n,μ) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{ηη'}$ for some $η'∈⟦Δ'⟧$.
 More specifically, $v∈⟦τ_1⟧_{ηη'}$ and $μ = ⟦τ_2⟧_{ηη'}$.
@@ -641,9 +625,8 @@ We have $\Handle e\,h →^* \Handle K[\Do v]\,h → e_h\subst{v}{x}\subst{v_c}{r
 where $v_c=λz.\,\Handle K[z]\,h$.
 To show $v_c ∈ ⟦τ_2 →_ρ τ_r⟧_{ηη'}$, take any $u ∈ ⟦τ_2⟧_{ηη'}$ and show
 $\Handle K[u]\,h ∈ \E⟦τ_r/ρ⟧_{ηη'} = \E⟦τ_r/ρ⟧_η$.
-Which holds, since $K[u] ∈ Y$.
-Therefore, $e_h\subst{v}{x}\subst{v_c}{r} ∈ \E⟦τ_r/ρ⟧_η$ and the claim follows
-by antireduction.
+Which holds by induction hypothesis.
+Therefore, $e_h\subst{v}{x}\subst{v_c}{r}$ is in $\E⟦τ_r/ρ⟧_η$ and so is $\Handle e\;h$.
 
 If $n>0$, then
 $\Handle K[\Do v]\,h ∈ \S⟦τ_r/ρ⟧_η$,
