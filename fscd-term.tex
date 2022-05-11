@@ -1,0 +1,757 @@
+\documentclass[a4paper, 12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{silence}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{newunicodechar}
+\usepackage{etoolbox}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{stmaryrd}
+\SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
+% https://tex.stackexchange.com/a/106719
+\DeclareSymbolFont{sfletters}{OML}{cmbrm}{m}{it}
+\DeclareMathSymbol{\slambda}{\mathord}{sfletters}{"15}
+%https://tex.stackexchange.com/a/335857
+\usepackage{microtype}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{mathpartir}
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+\title{Polymorphic algebraic effects: theoretical properties and implementation}
+\author{Wiktor Kuchta}
+\date{\vspace{-4ex}}
+
+%\newcommand{\textbsf}[1]{\textbf{\textsf{#1}}}
+%\newunicodechar{λ}{\mathsf{\lambda}}
+%\newunicodechar{λ}{\mathbf{\lambda}}
+%\newunicodechar{λ}{\boldsymbol{\lambda}}
+%\newunicodechar{λ}{\lambda}
+\newunicodechar{λ}{\slambda}
+\newcommand{\Do}{\textsf{do\;}}
+\newcommand{\Handle}{\textsf{handle\;}}
+\newcommand{\Lift}[1]{\boldsymbol{[}#1\boldsymbol{]}}
+\newcommand{\subst}[2]{\{#1/#2\}}
+\newcommand{\E}{\mathcal{E}}
+\newcommand{\K}{\mathcal{K}}
+\renewcommand{\S}{\mathcal{S}}
+\newcommand{\kT}{\mathsf{T}}
+\newcommand{\kE}{\mathsf{E}}
+\newcommand{\kR}{\mathsf{R}}
+\newcommand{\Free}{\textrm{-}\mathrm{free}}
+\newcommand{\Obs}{\mathrm{Obs}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\modulus}[1]{\left| #1 \right|}
+\newcommand{\abs}{\modulus}
+\newcommand{\ol}{\overline}
+\DeclareMathOperator{\dom}{dom}
+\newcommand{\+}{\enspace}
+\newcommand{\gr}{\textcolor{ForestGreen}}
+
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+
+\newunicodechar{│}{\mid} % Digr vv
+%\newunicodechar{╱}{/} % Digr FD
+\newunicodechar{╱}{\mathbin{/}} % Digr FD
+\newunicodechar{∷}{::} % Digr ::
+\newunicodechar{□}{\square} % Digr OS
+\newunicodechar{∅}{\emptyset} % Digr /0
+\newunicodechar{∞}{\infty} % Digr 00
+\newunicodechar{∂}{\partial} % Digr dP
+\newunicodechar{α}{\alpha}
+\newunicodechar{β}{\beta}
+\newunicodechar{ξ}{\xi} % Digr c*
+\newunicodechar{δ}{\delta} % Digr d*
+\newunicodechar{ε}{\varepsilon}
+\newunicodechar{φ}{\varphi}
+\newunicodechar{γ}{\gamma} % Digr g*
+\newunicodechar{θ}{\theta} % Digr h*
+\newunicodechar{ι}{\iota} % Digr i*
+\newunicodechar{κ}{\kappa}
+\newunicodechar{μ}{\mu}
+\newunicodechar{ν}{\nu}
+\newunicodechar{π}{\pi}
+\newunicodechar{ψ}{\psi}
+\newunicodechar{ρ}{\rho}
+\newunicodechar{σ}{\sigma}
+\newunicodechar{τ}{\tau}
+\newunicodechar{ω}{\omega}
+\newunicodechar{η}{\eta} % Digr y*
+\newunicodechar{ζ}{\zeta} % Digr z*
+\newunicodechar{Δ}{\Delta}
+\newunicodechar{Γ}{\Gamma}
+\newunicodechar{Λ}{\Lambda}
+\newunicodechar{Θ}{\Theta}
+\newunicodechar{Φ}{\Phi} % Digr F*
+\newunicodechar{Π}{\Pi}
+\newunicodechar{Ψ}{\Psi} % digr Q*
+\newunicodechar{Σ}{\Sigma} % digr S*
+\newunicodechar{Ω}{\Omega} % digr W*
+\newunicodechar{ℕ}{\N} % Digr NN 8469 nonstandard
+\newunicodechar{ℤ}{\Z} % Digr ZZ 8484 nonstandard
+\newunicodechar{∑}{\sum}
+\newunicodechar{∏}{\prod}
+\newunicodechar{∫}{\int}
+\newunicodechar{∓}{\mp}
+\newunicodechar{⌈}{\lceil} % Digr <7
+\newunicodechar{⌉}{\rceil} % Digr >7
+\newunicodechar{⌊}{\lfloor} % Digr 7<
+\newunicodechar{⌋}{\rfloor} % Digr 7>
+\newunicodechar{≅}{\cong} % Digr ?=
+\newunicodechar{≡}{\equiv} % Digr 3=
+\newunicodechar{◁}{\triangleleft} % Digr Tl
+\newunicodechar{▷}{\triangleright} % Digr Tr
+\newunicodechar{≤}{\le}
+\newunicodechar{≥}{\ge}
+\newunicodechar{≪}{\ll} % Digr <*
+\newunicodechar{≫}{\gg} % Digr *>
+\newunicodechar{≠}{\ne}
+\newunicodechar{⊆}{\subseteq} % Digr (_
+\newunicodechar{⊇}{\supseteq} % Digr _)
+\newunicodechar{⊂}{\subset} % Digr (C
+\newunicodechar{⊃}{\supset} % Digr C)
+\newunicodechar{∩}{\cap} % Digr (U
+\newunicodechar{∖}{\setminus} % Digr -\ 8726 nonstandard
+\newunicodechar{∪}{\cup} % Digr )U
+\newunicodechar{∼}{\sim} % Digr ?1
+\newunicodechar{≈}{\approx} % Digr ?2
+\newunicodechar{∈}{\in} % Digr (-
+\newunicodechar{∋}{\ni} % Digr -)
+\newunicodechar{∇}{\nabla} % Digr NB
+\newunicodechar{∃}{\exists} % Digr TE
+\newunicodechar{∀}{\forall} % Digr FA
+\newunicodechar{∧}{\wedge} % Digr AN
+\newunicodechar{∨}{\vee} % Digr OR
+\newunicodechar{⊥}{\bot} % Digr -T
+\newunicodechar{⊢}{\vdash} % Digr \- 8866 nonstandard
+\newunicodechar{⊨}{\models} % Digr \= 8872 nonstandard
+\newunicodechar{⊤}{\top} % Digr TO 8868 nonstandard
+\newunicodechar{⇒}{\implies} % Digr =>
+\newunicodechar{⊸}{\multimap} % Digr #> nonstandard
+\newunicodechar{⇐}{\impliedby} % Digr <=
+\newunicodechar{⇔}{\iff} % Digr ==
+\newunicodechar{↔}{\leftrightarrow} % Digr <>
+\newunicodechar{↦}{\mapsto} % Digr T> 8614 nonstandard
+\newunicodechar{∘}{\circ} % Digr Ob
+\newunicodechar{⊕}{\oplus} % Digr O+ 8853
+\newunicodechar{⊗}{\otimes} % Digr OX 8855
+\newunicodechar{⟦}{\llbracket} % Digr [[ 10214 nonstandard (needs pkg stmaryrd)
+\newunicodechar{⟧}{\rrbracket} % Digr ]] 10215 nonstandard
+
+
+% cursed
+\WarningFilter{newunicodechar}{Redefining Unicode}
+\newunicodechar{·}{\ifmmode\cdot\else\textperiodcentered\fi} % Digr .M
+\newunicodechar{×}{\ifmmode\times\else\texttimes\fi} % Digr *X
+\newunicodechar{→}{\ifmmode\rightarrow\else\textrightarrow\fi} % Digr ->
+\newunicodechar{←}{\ifmmode\leftarrow\else\textleftarrow\fi} % Digr ->
+\newunicodechar{⟨}{\ifmmode\langle\else\textlangle\fi} % Digr LA 10216 nonstandard
+\newunicodechar{⟩}{\ifmmode\rangle\else\textrangle\fi} % Digr RA 10217 nonstandard
+\newunicodechar{…}{\ifmmode\dots\else\textellipsis\fi} % Digr .,
+\newunicodechar{±}{\ifmmode\pm\else\textpm\fi} % Digr +-
+\newunicodechar{¬}{\ifmmode\lnot\else\textlnot\fi} % Digr NO
+
+\begin{document}
+
+\maketitle
+
+\chapter{Introduction}
+\iffalse
+A programming language needs to be more than just a lambda calculus,
+capable only of functional abstraction and evaluation of expressions.
+Programs need to have an effect on the outside world and, thinking more locally,
+in our programs we would like to have fragments which do not merely reduce to a value in isolation,
+but affect the execution of surrounding code in interesting ways.
+This is what we call computational effects, the typical examples of which are:
+input/output, mutable state, exceptions, nondeterminism, and coroutines.
+
+Today, we are at the mercy of programming language designers to include the
+effects we would like to use and make sure that they all interact with
+each other well.
+In recent years, however, a new approach, called \textit{algebraic effects}, has emerged.
+Algebraic effects allow programmers to express all the usual computational effects as library code
+and use them in the usual direct style (as opposed to eg. monadic encodings,
+which do not always play well with the rest of the language and do not compose easily).
+These implementations of effects are instances of one concept and hence interact
+with each other predictably.
+
+More concretely, algebraic effects may be thought of as resumable exceptions.
+We can \textit{perform} an \textit{operation},
+just as we can raise an exception in a typical high-level programming language.
+The operation is then handled by the nearest enclosing \textit{handler} for the specific operation.
+The handler receives the value given at perform-point and also,
+unlike normal exception handlers,
+a \textit{continuation}, a first-class functional value representing the rest
+of the code to execute inside the handler from the perform-point.
+By calling the continuation with a value we can resume at the perform-point,
+as if performing the operation evaluated to the value.
+But more interestingly, we can resume multiple times, or never, or store the continuation for later use.
+
+This access to the continuation, while powerful, might also be a recipe for disaster.
+That is why languages with algebraic effects typically have
+\textit{type-and-effect systems},
+not only tracking the type of value an expression might evaluate to, but also
+what kind of effects it may perform on the way.
+\fi
+
+\iffalse
+This work will study a particular formal language equipped with algebraic effects.
+Although most results in the domain of programming languages depend crucially on the exact calculus and type system used,
+we hope that the results, ideas, and techniques may apply elsewhere.
+This should not seem far-fetched,
+as the paper which introduced the language \cite{fscd19} is exactly about
+interexpressibility with other systems.
+
+Possibly the most interesting result of this work is a potentially novel use of coinduction
+in the method of logical relations.
+It allowed us to get rid of step-indexing in the definition of the logical relation and
+ultimately prove termination of the language.
+This may sound surprising, as coinduction is connotated primarily with infinite processes.
+
+[todo other contributions]
+
+I would like to thank Dariusz Biernacki, Filip Sieczkowski, and Piotr Polesiuk
+for their help with this work.
+\fi
+
+\chapter{The language}
+% TODO name the language?
+
+We will study the deep handler calculus and type-and-effect system formulated
+in \cite{fscd19}.
+It is a refreshingly minimal language---the call-by-value lambda calculus with a few extensions
+to be able to express the essence of algebraic effects.
+There is only one unnamed universal operation, performed $\Do v$.
+To be able to simulate calculi with named effects (and more),
+the \textit{lift} operator, written $\Lift{e}$, is introduced.
+When operations are performed inside the expression $e$ enclosed by lift,
+the nearest handler will be skipped and the operation will be handled by the next one instead.
+Naturally, the operator composes, so multiple enclosing lifts means multiple handlers skipped.
+In contrast to most work on algebraic effects, the effect-tracking system here is structural,
+we do not have any concept of predefined or user-defined (named) signatures of effects.
+Finally, the language features polymorphic expressions and polymorphic operations.
+
+\begin{figure}
+\begin{align*}
+	\textrm{TVar} ∋ α,β,…       &                    \\%&\textrm{(type variables)}\\
+	\textrm{Var} ∋ f,r,x,y,…    &                    \\%&\textrm{(variables)}\\
+	\textrm{Kind} ∋ κ           &::=
+		\kT │ \kE │ \kR \\%&\textrm{(kinds)}\\
+	\textrm{Typelike} ∋ σ,τ,ε,ρ &::=
+		α │ τ→_ρτ │ ∀α::κ.\,τ │ ι │ Δ.\,τ \Rightarrow τ │ ε · ρ
+		\\%&\textrm{(types and rows)}\\
+	\textrm{Val} ∋ v,u          &::= x │ λx.\,e \\%&\textrm{(values)}\\
+	\textrm{Exp} ∋ e            &::=
+		v │ e\;e │ \Lift{e} │ \Do v │ \Handle e\,\{x,r.\,e;\,x.\,e\}
+		\\%&\textrm{(expressions)}\\
+	\textrm{ECont} ∋ K          &::=
+		□ │ K\;e │ v\;K │ \Lift{K} │ \Handle K\,\{x,r.\,e;\,x.\,e\}
+		\\%&\textrm{(evaluation contexts)}
+\end{align*}
+\caption{Syntax.}
+\end{figure}
+
+% TODO inconsistent polytype and polyeffect syntax:
+% types have foralls one by one, operations have a forall for the whole Δ'
+
+\begin{figure}
+\begin{mathpar}
+	\inferrule
+		{ }
+		{0\Free(□)}
+
+	\inferrule
+		{n\Free(K)}
+		{n\Free(K\;e)}
+
+	\inferrule
+		{n\Free(K)}
+		{n\Free(v\;K)}
+
+	\inferrule
+		{n\Free(K)}
+		{{n+1}\Free(\Lift{K})}
+
+	\inferrule
+		{{n+1}\Free(K)}
+		{n\Free(\Handle K\,\{x,r.\,e_h;\,x.\,e_r\})}
+\end{mathpar}
+\caption{Evaluation context freeness.}
+\end{figure}
+
+\begin{figure}
+\begin{mathpar}
+	\inferrule
+		{e_1 ↦ e_2}
+		{K[e_1] → K[e_2]}
+
+	(λx.\,e)\;v ↦ e\subst{v}{x} % SUBST
+
+	\Lift{v} ↦ v
+
+	\inferrule
+		{0\Free(K) \\ v_c = λz.\,\Handle K[z]\,\{x,r.\,e_h;\,x.\,e_r\}}
+		{\Handle K[\Do v]\,\{x, r.\,e_h;\,x.\,e_r\} ↦ e_h\subst{v}{x}\subst{v_c}{r}} % SUBST
+
+	\Handle v\,\{x,r.\,e_h;\,x.\,e_r\} ↦ e_r\subst{v}{x} % SUBST
+\end{mathpar}
+\caption{Single-step reduction.} % TODO "Contraction"???
+\end{figure}
+
+\begin{figure}
+\begin{mathpar}
+	\inferrule
+		{α ∷ κ ∈ Δ}
+		{Δ ⊢ α ∷ κ}
+
+	\inferrule
+		{Δ ⊢ τ_1 ∷ \kT \\ Δ ⊢ ρ ∷ \kR \\ Δ ⊢ τ_2 ∷ \kT}
+		{Δ ⊢ τ_1 →_ρ τ_2 ∷ \kT}
+
+	\inferrule
+		{Δ, α :: κ ⊢ τ ∷ \kT}
+		{Δ ⊢ ∀α::κ.\, τ ∷ \kT}
+
+	\inferrule
+		{ }
+		{Δ ⊢ ι ∷ \kR}
+
+	\inferrule
+		{Δ ⊢ ε ∷ \kE \\ Δ ⊢ ρ ∷ \kR}
+		{Δ ⊢ ε · ρ ∷ \kR}
+
+	\inferrule
+		{Δ,Δ' ⊢ τ_1 ∷ \kT \\ Δ,Δ' ⊢ τ_2 ∷ \kT}
+		{Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
+
+	Δ ⊢ δ ∷ Δ' ⇔ \dom(δ) = \dom(Δ') ∧ ∀α∈\dom(δ).\, Δ ⊢ δ(α) ∷ Δ'(α)
+\end{mathpar}
+\caption{Well-formedness of types, rows, and type substitution.}
+%TODO: inductive definition of well-formed type substitutions?
+%TODO: syntax of Γ and Δ
+\end{figure}
+
+\begin{figure}
+\begin{mathpar}
+	\inferrule
+		{ }
+		{Δ ⊢ σ <: σ}
+		%\textsc{(S-Refl)}
+
+	\inferrule
+		{Δ ⊢ τ_2^1 <: τ_1^1 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ ⊢ τ_1^2 <: τ_2^2}
+		{Δ ⊢ τ_1^1 →_{ρ_1} τ_1^2 <: τ_2^1 →_{ρ_2} τ_2^2}
+		%\textsc{(S-Arrow)}
+
+	\inferrule
+		{Δ, α ∷ κ ⊢ τ_1 <: τ_2}
+		{Δ ⊢ ∀α∷κ.\, τ_1 <: ∀α∷κ. \,τ_2}
+		%\textsc{(S-ForAll)}
+
+	\inferrule
+		{Δ ⊢ ρ ∷ \kR}
+		{Δ ⊢ ι <: ρ}
+		%\textsc{(S-Empty)}
+
+	\inferrule
+		{Δ ⊢ ρ_1 <: ρ_2}
+		{Δ ⊢ ε·ρ_1 <: ε·ρ_2}
+		%\textsc{(S-Extend)}
+\end{mathpar}
+\caption{Subtyping.}
+\end{figure}
+
+\begin{figure}
+\begin{mathpar}
+	\inferrule
+		{x : τ ∈ Γ}
+		{Δ;Γ ⊢ x : τ ╱ ι}
+
+	\inferrule
+		{Δ ⊢ τ_1 ∷ \kT \\ Δ;Γ, x:τ_1 ⊢ e : τ_2 ╱ ρ}
+		{Δ;Γ ⊢ λx.\,e : τ_1 →_ρ τ_2 ╱ ι}
+
+	\inferrule
+		{Δ;Γ ⊢ e_1 : τ_1 →_ρ τ_2 ╱ ρ \\ Δ;Γ ⊢ e_2 : τ_1 ╱ ρ}
+		{Δ;Γ ⊢ e_1\,e_2 : τ_2 ╱ ρ}
+
+	\inferrule
+		{Δ ⊢ ε ∷ \kE \\ Δ;Γ ⊢ e : τ ╱ ρ}
+		{Δ;Γ ⊢ \Lift{e} : τ ╱ ε·ρ}
+
+	\inferrule
+		{Δ,α∷κ;Γ ⊢ e : τ ╱ ι}
+		{Δ;Γ ⊢ e : ∀α∷κ.\,τ ╱ ι}
+
+	\inferrule
+		{Δ ⊢ σ ∷ κ \\ Δ;Γ ⊢ e : ∀α∷κ.\, τ ╱ ρ}
+		{Δ;Γ ⊢ e : τ\subst{σ}{α} ╱ ρ}
+
+	\inferrule
+		{Δ ⊢ τ_1 <: τ_2 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ;Γ ⊢ e : τ_1 ╱ ρ_1}
+		{Δ;Γ ⊢ e : τ_2 ╱ ρ_2}
+
+	\inferrule
+		{Δ;Γ ⊢ v : δ(τ_1) ╱ ι \\ Δ ⊢ δ ∷ Δ' \\ Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
+		{Δ;Γ ⊢ \Do v : δ(τ_2) ╱ (Δ'.\, τ_1 \Rightarrow τ_2)}
+
+	\inferrule
+		{Δ;Γ ⊢ e : τ ╱ (Δ'.\,τ_1 \Rightarrow τ_2) · ρ \\
+		Δ,Δ';Γ,x:τ_1,r:τ_2→_ρ τ_r ⊢ e_h : τ_r ╱ ρ \\
+		Δ;Γ, x:τ ⊢ e_r : τ_r ╱ ρ}
+		{Δ;Γ ⊢ \Handle e\;\{x,r.\,e_h;x.\,e_r\} : τ_r ╱ ρ}
+
+\end{mathpar}
+\caption{Type system.}
+\end{figure}
+
+\chapter{The logical relation}
+[todo introduction to logical relations]
+
+The logical relation is inspired by \cite{hwc}.
+Some changes are due to language differences:
+we have only one universal operation which simplifies the treatment of effects,
+polymorphism does not manifest at the expression level---we do not have type lambdas,
+and our operations can be polymorphic.
+Instead of a binary step-indexed relation,
+our goal is to build a unary relation without step-indexing.
+
+\section{Definition}
+
+First, we define the interpretations of kinds.
+We call them the spaces of \textit{semantic types} and \textit{semantic effects}.
+\begin{align*}
+	⟦\kT⟧ &= \mathcal{P}(\textrm{Val}) = \mathsf{Type},\\
+	⟦\kE⟧ &= \mathcal{P}(\textrm{Exp}×\{0\}×\mathsf{Type}) \\
+	⟦\kR⟧ &= \mathcal{P}(\textrm{Exp}×ℕ×\mathsf{Type})
+\end{align*}
+%TODO semantic types/effects are overapproximations of possible behaviors? or sth
+Semantic types are simply sets of closed values.
+Semantic effects are sets of triples, which aim to describe a situation
+in which an expression being evaluated performs an effect.
+The components of such a triple are:
+the argument of the operation,
+the freeness of the enclosing context beyond which the operation can be handled,
+and the semantic type of values we can call the resumption with.
+
+Using structural induction we simultaneously define the interpretations of types and effects, as well as
+relations $\E$ on expressions and $\S$ on stuck terms.
+We parameterize the definitions by a mapping $η$ from type variables to
+semantic types or effects.
+
+\begin{align*}
+	⟦α⟧_η &= η(α) \\
+	\\
+	⟦τ_1 →_ρ τ_2⟧_η
+	 &= \{ λx.\,e \mid ∀v∈⟦τ_1⟧_η.\, e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η \} \\
+	⟦∀α::κ.\,τ⟧_η
+	&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
+	\\
+	⟦Δ.\,τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_{ηη'}) \mid η'∈⟦Δ⟧ ∧ v∈⟦τ_1⟧_{ηη'} \} \\
+	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(v, n+1, μ) \mid (v, n, μ)∈⟦ρ⟧_η \} \\
+	⟦ι⟧_η &= ∅ \\
+	\\
+	\E⟦τ/ρ⟧_η(X) &=
+	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η(X).\, e →^* e' \} \\
+	\S⟦τ/ρ⟧_η(X) &= \{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X \} \\
+	\\
+	\E⟦τ/ρ⟧_η &= \bigcap \{ X │ \E⟦τ/ρ⟧_η(X) ⊆ X \} \\
+	\S⟦τ/ρ⟧_η &= \S⟦τ/ρ⟧_η(\E⟦τ/ρ⟧_η)
+\end{align*}
+
+We define the set $\E⟦τ/ρ⟧_η$ as a solution to the fixed-point equation
+$\E⟦τ/ρ⟧_η(X) = X$.
+The function $\E⟦τ/ρ⟧_η$ is monotone, so by the Knaster-Tarski theorem
+it has a least fixed point.
+From its characterization as the intersection of all $\E⟦τ/ρ⟧_η$-closed sets,
+we immediately obtain the induction principle.
+
+\begin{lemma}[Tarski induction principle]\label{tarski-induction}
+	If $\E⟦τ/ρ⟧_η(X) ⊆ X$, then $\E⟦τ/ρ⟧_η ⊆ X$.
+\end{lemma}
+
+By expanding out the definition of the function $\E⟦τ/ρ⟧_η$
+and treating $X$ as a predicate $P$,
+we get the more familiar principle of structural induction on $\E⟦τ/ρ⟧_η$.
+\begin{lemma}[Induction principle]\label{induction}
+	Assume that $P(e)$ is implied by
+	$e$ evaluating to a value in $⟦τ⟧_η$
+	or reducing to some $K[\Do v]$ such that there exist $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K)$
+	and $P(K[u])$ holds for all $u∈μ$.
+	Then $P(e)$ holds for all $e ∈ \E⟦τ/ρ⟧_η$.
+\end{lemma}
+
+\begin{lemma}[Value inclusion]\label{value-inclusion}
+	For any $τ$ and $ρ$ we have $⟦τ⟧_η ⊆ \E⟦τ/ρ⟧_η$.
+\end{lemma}
+
+\begin{lemma}[Control-stuck inclusion]\label{stuck-inclusion}
+For any $τ$ and $ρ$ we have $\S⟦τ/ρ⟧_η ⊆ \E⟦τ/ρ⟧_η$.
+\end{lemma}
+
+\begin{lemma}[Closedness under antireduction]\label{antireduction}
+If $e →^* e' ∈ \E⟦τ/ρ⟧_η$, then $e∈\E⟦τ/ρ⟧_η$.
+\end{lemma}
+
+\begin{lemma}\label{mono}
+	If $⟦τ_1⟧_η ⊆ ⟦τ_2⟧_η$ and $⟦ρ_1⟧_η ⊆ ⟦ρ_2⟧_η$,
+	then $\S⟦τ_1/ρ_1⟧_η ⊆ \S⟦τ_2/ρ_2⟧_η$
+	and $\E⟦τ_1/ρ_1⟧_η ⊆ \E⟦τ_2/ρ_2⟧_η$.
+\end{lemma}
+
+\section{Compatibility lemmas}
+We want to establish that $⊢ e : τ ╱ ι$ implies $e ∈ \E⟦τ/ι⟧$.
+
+For this purpose we will prove a semantic counterpart of each typing rule.
+First, we need to define a counterpart to the typing judgment.
+Unlike typing judgments, our relations are on closed terms only,
+so we get around that by using substitution.
+We define semantic entailment as
+$$Δ;Γ ⊨ e : τ ╱ ρ ⇔ ∀η∈⟦Δ⟧.\, ∀γ∈⟦Γ⟧_η.\,γ(e) ∈ \E⟦τ/ρ⟧_η,$$
+where $⟦Δ⟧ = \{ η │ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}$ contains type-level mappings
+and $⟦Γ⟧_η = \{ γ │ ∀x:τ∈Γ.\,γ(x) ∈ ⟦τ⟧_η\}$ contains expression-level
+variable substitutions.
+
+\begin{lemma}[Variable compatibility]
+\end{lemma}
+\begin{proof}
+Assume $x : τ ∈ Γ$.
+We want to prove $Δ;Γ ⊨ x : τ ╱ ι$.
+Take any $η∈⟦Δ⟧$ and $γ∈⟦Γ⟧_η$.
+We want to show $γ(x) ∈ \E⟦τ/ι⟧_η$.
+From the definition of $⟦Γ⟧_η$
+we know that $γ(x) ∈ ⟦τ⟧_η$,
+so by \cref{value-inclusion} we have $γ(x) ∈ \E⟦τ/ι⟧_η$.
+\end{proof}
+
+\begin{lemma}[Abstraction compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ ⊢ {τ_1 ∷ \kT}$ and $Δ;Γ,{x:τ_1} ⊨ e : τ_2 ╱ ρ$.
+% Note: kind assumption necessary so that τ_1 →_ρ τ_2 well formed
+We want to prove $Δ;Γ ⊨ λx.\,e : {τ_1 →_ρ τ_2} ╱ ι$.
+Take any $η∈⟦Δ⟧$ and $γ∈⟦Γ⟧_η$.
+By \cref{value-inclusion} it suffices to show
+$γ(λx.\,e) = λx.\,γ(e) ∈ ⟦τ_1 →_ρ τ_2⟧_η$.
+So take any $v ∈ ⟦τ_1⟧_η.$
+% TODO: use of arrow interpretation; fragile
+We need to show $γ(e)\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η$.
+Let $γ' = γ'[x↦v]$.
+Then $γ' ∈ ⟦Γ,x:τ_1⟧_η$, so $γ(e)\subst{v}{x} = γ'(e) ∈ \E⟦τ_2/ρ⟧_η.$
+\end{proof}
+
+For clarity of presentation,
+in the following we will assume $Γ$ empty, i.e. an interpretation of $Γ$
+was already substituted.
+
+\begin{lemma}[Lift compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ ⊢ τ ∷ \kT$, $Δ ⊢ ε ∷ \kE$, and $Δ ⊢ ρ ∷ \kR$.
+Take any $η∈⟦Δ⟧$.
+Let $Y = \{e │ \Lift{e} ∈ \E⟦τ/ε·ρ⟧_η\}$.
+We will show $\E⟦τ/ρ⟧_η ⊆ Y$ by showing $\E⟦τ/ρ⟧_η(Y) ⊆ Y$.
+Take any $e∈\E⟦τ/ρ⟧_η(Y)$.
+
+If $e →^* K[\Do v] ∈ \S⟦τ/ρ⟧_η(Y)$, then
+we have $(v, n, μ) ∈ ⟦ρ⟧_η$ such that $n\Free(K)$ and
+$∀u∈μ.\, K[u] ∈ Y$
+We have $(v, n+1, μ) ∈ ⟦ε·ρ⟧_η$, $n+1\Free(\Lift{K})$,
+and $∀u∈μ.\, \Lift{K[u]} ∈ \E⟦τ/ε·ρ⟧_η$.
+So $\Lift{K[\Do v]} ∈ \S⟦τ/ε·ρ⟧_η$ and $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$
+by antireduction.
+
+If $e →^* v ∈ ⟦τ⟧_η$, then
+$\Lift{e} →^* \Lift{v} → v$,
+so $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$.
+\end{proof}
+
+\begin{lemma}[Application to value compatibility]
+\end{lemma}
+\begin{proof}
+Fix any well-formed $Δ$ and $τ_1 →_ρ τ_2$.
+Take any $η∈⟦Δ⟧$ and $(λx.\,e) ∈ ⟦τ_1 →_ρ τ_2/ρ⟧_η$.
+Let $Y = \{ e │ (λx.\,e)\;e ∈ \E⟦τ_2/ρ⟧_η\}$.
+We will show $\E⟦τ_1/ρ⟧_η ⊆ Y$ by showing $\E⟦τ_1/ρ⟧_η(Y) ⊆ Y$.
+Take any $e_2 ∈ \E⟦τ_1/ρ⟧_η(Y)$.
+
+If $e_2 →^* K[\Do v] ∈ \S⟦τ_1/ρ⟧_η(Y)$, then
+there exists $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K)$ and for all $u∈μ$
+we have $K[u]∈Y$.
+Since $n\Free((λx.\,e)\;e)$ and for all $u∈μ$ we have $((λx.\,e)\;K[u] ∈ \E⟦τ_2/ρ⟧_η$,
+$(λx.\,e)\;K[\Do v] ∈ \S⟦τ_2/ρ⟧_η$ and by antireduction $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
+
+If $e_2 →^* v ∈ ⟦τ_1⟧_η$, then
+$(λx.\,e)\;e_2 →^* e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η$,
+so $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$ by antireduction.
+\end{proof}
+
+\begin{lemma}[Application compatibility]
+\end{lemma}
+\begin{proof}
+%Assume $Δ;Γ ⊨ e_1 : τ_1 →_ρ τ_2 ╱ ρ$ and $Δ;Γ ⊨ e_2 : τ_1 ╱ ρ$.
+Fix any well-formed $Δ$ and $τ_1 →_ρ τ_2$.
+Take any $η∈⟦Δ⟧$ and $e_2 ∈ \E⟦τ_1/ρ⟧_η$.
+Let $Y = \{e_1 │ e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η\}$.
+We will show $\E⟦τ_1 →_ρ τ_2/ρ⟧⊆Y$ by showing $\E⟦τ_1 →_ρ τ_2/ρ⟧_η(Y) ⊆ Y$.
+Take any $e_1 ∈ \E⟦τ_1 →_ρ τ_2/ρ⟧_η(Y)$.
+
+If $e_1 →^* K_1[\Do v] ∈ \S⟦τ_1 →_ρ τ_2/ρ⟧_η(Y)$, then
+there exists $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K_1)$ and for all $u∈μ$
+we have $K_1[u] ∈ Y$.
+Since $n\Free(K_1\;e_2)$ and for all $u∈μ$ we have $K_1[u]\;e_2 ∈ \E⟦τ_2/ρ⟧_η$,
+$K_1[\Do v]\;e_2 ∈ \S⟦τ_2/ρ⟧_η$ and by antireduction $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
+
+Now assume $e_1 →^* (λx.\,e) ∈ ⟦τ_1 →_ρ τ_2/ρ⟧_η$.
+By the previous lemma $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$,
+so by antireduction $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
+\end{proof}
+
+\begin{lemma}[Handle compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ, Δ' ; x:τ_1, r:τ_2 →_ρ τ_r ⊨ e_h : τ_r ╱ ρ$ and
+$Δ; x:τ ⊨ e_r : τ_r ╱ ρ$.
+%We want to show
+%$Δ;Γ ⊨ \Handle e\,\{x,r.\,e_h;\;x.\,e_r\} : τ_r ╱ ρ$.
+Let $h$ stand for $\{x,r.\,e_h;\,x.\,e_r\}$.
+Take any $η∈⟦Δ⟧$.
+Let $Y = \{e │ \Handle e\,h ∈ \E⟦τ_r/ρ⟧_η\}$.
+We will show $\E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η ⊆ Y$
+by showing $\E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η(Y) ⊆ Y$.
+Note that only $τ_1$ and $τ_2$ require $Δ'$ to be in context.
+Take $e ∈ \E⟦τ/(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η(Y)$.
+
+If $e →^* v ∈ ⟦τ⟧_η$,
+then $\Handle e\,h →^* e_r\subst{v}{x} ∈ \E⟦τ_r/ρ⟧_η$,
+so the claim follows by antireduction.
+
+If $e →^* K[\Do v] ∈ \S⟦τ/(Δ'.\,τ_0 \Rightarrow τ_2) · ρ⟧_η(Y)$,
+then we have $(v,n,μ) ∈ ⟦(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$
+such that $n\Free(K)$ and $∀u∈μ.\,K[u]∈Y$.
+
+If $n=0$, then $(v,n,μ) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{ηη'}$ for some $η'∈⟦Δ'⟧$.
+More specifically, $v∈⟦τ_1⟧_{ηη'}$ and $μ = ⟦τ_2⟧_{ηη'}$.
+We have $\Handle e\,h →^* \Handle K[\Do v]\,h → e_h\subst{v}{x}\subst{v_c}{r}$,
+where $v_c=λz.\,\Handle K[z]\,h$.
+To show $v_c ∈ ⟦τ_2 →_ρ τ_r⟧_{ηη'}$, take any $u ∈ ⟦τ_2⟧_{ηη'}$ and show
+$\Handle K[u]\,h ∈ \E⟦τ_r/ρ⟧_{ηη'} = \E⟦τ_r/ρ⟧_η$.
+Which holds, since $K[u] ∈ Y$.
+Therefore, $e_h\subst{v}{x}\subst{v_c}{r} ∈ \E⟦τ_r/ρ⟧_η$ and the claim follows
+by antireduction.
+
+If $n>0$, then
+$\Handle K[\Do v]\,h ∈ \S⟦τ_r/ρ⟧_η$,
+since $n-1\Free(\Handle K\,h)$, $(v,n-1,μ) ∈ ⟦ρ⟧_η$,
+% gdyby przestrzeń efektów pozwalała na niezerowe indeksy to by się to psuło!
+and $∀u∈μ.\,\Handle K[u]\,h ∈ \E⟦τ_r/ρ⟧_η$.
+Again, the claim follows by antireduction.
+
+\end{proof}
+
+% Lemma: type substitution preserves well-kinding?
+
+% Ahmed LR: "compositionality"
+\begin{lemma} \label{subst-comp}
+	If $Δ$ and $Δ'$ disjoint, $Δ ⊢ δ ∷ Δ'$, and $Δ,Δ' ⊢ τ ∷ κ$, $η∈⟦Δ⟧$, and
+	$η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$,
+	then $⟦τ⟧_{η'} = ⟦δ(τ)⟧_η$.
+\end{lemma}
+\begin{proof}
+	By induction on the kinding rules.
+
+	If $τ=α ∈ Δ$, then both sides are equal to $η(α)$.
+
+	If $τ=α ∈ Δ'$, then equality follows from the definition of $η'$.
+
+	If $τ=ι$, then both sides are empty.
+
+	If $τ=∀α∷κ.\,τ'$, then
+	$⟦τ⟧_{η'} = \bigcap \{⟦τ'⟧_{η'[α↦μ]} │ μ∈⟦κ⟧\}$
+	and
+	$⟦δ(τ)⟧_{η} = \bigcap \{⟦δ(τ')⟧_{η[α↦μ]} │ μ∈⟦κ⟧\}$,
+	which are equal by the inductive hypothesis
+	(taking $Δ, α∷κ$ as $Δ$ in the statement).
+
+	If $τ=Δ''.\,τ_1 \Rightarrow τ_2$,
+	then $⟦τ⟧_{η'} = \{(v,0,⟦τ_2⟧_{η'η''}) │ η'' ∈ ⟦Δ''⟧ ∧ v ∈ ⟦τ_1⟧_{η'η''} \}$
+	and $⟦δ(τ)⟧_{η} = \{(v,0,⟦δ(τ_2)⟧_{ηη''}) │ η'' ∈ ⟦Δ''⟧ ∧ v ∈ ⟦δ(τ_1)⟧_{ηη''} \}$,
+	which are equal by induction (taking $Δ, Δ''$ as $Δ$ in the statement).
+
+	If $τ=ε·ρ$,
+	then $⟦τ⟧_{η'} = ⟦ε⟧_{η'} ∪ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦ρ⟧_{η'} \}$
+	and $⟦δ(τ)⟧_{η} = ⟦δ(ε)⟧_{η} ∪ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦δ(ρ)⟧_{η} \}$,
+	which are equal by the inductive hypothesis.
+\end{proof}
+
+\begin{lemma}[Do compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ ⊢ δ ∷ Δ'$, $Δ⊢Δ'.\,τ_1→τ_2 ∷ \kE$.
+Take any $η ∈ ⟦Δ⟧$.
+Assume $v ∈ ⟦δ(τ_1)⟧_η$.
+% TODO: since the compatibility proofs for values (variable and lambda)
+% first show containment in the interpretation of values, this is enough
+% we could assume $v ∈ \E⟦δ(τ_1)⟧_η
+We want to show $\Do v ∈ \E⟦δ(τ_2)/(Δ'.\,τ_1 \Rightarrow τ_2)⟧_η$.
+
+By \cref{stuck-inclusion} it suffices to show
+$\Do v ∈ \S⟦δ(τ_2)/(Δ'.\,τ_1 \Rightarrow τ_2)⟧_η$.
+By taking the empty context in the definition of $\S$ and \cref{value-inclusion},
+it suffices to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦Δ'.\,τ_1 \Rightarrow τ_2⟧_η$.
+From the interpretation of polymorphic effects, it
+would be enough to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{η'}$,
+where $η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$ for all $α∈Δ'$.
+By the interpretation of operations, it remains to show
+$v ∈ ⟦τ_1⟧_{η'}$ and $⟦δ(τ_2)⟧_η = ⟦τ_2⟧_{η'}$.
+Which follows immediately from \cref{subst-comp}.
+\end{proof}
+
+\begin{lemma}[Subtyping compatibility]
+\end{lemma}
+\begin{proof}
+By induction on subtyping rules it can be shown that
+if $σ_1 <: σ_2$, then $⟦σ_1⟧_η ⊆ ⟦σ_2⟧_η$ (for $σ_i$ of any kind).
+
+So if $Δ ⊢ τ_1 <: τ_2$, $Δ ⊢ ρ_1 <: ρ_2$ and $Δ; Γ ⊨ e : τ_1╱ρ_1$,
+then by \cref{mono}
+$Δ; Γ ⊨ e : τ_2╱ρ_2$.
+\end{proof}
+
+\begin{lemma}[Polymorphism introduction compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ,α∷κ; ⊨ e : τ ╱ ι$.
+Take $η∈⟦Δ⟧$.
+We know $e$ evaluates to a value in $⟦τ⟧_{η[α↦μ]}$ for
+any $μ∈⟦κ⟧$.
+Therefore this value is in $⟦∀α∷κ.\,τ⟧_η$,
+and by antireduction $e ∈ \E⟦∀α∷κ.\,τ/ι⟧_η$.
+\end{proof}
+
+\begin{lemma}[Polymorphism elimination compatibility]
+\end{lemma}
+\begin{proof}
+Assume $Δ ⊢ σ ∷ κ$ and $Δ; ⊨ e : ∀α∷κ.\,τ╱ρ$.
+By \cref{subst-comp} we have $⟦τ\subst{σ}{α}⟧_η = ⟦τ⟧_{η[α↦⟦σ⟧_η]}$,
+which is a superset of $⟦∀α∷κ.\,τ⟧$.
+So we have $Δ; ⊨ e : τ\subst{σ}{α} ╱ ρ$ by \cref{mono}.
+\end{proof}
+
+\begin{theorem}[Termination of evaluation]
+\end{theorem}
+\begin{proof}
+If $⊢ e : τ / ι$, then
+$e ∈ \E⟦τ/ι⟧$ and $e$ has to terminate to a value, since
+$⟦ι⟧$ is empty and hence $\S⟦τ/ι⟧$ is empty.
+\end{proof}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
