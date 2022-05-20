@@ -424,7 +424,8 @@ our goal is to build a unary relation without step-indexing.
 \section{Definition}
 
 First, we define the interpretations of kinds.
-We call them the spaces of \textit{semantic types} and \textit{semantic effects}.
+We call them the spaces of \textit{semantic types} or,
+in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}.
 \begin{align*}
 	⟦\kT⟧ &= \mathcal{P}(\textrm{Val}) = \mathsf{Type},\\
 	⟦\kE⟧ &= \mathcal{P}(\textrm{Exp}×\{0\}×\mathsf{Type}) \\
@@ -439,10 +440,13 @@ the argument of the operation,
 the freeness of the enclosing context beyond which the operation can be handled,
 and the semantic type of values we can call the resumption with.
 
+We interpret type contexts as mappings from type variables to semantic types:
+$$⟦Δ⟧ = \{ η │ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}.$$
+
 Using structural induction we simultaneously define the interpretations of types and effects, as well as
 relations $\E$ on expressions and $\S$ on stuck terms.
 We parameterize the definitions by a mapping $η$ from type variables to
-semantic types or effects.
+semantic types.
 
 \begin{align*}
 	⟦α⟧_η &= η(α) \\
@@ -513,8 +517,7 @@ Unlike typing judgments, our relations are on closed terms only,
 so we get around that by using substitution.
 We define semantic entailment as
 $$Δ;Γ ⊨ e : τ ╱ ρ ⇔ ∀η∈⟦Δ⟧.\, ∀γ∈⟦Γ⟧_η.\,γ(e) ∈ \E⟦τ/ρ⟧_η,$$
-where $⟦Δ⟧ = \{ η │ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}$ contains type-level mappings
-and $⟦Γ⟧_η = \{ γ │ ∀x:τ∈Γ.\,γ(x) ∈ ⟦τ⟧_η\}$ contains expression-level
+where $⟦Γ⟧_η = \{ γ │ ∀x:τ∈Γ.\,γ(x) ∈ ⟦τ⟧_η\}$ contains expression-level
 variable substitutions.
 
 \begin{lemma}[Variable compatibility]
