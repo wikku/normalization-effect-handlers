@@ -698,12 +698,40 @@ Which follows immediately from \cref{subst-comp}.
 \begin{lemma}[Subtyping compatibility]
 \end{lemma}
 \begin{proof}
-By induction on subtyping rules it can be shown that
-if $σ_1 <: σ_2$, then $⟦σ_1⟧_η ⊆ ⟦σ_2⟧_η$ (for $σ_i$ of any kind).
-
-So if $Δ ⊢ τ_1 <: τ_2$, $Δ ⊢ ρ_1 <: ρ_2$ and $Δ; Γ ⊨ e : τ_1╱ρ_1$,
-then by \cref{mono}
+By induction on subtyping rules we will show that
+if $Δ ⊢ σ_1 <: σ_2$, then $⟦σ_1⟧_η ⊆ ⟦σ_2⟧_η$ for all $η ∈ ⟦Δ⟧$.
+Then, by \cref{mono}, from $Δ ⊢ τ_1 <: τ_2$, $Δ ⊢ ρ_1 <: ρ_2$ and $Δ; Γ ⊨ e : τ_1╱ρ_1$
+we will be able to conclude
 $Δ; Γ ⊨ e : τ_2╱ρ_2$.
+
+For the case of the reflexivity rule,
+we obviously have $⟦σ⟧_η ⊆ ⟦σ⟧_η$.
+
+For the case of the function type rule,
+assume $⟦τ_2^1⟧_η ⊆ ⟦τ_1^1⟧_η$, $⟦ρ_1⟧_η ⊆ ⟦ρ_2⟧_η$, and $⟦τ_1^2⟧_η ⊆ ⟦τ_2^2⟧_η$.
+We want to show $⟦τ_1^1 →_{ρ_1} τ_1^2⟧_η ⊆ ⟦τ_2^1 →_{ρ_2} τ_2^2⟧_η$.
+So take any $(λx.\,e)$ in the former and any $v ∈ ⟦τ_2^1⟧$.
+Since $v ∈ ⟦τ_1^1⟧_η$, we have $e\subst{v}{x} ∈ \E⟦τ_1^2/ρ_1⟧_η$.
+By \cref{mono} we obtain $e\subst{v}{x} ∈ \E⟦τ_2^2/ρ_2⟧_η$ as desired.
+
+For the case of the universal quantifier rule,
+assume $⟦τ_1⟧_{η[α↦μ]} ⊆ ⟦τ_2⟧_{η[α↦μ]}$ for all $μ ∈ ⟦κ⟧$.
+The claim holds since
+\begin{align*}
+⟦∀α∷κ.\,τ_1⟧_η
+&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ_1⟧_{[α↦μ]η} \} \\
+&⊆ \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ_2⟧_{[α↦μ]η} \}
+=
+⟦∀α∷κ.\,τ_2⟧_η.
+\end{align*}
+
+The case of the empty row rule holds trivially, since $⟦ι⟧_η = ∅$.
+
+For the case of the row extension rule, assume $⟦ρ_1⟧_η ⊆ ⟦ρ_2⟧_η$.
+We clearly have
+$$\{(v,n+1,μ) │ (v,n,μ) ∈ ⟦ρ_1⟧_η\} ⊆ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦ρ_2⟧_η\},$$
+so $⟦ε·ρ_1⟧_η ⊆ ⟦ε·ρ_2⟧_η$ as well.
+
 \end{proof}
 
 \begin{lemma}[Polymorphism introduction compatibility]
