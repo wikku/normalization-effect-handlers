@@ -239,13 +239,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 
 \begin{figure}
 \begin{align*}
-	\textrm{TVar} ∋ α,β,…       &                    \\%&\textrm{(type variables)}\\
-	\textrm{Var} ∋ f,r,x,y,…    &                    \\%&\textrm{(variables)}\\
-	\textrm{Kind} ∋ κ           &::=
-		\kT │ \kE │ \kR \\%&\textrm{(kinds)}\\
-	\textrm{Typelike} ∋ σ,τ,ε,ρ &::=
-		α │ τ→_ρτ │ ∀α::κ.\,τ │ ι │ Δ.\,τ \Rightarrow τ │ ε · ρ
-		\\%&\textrm{(types and rows)}\\
+	%\textrm{Var} ∋ f,r,x,y,…    &                    \\%&\textrm{(variables)}\\
 	\textrm{Val} ∋ v,u          &::= x │ λx.\,e \\%&\textrm{(values)}\\
 	\textrm{Exp} ∋ e            &::=
 		v │ e\;e │ \Lift{e} │ \Do v │ \Handle e\,\{x,r.\,e;\,x.\,e\}
@@ -304,71 +298,21 @@ Finally, the language features polymorphic expressions and polymorphic operation
 \caption{Single-step reduction.} % TODO "Contraction"???
 \end{figure}
 
-\begin{figure}
-\begin{mathpar}
-	\inferrule
-		{α ∷ κ ∈ Δ}
-		{Δ ⊢ α ∷ κ}
-
-	\inferrule
-		{Δ ⊢ τ_1 ∷ \kT \\ Δ ⊢ ρ ∷ \kR \\ Δ ⊢ τ_2 ∷ \kT}
-		{Δ ⊢ τ_1 →_ρ τ_2 ∷ \kT}
-
-	\inferrule
-		{Δ, α :: κ ⊢ τ ∷ \kT}
-		{Δ ⊢ ∀α::κ.\, τ ∷ \kT}
-
-	\inferrule
-		{ }
-		{Δ ⊢ ι ∷ \kR}
-
-	\inferrule
-		{Δ ⊢ ε ∷ \kE \\ Δ ⊢ ρ ∷ \kR}
-		{Δ ⊢ ε · ρ ∷ \kR}
-
-	\inferrule
-		{Δ,Δ' ⊢ τ_1 ∷ \kT \\ Δ,Δ' ⊢ τ_2 ∷ \kT}
-		{Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
-
-	Δ ⊢ δ ∷ Δ' ⇔ \dom(δ) = \dom(Δ') ∧ ∀α∈\dom(δ).\, Δ ⊢ δ(α) ∷ Δ'(α)
-\end{mathpar}
-\caption{Well-formedness of types, rows, and type substitution.}
-%TODO: inductive definition of well-formed type substitutions?
-%TODO: syntax of Γ and Δ
-\end{figure}
+\clearpage
 
 \begin{figure}
 \begin{mathpar}
-	\inferrule
-		{ }
-		{Δ ⊢ σ <: σ}
-		%\textsc{(S-Refl)}
+	κ ::= \kT │ \kE │ \kR
 
-	\inferrule
-		{Δ ⊢ τ_2^1 <: τ_1^1 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ ⊢ τ_1^2 <: τ_2^2}
-		{Δ ⊢ τ_1^1 →_{ρ_1} τ_1^2 <: τ_2^1 →_{ρ_2} τ_2^2}
-		%\textsc{(S-Arrow)}
+	%(type variables): α,β,…
 
-	\inferrule
-		{Δ, α ∷ κ ⊢ τ_1 <: τ_2}
-		{Δ ⊢ ∀α∷κ.\, τ_1 <: ∀α∷κ. \,τ_2}
-		%\textsc{(S-ForAll)}
+	%Δ ::= · │ α::κ, Δ
 
-	\inferrule
-		{Δ ⊢ ρ ∷ \kR}
-		{Δ ⊢ ι <: ρ}
-		%\textsc{(S-Empty)}
+	%Γ ::= · │ x:τ, Γ
 
-	\inferrule
-		{Δ ⊢ ρ_1 <: ρ_2}
-		{Δ ⊢ ε·ρ_1 <: ε·ρ_2}
-		%\textsc{(S-Extend)}
-\end{mathpar}
-\caption{Subtyping.}
-\end{figure}
+	σ,τ,ε,ρ ::=
+		α │ τ→_ρτ │ ∀α::κ.\,τ │ ι │ Δ.\,τ \Rightarrow τ │ ε · ρ \\
 
-\begin{figure}
-\begin{mathpar}
 	\inferrule
 		{x : τ ∈ Γ}
 		{Δ;Γ ⊢ x : τ ╱ ι}
@@ -409,6 +353,69 @@ Finally, the language features polymorphic expressions and polymorphic operation
 
 \end{mathpar}
 \caption{Type system.}
+\end{figure}
+
+\begin{figure}
+\begin{mathpar}
+	\inferrule
+		{α ∷ κ ∈ Δ}
+		{Δ ⊢ α ∷ κ}
+
+	\inferrule
+		{Δ ⊢ τ_1 ∷ \kT \\ Δ ⊢ ρ ∷ \kR \\ Δ ⊢ τ_2 ∷ \kT}
+		{Δ ⊢ τ_1 →_ρ τ_2 ∷ \kT}
+
+	\inferrule
+		{Δ, α :: κ ⊢ τ ∷ \kT}
+		{Δ ⊢ ∀α::κ.\, τ ∷ \kT}
+
+	\inferrule
+		{ }
+		{Δ ⊢ ι ∷ \kR}
+
+	\inferrule
+		{Δ ⊢ ε ∷ \kE \\ Δ ⊢ ρ ∷ \kR}
+		{Δ ⊢ ε · ρ ∷ \kR}
+
+	\inferrule
+		{Δ,Δ' ⊢ τ_1 ∷ \kT \\ Δ,Δ' ⊢ τ_2 ∷ \kT}
+		{Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
+
+	%Δ ⊢ δ ∷ Δ' ⇔ \dom(δ) = \dom(Δ') ∧ ∀α∈\dom(δ).\, Δ ⊢ δ(α) ∷ Δ'(α)
+\end{mathpar}
+%\caption{Well-formedness of types, rows, and type substitution.}
+\caption{Well-formedness of types and rows}
+%TODO: inductive definition of well-formed type substitutions?
+%TODO: syntax of Γ and Δ
+\end{figure}
+\begin{figure}
+\begin{mathpar}
+	\inferrule
+		{ }
+		{Δ ⊢ σ <: σ}
+		%\textsc{(S-Refl)}
+
+	\inferrule
+		{Δ ⊢ τ_2^1 <: τ_1^1 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ ⊢ τ_1^2 <: τ_2^2}
+		{Δ ⊢ τ_1^1 →_{ρ_1} τ_1^2 <: τ_2^1 →_{ρ_2} τ_2^2}
+		%\textsc{(S-Arrow)}
+
+	\inferrule
+		{Δ, α ∷ κ ⊢ τ_1 <: τ_2}
+		{Δ ⊢ ∀α∷κ.\, τ_1 <: ∀α∷κ. \,τ_2}
+		%\textsc{(S-ForAll)}
+
+	\inferrule
+		{Δ ⊢ ρ ∷ \kR}
+		{Δ ⊢ ι <: ρ}
+		%\textsc{(S-Empty)}
+
+	\inferrule
+		{Δ ⊢ ρ_1 <: ρ_2}
+		{Δ ⊢ ε·ρ_1 <: ε·ρ_2}
+		%\textsc{(S-Extend)}
+\end{mathpar}
+\caption{Subtyping.}
 \end{figure}
 
 \chapter{The logical relation}
