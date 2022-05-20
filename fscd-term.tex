@@ -228,14 +228,39 @@ in \cite{fscd19}.
 It is a refreshingly minimal language---the call-by-value lambda calculus with a few extensions
 to be able to express the essence of algebraic effects.
 There is only one unnamed universal operation, performed $\Do v$.
-To be able to simulate calculi with named effects (and more),
+To be able to reach beyond the closest effect handler,
 the \textit{lift} operator, written $\Lift{e}$, is introduced.
 When operations are performed inside the expression $e$ enclosed by lift,
 the nearest handler will be skipped and the operation will be handled by the next one instead.
 Naturally, the operator composes, so multiple enclosing lifts means multiple handlers skipped.
 In contrast to most work on algebraic effects, the effect-tracking system here is structural,
-we do not have any concept of predefined or user-defined (named) signatures of effects.
+we do not have any concept of predefined or user-defined signatures of effects.
 Finally, the language features polymorphic expressions and polymorphic operations.
+
+The syntax of the calculus is shown in \cref{syntax}.
+We use metavariables $x$ and $r$ to refer to expression variables.
+As standard, we work modulo $α$-equivalence and distinguish separate instances
+of metavariables by using subscripts, superscripts, or adding primes.
+
+The evaluation contexts encode a left-to-right evaluation order.
+In \cref{freeness} we define a property of evaluation contexts
+called {\em $n$-freeness}, which means that an operation performed inside this
+context would be handled by the $n$-th handler outside of the context.
+This property is used in the reduction semantics (\cref{reduction}) for the calculus.
+
+In \cref{types} the type system is introduced.
+We have three kinds: types, effects, and rows.
+We use $α$ to range over type variables.
+Contexts $Γ$ are mappings from expression variables to types
+and type contexts $Δ$ are mappings from type variables to kinds.
+We additionally have the concept of a type-level substitution
+$Δ ⊢ δ ∷ Δ'$, which maps type variables in $Δ'$ to types of the appropriate kinds,
+well-formed in $Δ$.
+
+In \cref{subtyping} the subtyping rules are introduced.
+
+
+% ORDER! polymorphism
 
 \begin{figure}
 \begin{align*}
@@ -249,6 +274,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		\\%&\textrm{(evaluation contexts)}
 \end{align*}
 \caption{Syntax.}
+\label{syntax}
 \end{figure}
 
 % TODO inconsistent polytype and polyeffect syntax:
@@ -277,6 +303,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		{n\Free(\Handle K\,\{x,r.\,e_h;\,x.\,e_r\})}
 \end{mathpar}
 \caption{Evaluation context freeness.}
+\label{freeness}
 \end{figure}
 
 \begin{figure}
@@ -296,6 +323,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 	\Handle v\,\{x,r.\,e_h;\,x.\,e_r\} ↦ e_r\subst{v}{x} % SUBST
 \end{mathpar}
 \caption{Single-step reduction.} % TODO "Contraction"???
+\label{reduction}
 \end{figure}
 
 \clearpage
@@ -353,6 +381,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 
 \end{mathpar}
 \caption{Type system.}
+\label{types}
 \end{figure}
 
 \begin{figure}
@@ -385,6 +414,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 \end{mathpar}
 %\caption{Well-formedness of types, rows, and type substitution.}
 \caption{Well-formedness of types and rows}
+\label{kinding}
 %TODO: inductive definition of well-formed type substitutions?
 %TODO: syntax of Γ and Δ
 \end{figure}
@@ -416,6 +446,7 @@ Finally, the language features polymorphic expressions and polymorphic operation
 		%\textsc{(S-Extend)}
 \end{mathpar}
 \caption{Subtyping.}
+\label{subtyping}
 \end{figure}
 
 \chapter{The logical relation}
@@ -431,7 +462,7 @@ our goal is to build a unary relation without step-indexing.
 
 \section{Definition}
 
-First, we define the interpretations of kinds.
+We begin with defining the interpretations of kinds.
 We call them the spaces of \textit{semantic types} or,
 in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}.
 \begin{align*}
