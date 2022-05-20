@@ -498,11 +498,11 @@ and treating $X$ as a predicate $P$,
 we get the more familiar principle of structural induction on $\E⟦τ/ρ⟧_η$.
 \begin{lemma}[Induction principle]\label{induction}
 	Assume $P$ is a predicate on closed expressions and
-\begin{enumerate}
+\begin{itemize}
 	\item if $e$ evaluates to a value in $⟦τ⟧_η$, then $P(e)$ holds; and
 	\item if $e$ reduces to some $K[\Do v]$ such that there exist $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K)$
 		and $P(K[u])$ holds for all $u∈μ$, then $P(e)$ holds.
-\end{enumerate}
+\end{itemize}
 	Then $P(e)$ holds for all $e ∈ \E⟦τ/ρ⟧_η$.
 \end{lemma}
 
@@ -684,7 +684,7 @@ Again, the claim follows by antireduction.
 	If $τ=Δ''.\,τ_1 \Rightarrow τ_2$,
 	then $⟦τ⟧_{η'} = \{(v,0,⟦τ_2⟧_{η'η''}) │ η'' ∈ ⟦Δ''⟧ ∧ v ∈ ⟦τ_1⟧_{η'η''} \}$
 	and $⟦δ(τ)⟧_{η} = \{(v,0,⟦δ(τ_2)⟧_{ηη''}) │ η'' ∈ ⟦Δ''⟧ ∧ v ∈ ⟦δ(τ_1)⟧_{ηη''} \}$,
-	which are equal by induction (taking $Δ, Δ''$ as $Δ$ in the statement).
+	which are equal q`by induction (taking $Δ, Δ''$ as $Δ$ in the statement).
 
 	If $τ=ε·ρ$,
 	then $⟦τ⟧_{η'} = ⟦ε⟧_{η'} ∪ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦ρ⟧_{η'} \}$
