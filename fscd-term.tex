@@ -29,8 +29,9 @@
 %\newunicodechar{λ}{\boldsymbol{\lambda}}
 %\newunicodechar{λ}{\lambda}
 \newunicodechar{λ}{\slambda}
-\newcommand{\Do}{\textsf{do\;}}
-\newcommand{\Handle}{\textsf{handle\;}}
+\newcommand{\keyword}[1]{\textsf{\textup{#1}}}
+\newcommand{\Do}{\keyword{do}\;}
+\newcommand{\Handle}{\keyword{handle}\;}
 \newcommand{\Lift}[1]{\boldsymbol{[}#1\boldsymbol{]}}
 \newcommand{\subst}[2]{\{#1/#2\}}
 \newcommand{\E}{\mathcal{E}}
@@ -443,19 +444,29 @@ and the semantic type of values we can call the resumption with.
 We interpret type contexts as mappings from type variables to semantic types:
 $$⟦Δ⟧ = \{ η │ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}.$$
 
-Using structural induction we simultaneously define the interpretations of types and effects, as well as
-relations $\E$ on expressions and $\S$ on stuck terms.
+We define the interpretations of types and effects as well as
+relations $\E$ on expressions and $\S$ on control-stuck terms by structural induction.
 We parameterize the definitions by a mapping $η$ from type variables to
 semantic types.
 
+The interpretations of types are mostly standard,
+but we additionally have to consider effect annotations,
+as we can see in the case of the function type.
+
+A polymorphic type is interpreted, as usual,
+as the intersection of the interpretations
+for all possible choices of the semantic type for the type variable.
+Interestingly, we can see that a polymorphic effect is interpreted as the {\em union} of the interpretations
+of the effect for all possible choices of the semantic types for the type variables.
+
 \begin{align*}
 	⟦α⟧_η &= η(α) \\
-	\\
+	%\\
 	⟦τ_1 →_ρ τ_2⟧_η
 	 &= \{ λx.\,e \mid ∀v∈⟦τ_1⟧_η.\, e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η \} \\
 	⟦∀α::κ.\,τ⟧_η
 	&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
-	\\
+	%\\
 	⟦Δ.\,τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_{ηη'}) \mid η'∈⟦Δ⟧ ∧ v∈⟦τ_1⟧_{ηη'} \} \\
 	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(v, n+1, μ) \mid (v, n, μ)∈⟦ρ⟧_η \} \\
 	⟦ι⟧_η &= ∅ \\
@@ -468,12 +479,15 @@ semantic types.
 	\S⟦τ/ρ⟧_η &= \S⟦τ/ρ⟧_η(\E⟦τ/ρ⟧_η)
 \end{align*}
 
-We define the set $\E⟦τ/ρ⟧_η$ as a solution to the fixed-point equation
-$\E⟦τ/ρ⟧_η(X) = X$.
-The function $\E⟦τ/ρ⟧_η$ is monotone, so by the Knaster-Tarski theorem
-it has a least fixed point.
-From its characterization as the intersection of all $\E⟦τ/ρ⟧_η$-closed sets,
-we immediately obtain the induction principle.
+The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively.
+To describe the construction in more detail, we temporarily overload notation and define
+operators $\S⟦τ/ρ⟧_η$ and $\E⟦τ/ρ⟧_η$ on sets of expressions (denoted by $X$).
+They are clearly monotone,
+so by the Knaster-Tarski theorem % citation
+the fixed-point equation $\E⟦τ/ρ⟧_η(X) = X$ has a least solution.
+Additionally, it can be characterized as the intersection of all
+$\E⟦τ/ρ⟧_η$-closed sets.
+We immediately obtain the Tarski induction principle.
 
 \begin{lemma}[Tarski induction principle]\label{tarski-induction}
 	If $\E⟦τ/ρ⟧_η(X) ⊆ X$, then $\E⟦τ/ρ⟧_η ⊆ X$.
@@ -483,13 +497,16 @@ By expanding out the definition of the function $\E⟦τ/ρ⟧_η$
 and treating $X$ as a predicate $P$,
 we get the more familiar principle of structural induction on $\E⟦τ/ρ⟧_η$.
 \begin{lemma}[Induction principle]\label{induction}
-	Assume that $P(e)$ is implied by
-	$e$ evaluating to a value in $⟦τ⟧_η$
-	or reducing to some $K[\Do v]$ such that there exist $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K)$
-	and $P(K[u])$ holds for all $u∈μ$.
+	Assume $P$ is a predicate on closed expressions and
+\begin{enumerate}
+	\item if $e$ evaluates to a value in $⟦τ⟧_η$, then $P(e)$ holds; and
+	\item if $e$ reduces to some $K[\Do v]$ such that there exist $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K)$
+		and $P(K[u])$ holds for all $u∈μ$, then $P(e)$ holds.
+\end{enumerate}
 	Then $P(e)$ holds for all $e ∈ \E⟦τ/ρ⟧_η$.
 \end{lemma}
 
+We also note some straightforward but useful properties of the relations.
 \begin{lemma}[Value inclusion]\label{value-inclusion}
 	For any $τ$ and $ρ$ we have $⟦τ⟧_η ⊆ \E⟦τ/ρ⟧_η$.
 \end{lemma}
