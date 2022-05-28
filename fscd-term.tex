@@ -162,7 +162,6 @@
 \maketitle
 
 \chapter{Introduction}
-\iffalse
 A programming language needs to be more than just a lambda calculus,
 capable only of functional abstraction and evaluation of expressions.
 Programs need to have an effect on the outside world and, thinking more locally,
@@ -176,9 +175,10 @@ effects we would like to use and make sure that they all interact with
 each other well.
 In recent years, however, a new approach, called \textit{algebraic effects}, has emerged.
 Algebraic effects allow programmers to express all the usual computational effects as library code
-and use them in the usual direct style (as opposed to eg. monadic encodings,
+and use them in the usual direct style (as opposed to monadic style, % TODO CITE comprehending monads
+which is essentially like programming in an embedded language, which cannot 
 which do not always play well with the rest of the language and do not compose easily).
-These implementations of effects are instances of one concept and hence interact
+These implementations of effects are instances of one concept and interact
 with each other predictably.
 
 More concretely, algebraic effects may be thought of as resumable exceptions.
@@ -193,85 +193,150 @@ By calling the continuation with a value we can resume at the perform-point,
 as if performing the operation evaluated to the value.
 But more interestingly, we can resume multiple times, or never, or store the continuation for later use.
 
-This access to the continuation, while powerful, might also be a recipe for disaster.
+This access to the continuation, while powerful, might also be a recipe for disaster. % TODO non sequitur ?
 That is why languages with algebraic effects typically have
 \textit{type-and-effect systems},
 not only tracking the type of value an expression might evaluate to, but also
-what kind of effects it may perform on the way.
-\fi
+what kind of effects it may perform along the way.
 
-\iffalse
-This work will study a particular formal language equipped with algebraic effects.
-Although most results in the domain of programming languages depend crucially on the exact calculus and type system used,
-we hope that the results, ideas, and techniques may apply elsewhere.
-This should not seem far-fetched,
-as the paper which introduced the language \cite{fscd19} is exactly about
-interexpressibility with other systems.
+This work proves termination of evaluation (aka. normalization) of a
+particular formal language equipped with algebraic effects.
+We also explain how the proof can carry over to other calculi.
+Further, we explore the computational content of the proofs –
+a normalization by evaluation algorithm for the calculus.
 
-Possibly the most interesting result of this work is a potentially novel use of coinduction
-in the method of logical relations.
-It allowed us to get rid of step-indexing in the definition of the logical relation and
-ultimately prove termination of the language.
-This may sound surprising, as coinduction is connotated primarily with infinite processes.
+Termination of evaluation might be of interest for many reasons.
+Even though practical programming languages support recursion, loops, and other
+features allowing nontermination (eg. recursive types),
+it might be useful that code that does not use these features cannot be blamed
+for nontermination.
+Nontermination is sometimes also viewed as a computational effect,
+which however does not neatly fit the algebraic effect framework.
+Despite that, it can still be added as a built-in effect to be tracked by
+the effect system, provided that we have sufficiently identified possible sources % TODO Koka
+of nontermination.
 
-[todo other contributions]
+Normalization also implies that the calculus is sound as a logic, % TODO: what semantics? normal forms?
+looking through the lens of the Curry-Howard isomorphism.
+However, it is hard to give logical interpretations to effect annotations % TODO: cite? A Substructural Type Systemfor Delimited Continuations?
+and it is unclear how useful it is to treat calculi with algebraic effects as logics.
+
+%Although most results in the domain of programming languages depend crucially on the exact calculus and type system used,
+%we hope that the results, ideas, and techniques may apply elsewhere.
+%This should not seem far-fetched,
+%as the paper which introduced the language \cite{fscd19} is exactly about
+%interexpressibility with other systems.
+
+The primary approach to proving normalization (and many other properties) of % TODO to proving?
+typed formal calculi is through {\em logical relations}.  Logical relations are % TODO through?
+type-indexed relations on terms which essentially help carry additional
+information about {\em local} behavior of terms to make a type-derivation
+directed proof of the {\em global} property (such as normalization)
+have strong enough induction hypotheses and ultimately go through.
+
+In this work we will define logical predicates
+\footnote{In the context of normalization, logical predicates have many names, including:
+	(Tait's) reducibility predicates, reducibility candidates, and saturated sets.
+}
+to prove termination
+of evaluation in our language.
+An interesting point is that the definition of our logical predicates % TODO interesting point? ;/
+is recursive, in other words it is a solution to a fixed-point equation.
+This is unlike any normalization proof we know of.
+The fixed-point construction replaces the use of step-indexing % TODO cite
+which appears in the logical relation construction we are most directly inspired by.
 
 I would like to thank Dariusz Biernacki, Filip Sieczkowski, and Piotr Polesiuk
 for their help with this work.
-\fi
 
 \chapter{The language}
 % TODO name the language?
 
 We will study the deep handler calculus and type-and-effect system formulated
 in \cite{fscd19}.
-It is a refreshingly minimal language---the call-by-value lambda calculus with a few extensions
+% TODO: EM—DASH VS EN–DASH STYLE !!!
+It is a refreshingly minimal language – the call-by-value lambda calculus with a few extensions
 to be able to express the essence of algebraic effects.
 There is only one unnamed universal operation, performed $\Do v$.
 To be able to reach beyond the closest effect handler,
-the \textit{lift} operator, written $\Lift{e}$, is introduced.
-When operations are performed inside the expression $e$ enclosed by lift,
-the nearest handler will be skipped and the operation will be handled by the next one instead.
-Naturally, the operator composes, so multiple enclosing lifts means multiple handlers skipped.
+the \textit{lift} operator, written $\Lift{e}$, is introduced,
+which makes operations in $e$ skip the nearest handler.
+%When operations are performed inside the expression $e$ enclosed by lift,
+%the nearest handler will be skipped and the operation will be handled by the next one instead.
+%Naturally, the operator composes, so multiple enclosing lifts means multiple handlers skipped.
 In contrast to most work on algebraic effects, the effect-tracking system here is structural,
 we do not have any concept of predefined or user-defined signatures of effects.
 Finally, the language features polymorphic expressions and polymorphic operations.
 
 The syntax of the calculus is shown in \cref{syntax}.
 We use metavariables $x$ and $r$ to refer to expression variables.
-As standard, we work modulo $α$-equivalence and distinguish separate instances
+As is standard, we work modulo $α$-equivalence and distinguish separate instances
 of metavariables by using subscripts, superscripts, or adding primes.
 
-The evaluation contexts encode a left-to-right evaluation order.
-In \cref{freeness} we define a property of evaluation contexts
-called {\em $n$-freeness}, which means that an operation performed inside this
-context would be handled by the $n$-th handler outside of the context.
-This property is used in the reduction semantics (\cref{reduction}) for the calculus.
+Evaluation contexts are expressions with a hole ($□$) and
+encode a left-to-right evaluation order.
+There is a concept of {\em freeness} of evaluation contexts (\cref{freeness}),
+a quantity increased by lifts and decreased by handlers.
+Intuitively, an evaluation context is $n\Free$
+if an operation performed inside the context (in place of the hole) % in the place?
+would be handled by the $n$-th handler outside of the context.
+
+Naturally, freeness is used in the operational semantics (\cref{reduction}),
+where we can see that effect handling occurs if there
+is a $0\Free$ context between the operation and the handler.
+The resumption $v_c$ wraps the context $K$
+with the same handler, which is why the effect handlers are called {\em deep}.
+The other rules are the standard $β$-reduction of the $λ$-calculus
+and reductions in cases where an (effect-free) value is wrapped by an effect-related construct.
+It is straightforward to see that reduction is deterministic
+and compatible with respect to evaluation contexts.
 
 In \cref{types} the type system is introduced.
 We have three kinds: types, effects, and rows.
-We use $α$ to range over type variables.
-Contexts $Γ$ are mappings from expression variables to types
-and type contexts $Δ$ are mappings from type variables to kinds.
-We additionally have the concept of a type-level substitution
-$Δ ⊢ δ ∷ Δ'$, which maps type variables in $Δ'$ to types of the appropriate kinds,
+We use $α$ to range over type variables and
+$Δ$ to range over type contexts, i.e. mappings from type variables to kinds.
+A type context is written as a comma-separated sequence of type variables with their assigned kinds ($α ∷ κ$).
+We furthermore have the concept of {\em type-level substitutions}:
+we write $Δ ⊢ δ ∷ Δ'$ if $δ$ maps type variables in $Δ'$ to types of the corresponding kinds,
 well-formed in $Δ$.
+We assume that all types are well-formed (well-kinded) in the sense of \cref{kinding}.
+
+Analogously,
+contexts $Γ$ are mappings from expression variables to types,
+written as comma-separated sequences of variables with their assigned types ($x : τ$).
+
+Type-level substitutions are used only in the rule for $\Do\!\!\!$
+to instantiate the polymorphic variables $Δ'$ of effect $Δ'.\,τ_1 \Rightarrow τ_2$.
+Complementarily, the rule for $\Handle\!\!$ states that the effect handler clause $e_h$
+has to be essentially polymorphic in $Δ'$.
+
+We can intuitively understand effect rows as follows:
+ if $e : τ ╱ ρ$ and effect $ε$ appears at position $n$ in $ρ$, then
+subexpressions performing $ε$ are wrapped by $n$ lifts inside $e$.
+Clearly, the order of effects in the row matters.
+Note that the type system enables {\em row polymorphism}, % TODO: CITE
+since we can have a row ending in a polymorphic type variable.
+Such rows are usually called {\em open}. %, while monomorphic rows are called {\em closed}.
 
 In \cref{subtyping} the subtyping rules are introduced.
-
+Their principal purpose is to allow
+effect rows to be subsumed by rows with more effects at the end.
+For that to be of use in more places,
+we also have standard subsumption rules for polymorphic types and function types. % polymorphic?
+In particular, closed rows are subsumed by open rows. % TODO: trivial forall on the left
 
 % ORDER! polymorphism
 
 \begin{figure}
 \begin{align*}
 	%\textrm{Var} ∋ f,r,x,y,…    &                    \\%&\textrm{(variables)}\\
-	\textrm{Val} ∋ v,u          &::= x │ λx.\,e \\%&\textrm{(values)}\\
-	\textrm{Exp} ∋ e            &::=
+	v,u          &::= x │ λx.\,e &\textrm{(values)}\\
+	e            &::=
 		v │ e\;e │ \Lift{e} │ \Do v │ \Handle e\,\{x,r.\,e;\,x.\,e\}
-		\\%&\textrm{(expressions)}\\
-	\textrm{ECont} ∋ K          &::=
+		&\textrm{(expressions)}\\
+	K            &::=
 		□ │ K\;e │ v\;K │ \Lift{K} │ \Handle K\,\{x,r.\,e;\,x.\,e\}
-		\\%&\textrm{(evaluation contexts)}
+		&\textrm{(evaluation contexts)}
 \end{align*}
 \caption{Syntax.}
 \label{syntax}
@@ -426,16 +491,6 @@ In \cref{subtyping} the subtyping rules are introduced.
 		%\textsc{(S-Refl)}
 
 	\inferrule
-		{Δ ⊢ τ_2^1 <: τ_1^1 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ ⊢ τ_1^2 <: τ_2^2}
-		{Δ ⊢ τ_1^1 →_{ρ_1} τ_1^2 <: τ_2^1 →_{ρ_2} τ_2^2}
-		%\textsc{(S-Arrow)}
-
-	\inferrule
-		{Δ, α ∷ κ ⊢ τ_1 <: τ_2}
-		{Δ ⊢ ∀α∷κ.\, τ_1 <: ∀α∷κ. \,τ_2}
-		%\textsc{(S-ForAll)}
-
-	\inferrule
 		{Δ ⊢ ρ ∷ \kR}
 		{Δ ⊢ ι <: ρ}
 		%\textsc{(S-Empty)}
@@ -444,6 +499,16 @@ In \cref{subtyping} the subtyping rules are introduced.
 		{Δ ⊢ ρ_1 <: ρ_2}
 		{Δ ⊢ ε·ρ_1 <: ε·ρ_2}
 		%\textsc{(S-Extend)}
+
+	\inferrule
+		{Δ ⊢ τ_2^1 <: τ_1^1 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ ⊢ τ_1^2 <: τ_2^2}
+		{Δ ⊢ τ_1^1 →_{ρ_1} τ_1^2 <: τ_2^1 →_{ρ_2} τ_2^2}
+		%\textsc{(S-Arrow)}
+
+	\inferrule
+		{Δ, α ∷ κ ⊢ τ_1 <: τ_2}
+		{Δ ⊢ ∀α∷κ.\, τ_1 <: ∀α∷κ. \,τ_2}
+		%\textsc{(S-ForAll)}
 \end{mathpar}
 \caption{Subtyping.}
 \label{subtyping}
@@ -464,14 +529,15 @@ our goal is to build a unary relation without step-indexing.
 
 We begin with defining the interpretations of kinds.
 We call them the spaces of \textit{semantic types} or,
-in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}.
+in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}:
 \begin{align*}
-	⟦\kT⟧ &= \mathcal{P}(\textrm{Val}) = \mathsf{Type},\\
-	⟦\kE⟧ &= \mathcal{P}(\textrm{Exp}×\{0\}×\mathsf{Type}) \\
-	⟦\kR⟧ &= \mathcal{P}(\textrm{Exp}×ℕ×\mathsf{Type})
+	⟦\kT⟧ &= \mathcal{P}(\textrm{CVal}) = \mathsf{Type}\\
+	⟦\kE⟧ &= \mathcal{P}(\textrm{CVal}×\{0\}×\mathsf{Type}) \\
+	⟦\kR⟧ &= \mathcal{P}(\textrm{CVal}×ℕ×\mathsf{Type})
 \end{align*}
 %TODO semantic types/effects are overapproximations of possible behaviors? or sth
-Semantic types are simply sets of closed values.
+We write $\textrm{CVal}$ for the set of closed values, so
+elements of $\mathsf{Type}$ are simply sets of closed values.
 Semantic effects are sets of triples, which aim to describe a situation
 in which an expression being evaluated performs an effect.
 The components of such a triple are:
@@ -518,14 +584,36 @@ of the effect for all possible choices of the semantic types for the type variab
 \end{align*}
 
 The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively.
+The intuition is that an element of $\E⟦τ/ρ⟧_η$
+evaluates to a value of type $τ$ while possibly performing an effect in $ρ$ and
+getting control-stuck
+finitely many times along the way.
+When the term is control-stuck we do not have a handler,
+but we do know the return type of the operation,
+so we resume with all possible values in parallel.
+
+In other words,
+we can associate with an element in $\E⟦τ/ρ⟧_η$ its ``reduction trace'' 
+% TODO: quotes?
+– a tree where edges are the usual reduction ($→$) relation,
+except for $\S⟦τ/ρ⟧_η$ nodes, which have a branch for each element of $μ$,
+the value with which we replace the $\Do v$.\footnote{
+	If we formalized the definitions in a programming language (or proof assistant),
+	this is also how we could view the structure of values of the inductive type $\E⟦τ/ρ⟧_η$.
+}
+Note that different choices of values to resume with could
+theoretically lead to getting stuck a different number of times,
+so the depth of the tree is not uniform, and it could even be infinite.
+These trees are however well-founded thanks to the choice of the inductive interpretation.
+
 To describe the construction in more detail, we temporarily overload notation and define
 operators $\S⟦τ/ρ⟧_η$ and $\E⟦τ/ρ⟧_η$ on sets of expressions (denoted by $X$).
 They are clearly monotone,
 so by the Knaster-Tarski theorem % citation
 the fixed-point equation $\E⟦τ/ρ⟧_η(X) = X$ has a least solution.
-Additionally, it can be characterized as the intersection of all
+Moreover, it can be characterized as the intersection of all
 $\E⟦τ/ρ⟧_η$-closed sets.
-We immediately obtain the Tarski induction principle.
+We immediately obtain an induction principle.
 
 \begin{lemma}[Tarski induction principle]\label{tarski-induction}
 	If $\E⟦τ/ρ⟧_η(X) ⊆ X$, then $\E⟦τ/ρ⟧_η ⊆ X$.
@@ -576,6 +664,11 @@ where $⟦Γ⟧_η = \{ γ │ ∀x:τ∈Γ.\,γ(x) ∈ ⟦τ⟧_η\}$ contains 
 variable substitutions.
 
 \begin{lemma}[Variable compatibility]
+	$$
+	\inferrule
+		{x : τ ∈ Γ}
+		{Δ;Γ ⊨ x : τ ╱ ι}
+	$$
 \end{lemma}
 \begin{proof}
 Assume $x : τ ∈ Γ$.
@@ -588,6 +681,11 @@ so by \cref{value-inclusion} we have $γ(x) ∈ \E⟦τ/ι⟧_η$.
 \end{proof}
 
 \begin{lemma}[Abstraction compatibility]
+	$$
+	\inferrule
+		{Δ ⊢ τ_1 ∷ \kT \\ Δ;Γ, x:τ_1 ⊨ e : τ_2 ╱ ρ}
+		{Δ;Γ ⊨ λx.\,e : τ_1 →_ρ τ_2 ╱ ι}
+	$$
 \end{lemma}
 \begin{proof}
 Assume $Δ ⊢ {τ_1 ∷ \kT}$ and $Δ;Γ,{x:τ_1} ⊨ e : τ_2 ╱ ρ$.
@@ -604,10 +702,16 @@ Then $γ' ∈ ⟦Γ,x:τ_1⟧_η$, so $γ(e)\subst{v}{x} = γ'(e) ∈ \E⟦τ_2/
 \end{proof}
 
 For clarity of presentation,
-in the following we will assume $Γ$ empty, i.e. an interpretation of $Γ$
-was already substituted.
+in the following we will assume $Γ$ empty.
+The lemmas in full generality can be recovered by
+substituting an interpretation of $Γ$.
 
 \begin{lemma}[Lift compatibility]
+	$$
+	\inferrule
+		{Δ ⊢ ε ∷ \kE \\ Δ; ⊨ e : τ ╱ ρ}
+		{Δ; ⊨ \Lift{e} : τ ╱ ε·ρ}
+	$$
 \end{lemma}
 \begin{proof}
 Assume $Δ ⊢ τ ∷ \kT$, $Δ ⊢ ε ∷ \kE$, and $Δ ⊢ ρ ∷ \kR$.
@@ -627,6 +731,11 @@ so $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$.
 \end{proof}
 
 \begin{lemma}[Application compatibility]
+	$$
+	\inferrule
+		{Δ; ⊨ e_1 : τ_1 →_ρ τ_2 ╱ ρ \\ Δ; ⊨ e_2 : τ_1 ╱ ρ}
+		{Δ; ⊨ e_1\,e_2 : τ_2 ╱ ρ}
+	$$
 \end{lemma}
 \begin{proof}
 %Assume $Δ;Γ ⊨ e_1 : τ_1 →_ρ τ_2 ╱ ρ$ and $Δ;Γ ⊨ e_2 : τ_1 ╱ ρ$.
@@ -656,6 +765,13 @@ $(λx.\,e)\;e_2 →^* (λx.\,e)\;v → e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η$.
 \end{proof}
 
 \begin{lemma}[Handle compatibility]
+	$$
+	\inferrule
+		{Δ; ⊨ e : τ ╱ (Δ'.\,τ_1 \Rightarrow τ_2) · ρ \\
+		Δ,Δ';x:τ_1,r:τ_2→_ρ τ_r ⊨ e_h : τ_r ╱ ρ \\
+		Δ; x:τ ⊨ e_r : τ_r ╱ ρ}
+		{Δ; ⊨ \Handle e\;\{x,r.\,e_h;x.\,e_r\} : τ_r ╱ ρ}
+	$$
 \end{lemma}
 \begin{proof}
 Assume $Δ, Δ' ; x:τ_1, r:τ_2 →_ρ τ_r ⊨ e_h : τ_r ╱ ρ$ and
@@ -731,6 +847,11 @@ Again, the claim follows by antireduction.
 \end{proof}
 
 \begin{lemma}[Do compatibility]
+	$$
+	\inferrule
+		{Δ; ⊨ v : δ(τ_1) ╱ ι \\ Δ ⊢ δ ∷ Δ' \\ Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
+		{Δ; ⊨ \Do v : δ(τ_2) ╱ (Δ'.\, τ_1 \Rightarrow τ_2)}
+	$$
 \end{lemma}
 \begin{proof}
 Assume $Δ ⊢ δ ∷ Δ'$, $Δ⊢Δ'.\,τ_1→τ_2 ∷ \kE$.
@@ -754,6 +875,11 @@ Which follows immediately from \cref{subst-comp}.
 \end{proof}
 
 \begin{lemma}[Subtyping compatibility]
+	$$
+	\inferrule
+		{Δ ⊢ τ_1 <: τ_2 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ; ⊨ e : τ_1 ╱ ρ_1}
+		{Δ; ⊨ e : τ_2 ╱ ρ_2}
+	$$
 \end{lemma}
 \begin{proof}
 By induction on subtyping rules we will show that
@@ -793,6 +919,11 @@ so $⟦ε·ρ_1⟧_η ⊆ ⟦ε·ρ_2⟧_η$ as well.
 \end{proof}
 
 \begin{lemma}[Polymorphism introduction compatibility]
+	$$
+	\inferrule
+		{Δ,α∷κ; ⊨ e : τ ╱ ι}
+		{Δ; ⊨ e : ∀α∷κ.\,τ ╱ ι}
+	$$
 \end{lemma}
 \begin{proof}
 Assume $Δ,α∷κ; ⊨ e : τ ╱ ι$.
@@ -804,6 +935,11 @@ and by antireduction $e ∈ \E⟦∀α∷κ.\,τ/ι⟧_η$.
 \end{proof}
 
 \begin{lemma}[Polymorphism elimination compatibility]
+	$$
+	\inferrule
+		{Δ ⊢ σ ∷ κ \\ Δ; ⊨ e : ∀α∷κ.\, τ ╱ ρ}
+		{Δ; ⊨ e : τ\subst{σ}{α} ╱ ρ}
+	$$
 \end{lemma}
 \begin{proof}
 Assume $Δ ⊢ σ ∷ κ$ and $Δ; ⊨ e : ∀α∷κ.\,τ╱ρ$.
@@ -815,10 +951,17 @@ So we have $Δ; ⊨ e : τ\subst{σ}{α} ╱ ρ$ by \cref{mono}.
 \begin{theorem}[Termination of evaluation]
 \end{theorem}
 \begin{proof}
-If $⊢ e : τ / ι$, then
-$e ∈ \E⟦τ/ι⟧$ and $e$ has to terminate to a value, since
+If we have a derivation of $⊢ e : τ ╱ ι$, then
+after we replace each rule by the corresponding compatibility lemma,
+we obtain $⊨ e : τ ╱ ι$, so $e ∈ \E⟦τ/ι⟧$.
+Therefore $e$ has to terminate to a value, since
 $⟦ι⟧$ is empty and hence $\S⟦τ/ι⟧$ is empty.
 \end{proof}
+
+This is also an alternative proof of soundness (``well-typed programs do not go wrong''), which was already shown by
+the technique of progress and preservation \cite{fscd19}.
+
+\section{Applicability to other settings}
 
 \bibliographystyle{plain}
 \bibliography{refs}
