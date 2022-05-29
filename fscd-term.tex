@@ -257,7 +257,7 @@ in \cite{fscd19}.
 % TODO: EM—DASH VS EN–DASH STYLE !!!
 It is a refreshingly minimal language – the call-by-value lambda calculus with a few extensions
 to be able to express the essence of algebraic effects.
-There is only one unnamed universal operation, performed $\Do v$.
+There is only the universal operation, performed $\Do v$.
 To be able to reach beyond the closest effect handler,
 the \textit{lift} operator, written $\Lift{e}$, is introduced,
 which makes operations in $e$ skip the nearest handler.
@@ -266,7 +266,7 @@ which makes operations in $e$ skip the nearest handler.
 %Naturally, the operator composes, so multiple enclosing lifts means multiple handlers skipped.
 In contrast to most work on algebraic effects, the effect-tracking system here is structural,
 we do not have any concept of predefined or user-defined signatures of effects.
-Finally, the language features polymorphic expressions and polymorphic operations.
+Finally, the type system features polymorphic expressions and polymorphic operations.
 
 The syntax of the calculus is shown in \cref{syntax}.
 We use metavariables $x$ and $r$ to refer to expression variables.
@@ -275,6 +275,7 @@ of metavariables by using subscripts, superscripts, or adding primes.
 
 Evaluation contexts are expressions with a hole ($□$) and
 encode a left-to-right evaluation order.
+We use the standard notation $K[x]$ for substituting $x$ for the hole in $K$.
 There is a concept of {\em freeness} of evaluation contexts (\cref{freeness}),
 a quantity increased by lifts and decreased by handlers.
 Intuitively, an evaluation context is $n\Free$
@@ -285,7 +286,8 @@ Naturally, freeness is used in the operational semantics (\cref{reduction}),
 where we can see that effect handling occurs if there
 is a $0\Free$ context between the operation and the handler.
 The resumption $v_c$ wraps the context $K$
-with the same handler, which is why the effect handlers are called {\em deep}.
+with the same handler, which is why the effect handlers are called {\em deep}
+– all operations are handled, not just the first one (as in so called {\em shallow} handlers).
 The other rules are the standard $β$-reduction of the $λ$-calculus
 and reductions in cases where an (effect-free) value is wrapped by an effect-related construct.
 It is straightforward to see that reduction is deterministic
@@ -294,16 +296,13 @@ and compatible with respect to evaluation contexts.
 In \cref{types} the type system is introduced.
 We have three kinds: types, effects, and rows.
 We use $α$ to range over type variables and
-$Δ$ to range over type contexts, i.e. mappings from type variables to kinds.
-A type context is written as a comma-separated sequence of type variables with their assigned kinds ($α ∷ κ$).
+$Δ$ to range over type contexts, which assign kinds to type variables.
+Similarly, contexts $Γ$ assign types to term-level variables.
 We furthermore have the concept of {\em type-level substitutions}:
 we write $Δ ⊢ δ ∷ Δ'$ if $δ$ maps type variables in $Δ'$ to types of the corresponding kinds,
 well-formed in $Δ$.
-We assume that all types are well-formed (well-kinded) in the sense of \cref{kinding}.
+We assume that all types are well-formed (well-kinded) in the appropriate contexts in the sense of \cref{kinding}.
 
-Analogously,
-contexts $Γ$ are mappings from expression variables to types,
-written as comma-separated sequences of variables with their assigned types ($x : τ$).
 
 Type-level substitutions are used only in the rule for $\Do\!\!\!$
 to instantiate the polymorphic variables $Δ'$ of effect $Δ'.\,τ_1 \Rightarrow τ_2$.
@@ -316,13 +315,13 @@ subexpressions performing $ε$ are wrapped by $n$ lifts inside $e$.
 Clearly, the order of effects in the row matters.
 Note that the type system enables {\em row polymorphism}, % TODO: CITE
 since we can have a row ending in a polymorphic type variable.
-Such rows are usually called {\em open}. %, while monomorphic rows are called {\em closed}.
+Such rows are usually called {\em open} (and {\em closed} otherwise). %, while monomorphic rows are called {\em closed}.
 
 In \cref{subtyping} the subtyping rules are introduced.
-Their principal purpose is to allow
+Their main purpose is to allow
 effect rows to be subsumed by rows with more effects at the end.
 For that to be of use in more places,
-we also have standard subsumption rules for polymorphic types and function types. % polymorphic?
+we also have subsumption rules for polymorphic types and function types. % polymorphic?
 In particular, closed rows are subsumed by open rows. % TODO: trivial forall on the left
 
 % ORDER! polymorphism
@@ -478,7 +477,7 @@ In particular, closed rows are subsumed by open rows. % TODO: trivial forall on 
 	%Δ ⊢ δ ∷ Δ' ⇔ \dom(δ) = \dom(Δ') ∧ ∀α∈\dom(δ).\, Δ ⊢ δ(α) ∷ Δ'(α)
 \end{mathpar}
 %\caption{Well-formedness of types, rows, and type substitution.}
-\caption{Well-formedness of types and rows}
+\caption{Well-formedness of types and rows.}
 \label{kinding}
 %TODO: inductive definition of well-formed type substitutions?
 %TODO: syntax of Γ and Δ
@@ -562,7 +561,6 @@ as the intersection of the interpretations
 for all possible choices of the semantic type for the type variable.
 Interestingly, we can see that a polymorphic effect is interpreted as the {\em union} of the interpretations
 of the effect for all possible choices of the semantic types for the type variables.
-
 \begin{align*}
 	⟦α⟧_η &= η(α) \\
 	%\\
@@ -573,16 +571,13 @@ of the effect for all possible choices of the semantic types for the type variab
 	%\\
 	⟦Δ.\,τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_{ηη'}) \mid η'∈⟦Δ⟧ ∧ v∈⟦τ_1⟧_{ηη'} \} \\
 	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(v, n+1, μ) \mid (v, n, μ)∈⟦ρ⟧_η \} \\
-	⟦ι⟧_η &= ∅ \\
-	\\
-	\E⟦τ/ρ⟧_η(X) &=
-	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η(X).\, e →^* e' \} \\
-	\S⟦τ/ρ⟧_η(X) &= \{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X \} \\
-	\\
-	\E⟦τ/ρ⟧_η &= \bigcap \{ X │ \E⟦τ/ρ⟧_η(X) ⊆ X \} \\
-	\S⟦τ/ρ⟧_η &= \S⟦τ/ρ⟧_η(\E⟦τ/ρ⟧_η)
+	⟦ι⟧_η &= ∅
 \end{align*}
-
+\begin{align*}
+	\E⟦τ/ρ⟧_η &=
+	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η.\, e →^* e' \} \\
+	\S⟦τ/ρ⟧_η &= \{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈ \E⟦τ/ρ⟧_η \}
+\end{align*} \indent
 The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively.
 The intuition is that an element of $\E⟦τ/ρ⟧_η$
 evaluates to a value of type $τ$ while possibly performing an effect in $ρ$ and
@@ -591,12 +586,14 @@ finitely many times along the way.
 When the term is control-stuck we do not have a handler,
 but we do know the return type of the operation,
 so we resume with all possible values in parallel.
+% in parallel but finitely many times? ;/
 
 In other words,
 we can associate with an element in $\E⟦τ/ρ⟧_η$ its ``reduction trace'' 
 % TODO: quotes?
-– a tree where edges are the usual reduction ($→$) relation,
-except for $\S⟦τ/ρ⟧_η$ nodes, which have a branch for each element of $μ$,
+– a tree where edges are multi-step reductions,
+leaves are values in $⟦τ⟧_η$, internal nodes
+are in $\S⟦τ/ρ⟧_η$ and have a branch for each element of $μ$,
 the value with which we replace the $\Do v$.\footnote{
 	If we formalized the definitions in a programming language (or proof assistant),
 	this is also how we could view the structure of values of the inductive type $\E⟦τ/ρ⟧_η$.
@@ -605,15 +602,32 @@ Note that different choices of values to resume with could
 theoretically lead to getting stuck a different number of times,
 so the depth of the tree is not uniform, and it could even be infinite.
 These trees are however well-founded thanks to the choice of the inductive interpretation.
-
+\begin{align*}
+	\E⟦τ/ρ⟧_η(X) &=
+	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η(X).\, e →^* e' \} \\
+	\S⟦τ/ρ⟧_η(X) &= \{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X \} \\
+	\E⟦τ/ρ⟧_η &= \bigcap \{ X │ \E⟦τ/ρ⟧_η(X) ⊆ X \} \\
+	\S⟦τ/ρ⟧_η &= \S⟦τ/ρ⟧_η(\E⟦τ/ρ⟧_η)
+\end{align*} \indent
 To describe the construction in more detail, we temporarily overload notation and define
 operators $\S⟦τ/ρ⟧_η$ and $\E⟦τ/ρ⟧_η$ on sets of expressions (denoted by $X$).
 They are clearly monotone,
 so by the Knaster-Tarski theorem % citation
-the fixed-point equation $\E⟦τ/ρ⟧_η(X) = X$ has a least solution.
+the fixed-point equation $\E⟦τ/ρ⟧_η(X) = X$ has a least solution.\footnote{
+	The operators are not Scott-continuous because of potentially infinite semantic
+	types $μ$.
+	This is why the construction from the Kleene fixed-point theorem (union of
+	iterations of the operator on the empty set)
+	would fail to be a solution.
+	With this definition the reduction traces have bounded depth.
+	The proofs of compatibility lemmas would fail:
+	they graft different reduction traces to the leaves of a
+	potentially infinitely branching reduction trace,
+	so the bounded depth is not preserved.
+}
 Moreover, it can be characterized as the intersection of all
 $\E⟦τ/ρ⟧_η$-closed sets.
-We immediately obtain an induction principle.
+We immediately obtain the following principle:
 
 \begin{lemma}[Tarski induction principle]\label{tarski-induction}
 	If $\E⟦τ/ρ⟧_η(X) ⊆ X$, then $\E⟦τ/ρ⟧_η ⊆ X$.
@@ -703,7 +717,7 @@ Then $γ' ∈ ⟦Γ,x:τ_1⟧_η$, so $γ(e)\subst{v}{x} = γ'(e) ∈ \E⟦τ_2/
 
 For clarity of presentation,
 in the following we will assume $Γ$ empty.
-The lemmas in full generality can be recovered by
+The lemmas in full generality can be proven just by
 substituting an interpretation of $Γ$.
 
 \begin{lemma}[Lift compatibility]
@@ -949,10 +963,11 @@ So we have $Δ; ⊨ e : τ\subst{σ}{α} ╱ ρ$ by \cref{mono}.
 \end{proof}
 
 \begin{theorem}[Termination of evaluation]
+	If $⊢ e : τ ╱ ι$, then evalution of $e$ terminates.
 \end{theorem}
 \begin{proof}
-If we have a derivation of $⊢ e : τ ╱ ι$, then
-after we replace each rule by the corresponding compatibility lemma,
+Take a derivation of $⊢ e : τ ╱ ι$.
+After replacing each typing rule by the corresponding compatibility lemma,
 we obtain $⊨ e : τ ╱ ι$, so $e ∈ \E⟦τ/ι⟧$.
 Therefore $e$ has to terminate to a value, since
 $⟦ι⟧$ is empty and hence $\S⟦τ/ι⟧$ is empty.
@@ -962,6 +977,13 @@ This is also an alternative proof of soundness (``well-typed programs do not go 
 the technique of progress and preservation \cite{fscd19}.
 
 \section{Applicability to other settings}
+
+The calculus considered so far is fairly simple.
+In particular, we cannot have multiple operations grouped into one effect
+and we do not labels (analogous to prompts for delimited continuations),
+which allow us to have completely independent sets of effect-related constructs in our programs.
+
+\section{Fixed-point logical relation}
 
 \bibliographystyle{plain}
 \bibliography{refs}
