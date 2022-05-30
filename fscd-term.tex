@@ -227,22 +227,26 @@ and it is unclear how useful it is to treat calculi with algebraic effects as lo
 %as the paper which introduced the language \cite{fscd19} is exactly about
 %interexpressibility with other systems.
 
-The primary approach to proving normalization (and many other properties) of % TODO to proving?
-typed formal calculi is through {\em logical relations}.  Logical relations are % TODO through?
+The primary tool for proving normalization (and many other properties) of % TODO to proving?
+typed formal calculi are {\em logical relations}.  Logical relations are % TODO through?
 type-indexed relations on terms which essentially help carry additional
 information about {\em local} behavior of terms to make a type-derivation
 directed proof of the {\em global} property (such as normalization)
 have strong enough induction hypotheses and ultimately go through.
 
-In this work we will define logical predicates
-\footnote{In the context of normalization, logical predicates have many names, including:
+In this work we will define logical predicates\footnote{
+	In the context of normalization, logical predicates have many names, including:
 	(Tait's) reducibility predicates, reducibility candidates, and saturated sets.
 }
 to prove termination
 of evaluation in our language.
-An interesting point is that the definition of our logical predicates % TODO interesting point? ;/
+%An interesting point % TODO interesting point? ;/
+A novelty of our approach
+is that the definition of the logical predicates
 is recursive, in other words it is a solution to a fixed-point equation.
-This is unlike any normalization proof we know of.
+To our knowledge, this is the first use of this technique in the
+area of algebraic effects
+%This is unlike any normalization proof we know of.
 The fixed-point construction replaces the use of step-indexing % TODO cite
 which appears in the logical relation construction we are most directly inspired by.
 
@@ -717,7 +721,7 @@ Then $γ' ∈ ⟦Γ,x:τ_1⟧_η$, so $γ(e)\subst{v}{x} = γ'(e) ∈ \E⟦τ_2/
 
 For clarity of presentation,
 in the following we will assume $Γ$ empty.
-The lemmas in full generality can be proven just by
+The lemmas in full generality can then be proven simply by
 substituting an interpretation of $Γ$.
 
 \begin{lemma}[Lift compatibility]
@@ -983,7 +987,47 @@ In particular, we cannot have multiple operations grouped into one effect
 and we do not labels (analogous to prompts for delimited continuations),
 which allow us to have completely independent sets of effect-related constructs in our programs.
 
-\section{Fixed-point logical relation}
+\section{Related work}
+
+We have already discussed \cite{hwc}, where the interpretations of effects
+and the idea of a relation on control-stuck terms comes from.
+One thing that was not mentioned is that their relation is {\em biorthogonal}
+– there is a relation on full program evaluation contexts.
+The relation on expressions is defined extensionally:
+a term is good if it behaves well in a good context.
+Noticing that this is unnecessary leads to simpler definitions and proofs.
+More importantly, the intensional direct-style definition of good terms leads to
+better intuition, in particular allows us to consider reduction traces.
+However, opting for direct-style logical relations would possibly not simplify the definitions
+in \cite{hwc} as dramatically,
+because the relations are binary.
+
+A work which is eerily similar to ours, albeit in a very different setting, is \cite{marriage}.
+To reason about program equivalence,
+they define a relation $\E$ on expressions
+and a relation $\S$ on stuck terms.
+However, the terms are ``stuck'' for a different reason:
+they are applications to ``external'' functions about which we in a sense do not know enough,
+a situation reminiscent of normal form bisimulations.
+They also have a recursive definition and have to take a fixed-point solution,
+however they interpret it {\em coinductively},
+i.e. as the greatest fixed point.
+
+In our setting, a coinductive definition would lead to
+expressions in $\E$ having reduction traces with potentially infinite depth.
+Note that if a reduction trace has no leaves, so the reduction never reaches a value,
+then the type $τ$ can be arbitrary.
+The compatibility lemma which would fail is the one for $\Handle\!\!$.
+This should not be very surprising,
+as this is the rule responsible for eliminating effects –
+in particular it should be able to take
+an expression in $\E⟦τ/τ_1 \Rightarrow τ_2⟧_η$ and produce something in $\E⟦τ/ι⟧_η$, which cannot get
+stuck and simply evaluates to a value of type $τ$.
+This seems impossible if
+the former can never evaluate to a value and the $τ$ can even be arbitrary.
+
+% would the proof even work with biorthogonality?
+
 
 \bibliographystyle{plain}
 \bibliography{refs}
