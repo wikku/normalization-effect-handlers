@@ -176,16 +176,20 @@ input/output, mutable state, exceptions, nondeterminism, and coroutines.
 Today, we are at the mercy of programming language designers to include the
 effects we would like to use and make sure that they all interact with
 each other well.
-In recent years, however, a new approach, called \textit{algebraic effects}, has emerged.
-Algebraic effects allow programmers to express all the usual computational effects as library code
-and use them in the usual direct style (as opposed to monadic style, % TODO CITE comprehending monads
-which is essentially like programming in an embedded language, which cannot 
-which do not always play well with the rest of the language and do not compose easily).
-These implementations of effects are instances of one concept and interact
-with each other predictably.
+A traditional way to remedy this is to (purely functionally) model effects using monads \cite{monads}.
+This requires use of monadic style, which among other things causes
+stratification of code into two styles and does not always cooperate well with
+the language's native facilities.
+Moreover, monads do not compose in general, so modular programming with monads introduces some overheads.
 
-More concretely, algebraic effects may be thought of as resumable exceptions.
-We can \textit{perform} an \textit{operation},
+However, in recent years a new approach has emerged: \textit{algebraic effects and handlers} \cite{Plotkin_2013}.
+Algebraic effects allow programmers to express common computational effects as library code
+and use them in the usual direct style.
+This is done by decoupling effects into purely syntactic {\em operations} with their signatures
+and giving them meaning separately, here by using {\em effect handlers}.
+
+Effect handlers may be thought of as resumable exceptions.
+We can \textit{perform} an operation,
 just as we can raise an exception in a typical high-level programming language.
 The operation is then handled by the nearest enclosing \textit{handler} for the specific operation.
 The handler receives the value given at perform-point and also,
@@ -196,23 +200,30 @@ By calling the continuation with a value we can resume at the perform-point,
 as if performing the operation evaluated to the value.
 But more interestingly, we can resume multiple times, or never, or store the continuation for later use.
 
-This access to the continuation, while powerful, might also be a recipe for disaster. % TODO non sequitur ?
-That is why languages with algebraic effects typically have
+To prevent crashes because of unhandled operations and aid understanding of effectful code,
+languages with algebraic effects typically have powerful
 \textit{type-and-effect systems},
 not only tracking the type of value an expression might evaluate to, but also
 what kind of effects it may perform along the way.
+Type-and-effect systems allow us to deduce some basic information about programs,
+for example that a pure expression cannot evaluate to two different values,
+or, in some systems, that it will {\em always} evaluate to a value.
 
-This work proves termination of evaluation (aka. normalization) of a
-particular formal language equipped with algebraic effects.
+This work proves termination of evaluation (also known as normalization) of a
+particular language equipped with algebraic effects.
 We also explain how the proof can carry over to other calculi.
 Further, we explore the computational content of the proofs –
 a normalization by evaluation algorithm for the calculus.
 
-Termination of evaluation might be of interest for many reasons.
-Even though practical programming languages support recursion, loops, and other
+Termination of evaluation might be of interest for many reasons,
+for example it simplifies formal semantics and reasoning.
+It can also be considered as another safety property, just like ``never crashing''
+(though in practice nonterminating programs are indistinguishable from very long-running ones).
+Even though most programming languages support recursion, loops, and other
 features allowing nontermination (eg. recursive types),
-it might be useful that code that does not use these features cannot be blamed
-for nontermination.
+it might be useful to know that fragments that do not use these features cannot be blamed
+for it.
+
 Nontermination is sometimes also viewed as a computational effect,
 which however does not neatly fit the algebraic effect framework.
 Despite that, it can still be added as a built-in effect to be tracked by
@@ -596,7 +607,7 @@ so we resume with all possible values in parallel.
 This is a very local view of effectful computations,
 perhaps giving the false impression that all handlers immediately resume with a value and
 do nothing more (this is called the {\em reader} effect and is equivalent to dynamically-scoped variables).
-In reality, much could have happened between
+In reality, much can happen between
 performing the operation and it finally returning.
 Nevertheless, this local view suffices for our purposes and
 accurately reflects how much of the computation remains in the scope of a handler
@@ -1088,6 +1099,5 @@ In different settings, this technique appears rare and our work is one example.
 
 
 \printbibliography
-
 
 \end{document}
