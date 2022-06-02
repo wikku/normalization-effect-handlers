@@ -16,8 +16,11 @@
 \usepackage{microtype}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{mathpartir}
+\usepackage[style=alphabetic]{biblatex}
 \usepackage{hyperref}
 \usepackage{cleveref}
+
+\addbibresource{refs.bib}
 
 \title{Polymorphic algebraic effects: theoretical properties and implementation}
 \author{Wiktor Kuchta}
@@ -314,7 +317,7 @@ We can intuitively understand effect rows as follows:
  if $e : τ ╱ ρ$ and effect $ε$ appears at position $n$ in $ρ$, then
 subexpressions performing $ε$ are wrapped by $n$ lifts inside $e$.
 Clearly, the order of effects in the row matters.
-Note that the type system enables {\em row polymorphism}, % TODO: CITE
+The type system enables {\em row polymorphism}, % TODO: CITE
 since we can have a row ending in a polymorphic type variable.
 Such rows are usually called {\em open} (and {\em closed} otherwise). %, while monomorphic rows are called {\em closed}.
 
@@ -580,6 +583,8 @@ of the effect for all possible choices of the semantic types for the type variab
 	\S⟦τ/ρ⟧_η &= \{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈ \E⟦τ/ρ⟧_η \}
 \end{align*} \indent
 The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively.
+Note the similarities to the interpretation of function types in the definition of
+$\S⟦τ/ρ⟧_η$.
 The intuition is that an element of $\E⟦τ/ρ⟧_η$
 evaluates to a value of type $τ$ while possibly performing an effect in $ρ$ and
 getting control-stuck
@@ -587,6 +592,15 @@ finitely many times along the way.
 When the term is control-stuck we do not have a handler,
 but we do know the return type of the operation,
 so we resume with all possible values in parallel.
+
+This is a very local view of effectful computations,
+perhaps giving the false impression that all handlers immediately resume with a value and
+do nothing more (this is called the {\em reader} effect and is equivalent to dynamically-scoped variables).
+In reality, much could have happened between
+performing the operation and it finally returning.
+Nevertheless, this local view suffices for our purposes and
+accurately reflects how much of the computation remains in the scope of a handler
+throughout evaluation.
 % in parallel but finitely many times? ;/
 
 In other words,
@@ -603,6 +617,7 @@ Note that different choices of values to resume with could
 theoretically lead to getting stuck a different number of times,
 so the depth of the tree is not uniform, and it could even be infinite.
 These trees are however well-founded thanks to the choice of the inductive interpretation.
+
 \begin{align*}
 	\E⟦τ/ρ⟧_η(X) &=
 	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η(X).\, e →^* e' \} \\
@@ -980,6 +995,18 @@ the technique of progress and preservation \cite{fscd19}.
 \section{Extensions}
 
 The calculus considered so far is fairly simple.
+We will explain why the method we have shown scales to different calculi.
+
+The simplest extension which we can make is analogous to multi-prompt delimited continuations:
+annotate each operation, handler, and lift with a label from a fixed set of labels.
+In result we obtain sets of completely independent effect-related operators for each label.
+We would also need a notion of freeness per label,
+which would naturally be reflected in the type system as having different rows of effect per label.\footnote{
+	Alternatively: one row in which effects are tagged with labels and can be swapped using subsumption rules.
+}
+The numbers representing freeness in the logical relations would also have to be changed into
+functions from labels to natural numbers.
+
 In particular, we cannot have multiple operations grouped into one effect
 and we do not have labels (analogous to prompts for delimited continuations),
 which allow us to have completely independent sets of effect-related constructs in our programs.
@@ -988,14 +1015,14 @@ which allow us to have completely independent sets of effect-related constructs 
 
 \section{Related work}
 
-We have already discussed \cite{hwc}, where the interpretations of effects
-and the idea of a relation on control-stuck terms comes from.
+We have already discussed \cite{hwc}, where the interpretation of effects
+and the relation on control-stuck terms comes from.
 One thing that was not mentioned is that their relation is {\em biorthogonal}
 – there is an additional relation on (full program) evaluation contexts.
-The relation on expressions is defined extensionally:
-a term is ``good'' if it behaves ``well'' in all ``good'' contexts.
+Their relation on expressions is defined extensionally:
+an expression is ``good'' if it behaves ``well'' in all ``good'' contexts.
 In our work, noticing that this is unnecessary led to simpler definitions and proofs.
-More importantly, the intensional direct-style definition of good terms leads to
+More importantly, our intensional direct-style definition of good expressions leads to
 better intuition, in particular allows us to consider reduction traces.
 However, opting for direct-style logical relations would possibly not simplify the work
 in \cite{hwc} as dramatically,
@@ -1004,12 +1031,12 @@ because the relations are binary.
 A work which is eerily similar to ours, albeit in a very different setting, is \cite{marriage}.
 To reason about program equivalence,
 they define a relation $\E$ on expressions
-and a relation $\S$ on stuck terms.
+and a relation $\S$ on stuck terms
+by solving a recursive equation.
 However, the terms are ``stuck'' for a different reason:
 they are applications to ``external'' functions about which we in a sense do not know enough,
 a situation reminiscent of normal form bisimulations.
-Their relation $\E$ also is defined by a recursive equation,
-however they interpret it {\em coinductively},
+Furthermore, they interpret the recursive definition {\em coinductively},
 i.e. as the greatest fixed point.
 
 In our setting, a coinductive definition would allow
@@ -1034,21 +1061,21 @@ Such a mention appears in \cite{hia}.
 We speculate that their proof might have
 a combinatorial flavor, rather than use only logical relations.
 This is because multiple such arguments appear in a paper they cite \cite{exrw} and
-because of the mention that during handling the handler in the resumption is wrapped
-around a subterm of the original handled computation.
+because of the mention that the handler is reapplied
+on a strict subterm of the original computation during each handling reduction.
 This is possible thanks to an unusual calculus,
 where the operation carries a continuation alongside the argument
 and there is a reduction that grows this continuation until
 the operation is directly inside the handler.
-It is feasible that such an argument could also work in our semantics with
-a carefully selected term size function.
+It is feasible that such an argument could also work in our semantics by using
+a suitable term size function.
 
 A calculus with effect handlers appears and its termination proof is mentioned in \cite{expressive}.
 However, as it is even terser than the previous one, we cannot give any comment.
 
 A mechanized proof of strong normalization for the calculus defined in \cite{expressive}
 is reported in \cite{sol}.
-It seems that a tool for proof search is used and the proof is not spelled out in detail,
+A tool for proof search is used and the proof is not spelled out in detail,
 however it also relies on combinatorial arguments and strikes us as more elaborate than ours.
 
 The possibility of defining logical relations by solving fixed-point equations
@@ -1060,7 +1087,7 @@ In different settings, this technique appears rare and our work is one example.
 % would the proof even work with biorthogonality?
 
 
-\bibliographystyle{plain}
-\bibliography{refs}
+\printbibliography
+
 
 \end{document}
