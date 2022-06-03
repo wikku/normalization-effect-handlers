@@ -182,7 +182,7 @@ stratification of code into two styles and does not always cooperate well with
 the language's native facilities.
 Moreover, monads do not compose in general, so modular programming with monads introduces some overheads.
 
-However, in recent years a new approach has emerged: \textit{algebraic effects and handlers} \cite{Plotkin_2013}.
+In recent years a new promising approach has emerged: \textit{algebraic effects and handlers} \cite{Plotkin_2013}.
 Algebraic effects allow programmers to express common computational effects as library code
 and use them in the usual direct style.
 This is done by decoupling effects into purely syntactic {\em operations} with their signatures
@@ -683,7 +683,12 @@ For any $τ$ and $ρ$ we have $\S⟦τ/ρ⟧_η ⊆ \E⟦τ/ρ⟧_η$.
 If $e →^* e' ∈ \E⟦τ/ρ⟧_η$, then $e∈\E⟦τ/ρ⟧_η$.
 \end{lemma}
 
-\begin{lemma}\label{mono}
+\begin{lemma}[Weakening]\label{weakening}
+	If $η'$ extends $η$,
+	then $\E⟦τ/ρ⟧_η = \E⟦τ/ρ⟧_{η'}$.
+\end{lemma}
+
+\begin{lemma}[Monotonicity in types]\label{mono}
 	If $⟦τ_1⟧_η ⊆ ⟦τ_2⟧_η$ and $⟦ρ_1⟧_η ⊆ ⟦ρ_2⟧_η$,
 	then $\S⟦τ_1/ρ_1⟧_η ⊆ \S⟦τ_2/ρ_2⟧_η$
 	and $\E⟦τ_1/ρ_1⟧_η ⊆ \E⟦τ_2/ρ_2⟧_η$.
@@ -901,7 +906,7 @@ By \cref{stuck-inclusion} it suffices to show
 $\Do v ∈ \S⟦δ(τ_2)/(Δ'.\,τ_1 \Rightarrow τ_2)⟧_η$.
 By taking the empty context in the definition of $\S$ and \cref{value-inclusion},
 it suffices to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦Δ'.\,τ_1 \Rightarrow τ_2⟧_η$.
-From the interpretation of polymorphic effects, it
+By the interpretation of polymorphic effects, it
 would be enough to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{η'}$,
 where $η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$ for all $α∈Δ'$.
 By the interpretation of operations, it remains to show
@@ -1044,22 +1049,29 @@ a situation reminiscent of normal form bisimulations.
 Furthermore, they interpret the recursive definition {\em coinductively},
 i.e. as the greatest fixed point.
 
-In our setting, a coinductive definition would allow
+In our setting, a coinductive definition would theoretically allow
 expressions in $\E⟦τ/ρ⟧_η$ to have reduction traces that are ill-founded
 i.e.\ contain infinite paths.
 %i.e. some choices of operation return values would lead to nontermination.
-Note that if a reduction trace has no leaves, so a value can never be reached,
-then the type $τ$ can be arbitrary.
-The compatibility lemma which would fail is the one for $\Handle\!\!$.
-This should not be very surprising,
+The compatibility lemmas can be proven using strong coinduction\footnote{
+	Strong coinduction is the principle that $X ⊆ F(X ∪ νF)$ implies $X ⊆ νF$,
+	where $F$ is an operator on a complete lattice and $νF$ is its greatest fixed point.
+}
+	at the type in the rule conclusion,
+except the one for $\Handle\!\!$.
+The problem is that we substitute a resumption
+which contains the handler for $r$,
+but to show that it is in $⟦τ_2 →_ρ τ_r⟧_η$
+we would need exactly the claim we are trying to prove in the first place.
+The failure of $\Handle\!\!$ compatibility should not be very surprising,
 as this is the rule responsible for eliminating effects –
 in particular it should be able to take
-an expression in $\E⟦τ/τ_1 \Rightarrow τ_2⟧_η$ and show that wrapping it in a
+any expression in $\E⟦τ/τ_1 \Rightarrow τ_2⟧_η$ and show that wrapping it in a
 suitable handler produces an expression in $\E⟦τ/ι⟧_η$, which cannot get
 stuck and simply evaluates to a value of type $τ$.
-This is clearly impossible if
-the former can never evaluate to a value and $τ$ can be arbitrary.
-% TODO why did it look like it worked with reader-like handlers??
+This seems impossible,
+as theoretically the expression's reduction trace could have no
+leaves, so by definition of $\E$ the type $τ$ could be arbitrary.
 
 We have found only sketches of normalization proofs for algebraic effects in the literature,
 so we cannot be sure of how they work.
