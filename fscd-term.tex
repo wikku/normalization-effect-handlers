@@ -19,6 +19,7 @@
 \usepackage[style=alphabetic]{biblatex}
 \usepackage{hyperref}
 \usepackage{cleveref}
+\usepackage{tikz}
 
 \addbibresource{refs.bib}
 
@@ -228,8 +229,9 @@ for it.
 Nontermination is sometimes also viewed as a computational effect,
 which however does not neatly fit the algebraic effect framework.
 Despite that, it can still be added as a built-in effect to be tracked by
-the effect system, provided that we have sufficiently identified possible sources % TODO Koka
+the effect system, provided that we have sufficiently identified possible sources
 of nontermination.
+For example, the Koka programming language\cite{koka} implements this feature.
 
 Normalization also implies that the calculus is sound as a logic, % TODO: what semantics? normal forms?
 looking through the lens of the Curry-Howard isomorphism.
@@ -580,8 +582,8 @@ of the effect for all possible choices of the semantic types for the type variab
 	⟦∀α::κ.\,τ⟧_η
 	&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
 	%\\
-	⟦Δ.\,τ_1 \Rightarrow τ_2⟧_η &= \{(v,0,⟦τ_2⟧_{ηη'}) \mid η'∈⟦Δ⟧ ∧ v∈⟦τ_1⟧_{ηη'} \} \\
-	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(v, n+1, μ) \mid (v, n, μ)∈⟦ρ⟧_η \} \\
+	⟦Δ.\,τ_1 \Rightarrow τ_2⟧_η &= \{(\Do v,0,⟦τ_2⟧_{ηη'}) \mid η'∈⟦Δ⟧ ∧ v∈⟦τ_1⟧_{ηη'} \} \\
+	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(e, n+1, μ) \mid (e, n, μ)∈⟦ρ⟧_η \} \\
 	⟦ι⟧_η &= ∅
 \end{align*}
 \begin{align*}
@@ -610,21 +612,83 @@ accurately reflects how much of the computation remains in the scope of a handle
 throughout evaluation.
 % in parallel but finitely many times? ;/
 
-In other words,
-we can associate with an element in $\E⟦τ/ρ⟧_η$ its ``reduction trace'' 
+\begin{figure}
+\begin{tikzpicture}
+
+	\node (e) at (0,0.5) {$\textit{times}\;(\Do ())\,\textit{tick}$};
+	\node (e0) at (0,-1) {$\textit{times}\;0\,\textit{tick}$};
+	\node (e1) at (4,-1) {$\textit{times}\;1\,\textit{tick}$};
+	\node (e2) at (8,-1) {$\textit{times}\;2\,\textit{tick}$};
+	\node (einf) at (12,-1) {$\hdots$};
+	\draw[dashed,->] (e.south) -- (e0.north);
+	\draw[dashed,->] (e.south) -- (e1.north);
+	\draw[dashed,->] (e.south) -- (e2.north);
+	\draw[dashed,->] (e.south) -- ([yshift=4] einf.north);
+
+	\node (e0a) at (0,-2.5) {$()$};
+	\node (e1a) at (4,-2.5) {$\Lift{\Do ()}; \textit{times}\;0\,\textit{tick}$};
+	\node (e2a) at (8,-2.5) {$\Lift{\Do ()}; \textit{times}\;1\,\textit{tick}$};
+	%\node (einfa) at (12,-1.85) {$\ddots$};
+
+	\draw[->] (e0.south) -- (e0a.north) node[very near end,right=-3]{\textsubscript{*}};
+	\draw[->] (e1.south) -- (e1a.north) node[very near end,right=-3]{\textsubscript{*}};
+	\draw[->] (e2.south) -- (e2a.north) node[very near end,right=-3]{\textsubscript{*}};
+
+	\node (e1b) at (4,-4) {$\Lift{()}; \textit{times}\;0\,\textit{tick}$};
+	\node (e2b) at (8,-4) {$\Lift{()}; \textit{times}\;1\,\textit{tick}$};
+
+	\draw[dashed,->] (e1a.south) -- (e1b.north);
+	\draw[dashed,->] (e2a.south) -- (e2b.north);
+
+	\node (e1c) at (4,-5.5) {$()$};
+	\node (e2c) at (8,-5.5) {$\Lift{\Do ()}; \textit{times}\;0\,\textit{tick}$};
+
+	\draw[->] (e1b.south) -- (e1c.north) node[very near end,right=-3]{\textsubscript{*}};
+	\draw[->] (e2b.south) -- (e2c.north) node[very near end,right=-3]{\textsubscript{*}};
+
+	\node (e2d) at (8,-7) {$\Lift{()}; \textit{times}\;0\,\textit{tick}$};
+
+	\draw[dashed,->] (e2c.south) -- (e2d.north);
+
+	\node (e2e) at (8,-8.5) {$()$};
+
+	\draw[->] (e2d.south) -- (e2e.north) node[very near end,right=-3]{\textsubscript{*}};
+
+	\node (einfa) at (12,-5.5) {$\vdots$};
+	\node (einfb) at (12,-10) {$\ddots$};
+
+\end{tikzpicture}
+\caption{
+	An illustration of the reduction trace for $\textit{times}\;(\Do ())\,\textit{tick} ∈
+	\E⟦\textsf{unit}/ \textsf{askNat} · \textsf{tick} · ι⟧$,
+	where $\textsf{askNat} = \textsf{unit}\Rightarrow\textsf{nat}$
+	and $\textsf{tick} = \textsf{unit}\Rightarrow\textsf{unit}$.
+	For clarity we assume the unit type, the inductive naturals and a function \textit{times} for invoking a thunk $n$ times,
+	but these can be defined using Church encodings.
+	We set $\textit{tick} = λx.\,\Lift{\Do ()}$. The semicolon is standard syntax sugar:
+	$e_1;e_2$ is expanded out to $(λx.\,e_2)\;e_1$ with $x$ not free in $e_2$.
+	The normal arrow is the usual reduction, while the dashed one represents substituting
+	a value from the operation return type in a stuck term
+	in $\S⟦\textsf{unit}/ \textsf{askNat} · \textsf{tick} · ι⟧$.
+	This tree is well-founded despite having infinite depth.
+}
+\end{figure}
+
+More graphically,
+we can associate with an element in $\E⟦τ/ρ⟧_η$ what we will call its {\em reduction trace}
 % TODO: quotes?
-– a tree where edges are multi-step reductions,
-leaves are values in $⟦τ⟧_η$, internal nodes
-are in $\S⟦τ/ρ⟧_η$ and have a branch for each element of $μ$,
-the value with which we replace the $\Do v$.\footnote{
-	If we formalized the definitions in a programming language (or proof assistant),
-	this is also how we could view the structure of values of the inductive type $\E⟦τ/ρ⟧_η$.
+– a tree where nodes are expressions in $\E⟦τ/ρ⟧_η$,
+leaves are values in $⟦τ⟧_η$, and edges are either multi-step reductions
+or branches from $\S⟦τ/ρ⟧_η$ for each element of $μ$,
+which substitute the value for the operation.%
+\footnote{
+	This is also how we could view the structure of values of the inductive type $\E⟦τ/ρ⟧_η$,
+	had we formalized the definitions in a (dependent) type theory.
 }
 Note that different choices of values to resume with could
 theoretically lead to getting stuck a different number of times,
 so the depth of the tree is not uniform, and it could even be infinite.
 These trees are however well-founded thanks to the choice of the inductive interpretation.
-
 \begin{align*}
 	\E⟦τ/ρ⟧_η(X) &=
 	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η(X).\, e →^* e' \} \\
@@ -844,7 +908,7 @@ Therefore, $e_h\subst{v}{x}\subst{v_c}{r}$ is in $\E⟦τ_r/ρ⟧_η$ and so is 
 
 If $n>0$, then
 $\Handle K[e']\,h ∈ \S⟦τ_r/ρ⟧_η$,
-since $n-1\Free(\Handle K\,h)$, $(v,n-1,μ) ∈ ⟦ρ⟧_η$,
+since $n-1\Free(\Handle K\,h)$, $(e',n-1,μ) ∈ ⟦ρ⟧_η$,
 % gdyby przestrzeń efektów pozwalała na niezerowe indeksy to by się to psuło!
 and $∀u∈μ.\,\Handle K[u]\,h ∈ \E⟦τ_r/ρ⟧_η$.
 Again, the claim follows by antireduction.
@@ -876,13 +940,13 @@ Again, the claim follows by antireduction.
 	(taking $Δ, α∷κ$ as $Δ$ in the statement).
 
 	If $τ=Δ''.\,τ_1 \Rightarrow τ_2$,
-	then $⟦τ⟧_{η'} = \{(v,0,⟦τ_2⟧_{η'η''}) │ η'' ∈ ⟦Δ''⟧ ∧ v ∈ ⟦τ_1⟧_{η'η''} \}$
-	and $⟦δ(τ)⟧_{η} = \{(v,0,⟦δ(τ_2)⟧_{ηη''}) │ η'' ∈ ⟦Δ''⟧ ∧ v ∈ ⟦δ(τ_1)⟧_{ηη''} \}$,
+	then $⟦τ⟧_{η'} = \{(e,0,⟦τ_2⟧_{η'η''}) │ η'' ∈ ⟦Δ''⟧ ∧ v ∈ ⟦τ_1⟧_{η'η''} \}$
+	and $⟦δ(τ)⟧_{η} = \{(e,0,⟦δ(τ_2)⟧_{ηη''}) │ η'' ∈ ⟦Δ''⟧ ∧ v ∈ ⟦δ(τ_1)⟧_{ηη''} \}$,
 	which are equal q`by induction (taking $Δ, Δ''$ as $Δ$ in the statement).
 
 	If $τ=ε·ρ$,
-	then $⟦τ⟧_{η'} = ⟦ε⟧_{η'} ∪ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦ρ⟧_{η'} \}$
-	and $⟦δ(τ)⟧_{η} = ⟦δ(ε)⟧_{η} ∪ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦δ(ρ)⟧_{η} \}$,
+	then $⟦τ⟧_{η'} = ⟦ε⟧_{η'} ∪ \{(e,n+1,μ) │ (e,n,μ) ∈ ⟦ρ⟧_{η'} \}$
+	and $⟦δ(τ)⟧_{η} = ⟦δ(ε)⟧_{η} ∪ \{(e,n+1,μ) │ (e,n,μ) ∈ ⟦δ(ρ)⟧_{η} \}$,
 	which are equal by the inductive hypothesis.
 \end{proof}
 
@@ -903,9 +967,9 @@ We want to show $\Do v ∈ \E⟦δ(τ_2)/(Δ'.\,τ_1 \Rightarrow τ_2)⟧_η$.
 By \cref{stuck-inclusion} it suffices to show
 $\Do v ∈ \S⟦δ(τ_2)/(Δ'.\,τ_1 \Rightarrow τ_2)⟧_η$.
 By taking the empty context in the definition of $\S$ and \cref{value-inclusion},
-it suffices to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦Δ'.\,τ_1 \Rightarrow τ_2⟧_η$.
+it suffices to show $(\Do v,0,⟦δ(τ_2)⟧_η) ∈ ⟦Δ'.\,τ_1 \Rightarrow τ_2⟧_η$.
 By the interpretation of polymorphic effects, it
-would be enough to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{η'}$,
+would be enough to show $(\Do v,0,⟦δ(τ_2)⟧_η) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{η'}$,
 where $η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$ for all $α∈Δ'$.
 In other words, we need
 $v ∈ ⟦τ_1⟧_{η'}$ and $⟦δ(τ_2)⟧_η = ⟦τ_2⟧_{η'}$,
@@ -951,7 +1015,7 @@ The case of the empty row rule holds trivially, since $⟦ι⟧_η = ∅$.
 
 For the case of the row extension rule, assume $⟦ρ_1⟧_η ⊆ ⟦ρ_2⟧_η$.
 We clearly have
-$$\{(v,n+1,μ) │ (v,n,μ) ∈ ⟦ρ_1⟧_η\} ⊆ \{(v,n+1,μ) │ (v,n,μ) ∈ ⟦ρ_2⟧_η\},$$
+$$\{(e,n+1,μ) │ (e,n,μ) ∈ ⟦ρ_1⟧_η\} ⊆ \{(e,n+1,μ) │ (e,n,μ) ∈ ⟦ρ_2⟧_η\},$$
 so $⟦ε·ρ_1⟧_η ⊆ ⟦ε·ρ_2⟧_η$ as well.
 
 \end{proof}
