@@ -202,7 +202,8 @@ But more interestingly, we can resume multiple times, or never, or store the con
 
 To prevent crashes because of unhandled operations and aid understanding of effectful code,
 languages with algebraic effects typically have powerful
-\textit{type-and-effect systems},
+\textit{type-and-effect systems}\footnote{
+We will often say just ``type'' when referring to both types and effects.},
 not only tracking the type of value an expression might evaluate to, but also
 what kind of effects it may perform along the way.
 Type-and-effect systems allow us to deduce some basic information about programs,
@@ -248,7 +249,7 @@ information about {\em local} behavior of terms to make a type-derivation
 directed proof of the {\em global} property (such as normalization)
 have strong enough induction hypotheses and ultimately go through.
 
-In this work we will define logical relations\footnote{
+In this work we define logical relations\footnote{
 	In the context of normalization, logical relations have many names, including:
 	(Tait's) reducibility predicates, reducibility candidates, and saturated sets.
 }
@@ -526,12 +527,10 @@ In particular, closed rows are subsumed by open rows. % TODO: trivial forall on 
 \end{figure}
 
 \chapter{The logical relation}
-[todo introduction to logical relations]
-
 The logical relation is inspired by \cite{hwc}.
 Some changes are due to language differences:
 we have only one universal operation which simplifies the treatment of effects,
-polymorphism does not manifest at the expression level---we do not have type lambdas,
+polymorphism does not manifest at the expression level (we do not have type lambdas),
 and our operations can be polymorphic.
 Instead of a binary step-indexed relation,
 our goal is to build a unary relation without step-indexing.
@@ -543,21 +542,21 @@ We call them the spaces of \textit{semantic types} or,
 in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}:
 \begin{align*}
 	⟦\kT⟧ &= \mathcal{P}(\textrm{CVal}) = \mathsf{Type}\\
-	⟦\kE⟧ &= \mathcal{P}(\textrm{CVal}×\{0\}×\mathsf{Type}) \\
-	⟦\kR⟧ &= \mathcal{P}(\textrm{CVal}×ℕ×\mathsf{Type})
+	⟦\kE⟧ &= \mathcal{P}(\textrm{CExp}×\{0\}×\mathsf{Type}) \\
+	⟦\kR⟧ &= \mathcal{P}(\textrm{CExp}×ℕ×\mathsf{Type})
 \end{align*}
 %TODO semantic types/effects are overapproximations of possible behaviors? or sth
-We write $\textrm{CVal}$ for the set of closed values, so
+We write $\textrm{CVal}$ and $\textrm{CExp}$ for the sets of closed values and closed expressions respectively, so
 elements of $\mathsf{Type}$ are simply sets of closed values.
 Semantic effects are sets of triples, which aim to describe a situation
 in which an expression being evaluated performs an effect.
 The components of such a triple are:
-the argument of the operation,
+the operation with its argument,
 the freeness of the enclosing context beyond which the operation can be handled,
 and the semantic type of values we can call the resumption with.
 
 We interpret type contexts as mappings from type variables to semantic types:
-$$⟦Δ⟧ = \{ η │ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}.$$
+$$⟦Δ⟧ = \{ η │ \dom(η) = \dom(Δ) ∧ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}.$$
 
 We define the interpretations of types and effects as well as
 relations $\E$ on expressions and $\S$ on control-stuck terms by structural induction.
@@ -588,7 +587,7 @@ of the effect for all possible choices of the semantic types for the type variab
 \begin{align*}
 	\E⟦τ/ρ⟧_η &=
 	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η.\, e →^* e' \} \\
-	\S⟦τ/ρ⟧_η &= \{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈ \E⟦τ/ρ⟧_η \}
+	\S⟦τ/ρ⟧_η &= \{ K[e] \mid ∃n,μ.\, (e,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈ \E⟦τ/ρ⟧_η \}
 \end{align*} \indent
 The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively.
 Note the similarities to the interpretation of function types in the definition of
@@ -629,7 +628,7 @@ These trees are however well-founded thanks to the choice of the inductive inter
 \begin{align*}
 	\E⟦τ/ρ⟧_η(X) &=
 	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η(X).\, e →^* e' \} \\
-	\S⟦τ/ρ⟧_η(X) &= \{ K[\Do v] \mid ∃n,μ.\, (v,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X \} \\
+	\S⟦τ/ρ⟧_η(X) &= \{ K[e] \mid ∃n,μ.\, (e,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X \} \\
 	\E⟦τ/ρ⟧_η &= \bigcap \{ X │ \E⟦τ/ρ⟧_η(X) ⊆ X \} \\
 	\S⟦τ/ρ⟧_η &= \S⟦τ/ρ⟧_η(\E⟦τ/ρ⟧_η)
 \end{align*} \indent
@@ -664,7 +663,7 @@ we get the more familiar principle of structural induction on $\E⟦τ/ρ⟧_η$
 	Assume $P$ is a predicate on closed expressions and
 \begin{itemize}
 	\item if $e$ evaluates to a value in $⟦τ⟧_η$, then $P(e)$ holds; and
-	\item if $e$ reduces to some $K[\Do v]$ such that there exist $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K)$
+	\item if $e$ reduces to some $K[e']$ such that there exist $(e',n,μ)∈⟦ρ⟧_η$ such that $n\Free(K)$
 		and $P(K[u])$ holds for all $u∈μ$, then $P(e)$ holds.
 \end{itemize}
 	Then $P(e)$ holds for all $e ∈ \E⟦τ/ρ⟧_η$.
@@ -696,14 +695,13 @@ If $e →^* e' ∈ \E⟦τ/ρ⟧_η$, then $e∈\E⟦τ/ρ⟧_η$.
 
 \section{Compatibility lemmas}
 We want to establish that $⊢ e : τ ╱ ι$ implies $e ∈ \E⟦τ/ι⟧$.
-
 For this purpose we will prove a semantic counterpart of each typing rule.
 First, we need to define a counterpart to the typing judgment.
 Unlike typing judgments, our relations are on closed terms only,
 so we get around that by using substitution.
 We define semantic entailment as follows:
 $$Δ;Γ ⊨ e : τ ╱ ρ ⇔ ∀η∈⟦Δ⟧.\, ∀γ∈⟦Γ⟧_η.\,γ(e) ∈ \E⟦τ/ρ⟧_η,$$
-where $⟦Γ⟧_η = \{ γ │ ∀x:τ∈Γ.\,γ(x) ∈ ⟦τ⟧_η\}$ contains expression-level
+where $⟦Γ⟧_η = \{ γ │ \dom(γ) = \dom(Γ) ∧ ∀x:τ∈Γ.\,γ(x) ∈ ⟦τ⟧_η\}$ contains expression-level
 variable substitutions.
 
 \begin{lemma}[Variable compatibility]
@@ -760,12 +758,12 @@ Assume $Δ ⊢ τ ∷ \kT$, $Δ ⊢ ε ∷ \kE$, and $Δ ⊢ ρ ∷ \kR$.
 Take any $η∈⟦Δ⟧$.
 We will show by induction on $e∈\E⟦τ/ρ⟧_η$ that $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$.
 
-If $e →^* K[\Do v]$ and there exists
-$(v, n, μ) ∈ ⟦ρ⟧_η$ such that $n\Free(K)$ and
+If $e →^* K[e']$ and there exists
+$(e', n, μ) ∈ ⟦ρ⟧_η$ such that $n\Free(K)$ and
 for all $u∈μ$ the induction hypothesis holds for $K[u]$,
-then we have $(v, n+1, μ) ∈ ⟦ε·ρ⟧_η$, $n+1\Free(\Lift{K})$,
+then we have $(e', n+1, μ) ∈ ⟦ε·ρ⟧_η$, $n+1\Free(\Lift{K})$,
 and $∀u∈μ.\, \Lift{K[u]} ∈ \E⟦τ/ε·ρ⟧_η$.
-So $\Lift{K[\Do v]} ∈ \S⟦τ/ε·ρ⟧_η$ and $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$ by antireduction.
+So $\Lift{K[e']} ∈ \S⟦τ/ε·ρ⟧_η$ and $\Lift{e} ∈ \E⟦τ/ε·ρ⟧_η$ by antireduction.
 
 If $e →^* v ∈ ⟦τ⟧_η$, then
 $\Lift{e} →^* \Lift{v} → v$,
@@ -786,20 +784,20 @@ Take any $η∈⟦Δ⟧$ and $e_2 ∈ \E⟦τ_1/ρ⟧_η$.
 We will show by induction on $e_1∈\E⟦τ_1→_ρ τ_2/ρ⟧_η$ that
 $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
 
-If $e_1 →^* K_1[\Do v]$ and
-there exists $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K_1)$ and for all $u∈μ$
+If $e_1 →^* K_1[e_1']$ and
+there exists $(e_1',n,μ)∈⟦ρ⟧_η$ such that $n\Free(K_1)$ and for all $u∈μ$
 the inductive hypothesis holds for $K_1[u]$,
-then $K_1[\Do v]\;e_2 ∈ \S⟦τ_2/ρ⟧_η$, since $n\Free(K_1\;e_2)$.
+then $K_1[e_1']\;e_2 ∈ \S⟦τ_2/ρ⟧_η$, since $n\Free(K_1\;e_2)$.
 By antireduction $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
 
 Now assume $e_1 →^* (λx.\,e) ∈ ⟦τ_1 →_ρ τ_2/ρ⟧_η$.
 We will show by induction on $e_2 ∈ \E⟦τ_1/ρ⟧_η$ that $(λx.\,e)\;e_2 ∈ \E⟦t_2/ρ⟧_η$
 and the claim will follow by antireduction.
 
-If $e_2 →^* K_2[\Do v]$ and
-there exists $(v,n,μ)∈⟦ρ⟧_η$ such that $n\Free(K_2)$ and for all $u∈μ$
+If $e_2 →^* K_2[e_2']$ and
+there exists $(e_2',n,μ)∈⟦ρ⟧_η$ such that $n\Free(K_2)$ and for all $u∈μ$
 the inductive hypothesis holds for $K_2[u]$,
-then $(λx.\,e)\;K_2[\Do v] ∈ \S⟦τ_2/ρ⟧_η$, since $n\Free((λx.\,e)\;K_2)$.
+then $(λx.\,e)\;K_2[e_2'] ∈ \S⟦τ_2/ρ⟧_η$, since $n\Free((λx.\,e)\;K_2)$.
 By antireduction $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
 
 If $e_2 →^* v ∈ ⟦τ_1⟧_η$, then
@@ -830,13 +828,13 @@ If $e →^* v ∈ ⟦τ⟧_η$,
 then $\Handle e\,h →^* e_r\subst{v}{x} ∈ \E⟦τ_r/ρ⟧_η$,
 so the claim follows by antireduction.
 
-Now assume $e →^* K[\Do v]$ and
-we have $(v,n,μ) ∈ ⟦(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$
+Now assume $e →^* K[e']$ and
+we have $(e',n,μ) ∈ ⟦(Δ'.\,τ_1 \Rightarrow τ_2) · ρ⟧_η$
 such that $n\Free(K)$ and
 for all $u∈μ$ the induction hypothesis holds for $K[u]$.
 
-If $n=0$, then $(v,n,μ) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{ηη'}$ for some $η'∈⟦Δ'⟧$.
-More specifically, $v∈⟦τ_1⟧_{ηη'}$ and $μ = ⟦τ_2⟧_{ηη'}$.
+If $n=0$, then $(e',n,μ) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{ηη'}$ for some $η'∈⟦Δ'⟧$.
+More specifically, $e' = \Do v$, $v∈⟦τ_1⟧_{ηη'}$ and $μ = ⟦τ_2⟧_{ηη'}$.
 We have $\Handle e\,h →^* \Handle K[\Do v]\,h → e_h\subst{v}{x}\subst{v_c}{r}$,
 where $v_c=λz.\,\Handle K[z]\,h$.
 To show $v_c ∈ ⟦τ_2 →_ρ τ_r⟧_{ηη'}$, take any $u ∈ ⟦τ_2⟧_{ηη'}$ and show
@@ -845,7 +843,7 @@ Which holds by induction hypothesis.
 Therefore, $e_h\subst{v}{x}\subst{v_c}{r}$ is in $\E⟦τ_r/ρ⟧_η$ and so is $\Handle e\;h$.
 
 If $n>0$, then
-$\Handle K[\Do v]\,h ∈ \S⟦τ_r/ρ⟧_η$,
+$\Handle K[e']\,h ∈ \S⟦τ_r/ρ⟧_η$,
 since $n-1\Free(\Handle K\,h)$, $(v,n-1,μ) ∈ ⟦ρ⟧_η$,
 % gdyby przestrzeń efektów pozwalała na niezerowe indeksy to by się to psuło!
 and $∀u∈μ.\,\Handle K[u]\,h ∈ \E⟦τ_r/ρ⟧_η$.
@@ -909,9 +907,9 @@ it suffices to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦Δ'.\,τ_1 \Rightarrow τ_2�
 By the interpretation of polymorphic effects, it
 would be enough to show $(v,0,⟦δ(τ_2)⟧_η) ∈ ⟦τ_1 \Rightarrow τ_2⟧_{η'}$,
 where $η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$ for all $α∈Δ'$.
-By the interpretation of operations, it remains to show
-$v ∈ ⟦τ_1⟧_{η'}$ and $⟦δ(τ_2)⟧_η = ⟦τ_2⟧_{η'}$.
-Which follows immediately from \cref{subst-comp}.
+In other words, we need
+$v ∈ ⟦τ_1⟧_{η'}$ and $⟦δ(τ_2)⟧_η = ⟦τ_2⟧_{η'}$,
+which follows immediately from \cref{subst-comp}.
 \end{proof}
 
 \begin{lemma}[Subtyping compatibility]
@@ -1000,7 +998,7 @@ $⟦ι⟧$ is empty and hence $\S⟦τ/ι⟧$ is empty.
 \end{proof}
 
 This is also an alternative proof of soundness (``well-typed programs do not go wrong''), which was already shown by
-the technique of progress and preservation \cite{fscd19}.
+the technique of progress and preservation in \cite{fscd19}.
 
 \section{Extensions}
 
