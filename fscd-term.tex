@@ -182,7 +182,7 @@ A traditional way to remedy this is to (purely functionally) model effects using
 This requires the use of monadic style, which among other things causes
 stratification of code into two styles and does not always cooperate well with
 the language's native facilities.
-Moreover, monads do not compose in general, so modular programming with monads introduces some overheads.
+Moreover, monads do not compose in general, so modular programming with monads has some overheads.
 
 In recent years a new promising approach has emerged: \textit{algebraic effects and handlers} \cite{Plotkin_2013}.
 A language featuring algebraic effects lets programmers express all common computational effects as library code
@@ -196,7 +196,7 @@ just as we can raise an exception in a typical high-level programming language.
 The operation is then handled by the nearest enclosing \textit{handler} for the specific operation.
 The handler receives the value given at perform-point and also,
 unlike normal exception handlers,
-a \textit{resumption} a first-class functional value representing the rest
+a \textit{resumption} – a first-class functional value representing the rest
 of the code to execute inside the handler from the perform-point.
 By calling the resumption with a value we can resume at the perform-point,
 as if performing the operation evaluated to the value.
@@ -212,7 +212,8 @@ Type-and-effect systems allow us to deduce some basic information about programs
 for example that a pure expression cannot evaluate to two different values,
 or, in some systems, that it will {\em always} evaluate to a value.
 
-This work proves termination of evaluation (also known as normalization) of a
+In this work we demonstrate a (to our knowledge) novel proof
+termination of evaluation (also known as normalization) for a
  language equipped with algebraic effects.
 We obtain soundness as a corollary.
 We also explain how the proof can carry over to other calculi.
@@ -594,7 +595,7 @@ $\S⟦τ/ρ⟧_η$.
 The intuition is that an element of $\E⟦τ/ρ⟧_η$
 evaluates to a value of type $τ$ while possibly performing an effect in $ρ$ and
 getting control-stuck
-finitely many times alng the way.
+finitely many times along the way.
 When the term is control-stuck, we do not have a handler,
 but we do know the return type of the operation,
 so we resume with all possible values in parallel.
@@ -662,7 +663,10 @@ throughout evaluation.
 	and $\textsf{tick} = \textsf{unit}\Rightarrow\textsf{unit}$.
 	For clarity, we assume the unit type, the inductive naturals, and a function \textit{times} for invoking a thunk $n$ times,
 	but these can be realized using Church encodings.
-	We set $\textit{tick} = λx.\,\Lift{\Do ()}$. The semicolon is standard syntax sugar:
+	We set $\textit{tick} = λx.\,\Lift{\Do ()}$.
+	Here, the \textsf{tick} effect does not seem to do much, but
+	a handler for it could, for instance, increment an external counter.
+	The semicolon is standard syntax sugar:
 	$e_1;e_2$ is expanded to $(λx.\,e_2)\;e_1$ with $x$ not free in $e_2$.
 	The normal arrow is the usual reduction, while the dashed one represents substituting
 	a value from the operation return type in a stuck term
@@ -703,7 +707,7 @@ the fixed-point equation $\E⟦τ/ρ⟧_η(X) = X$ has a least solution.\footnot
 	This is why the construction from the Kleene fixed-point theorem (union of
 	iterations of the operator on the empty set)
 	would fail to be a solution.
-	With this definition the reduction traces have bounded depth
+	With this definition the reduction traces have bounded depth.
 	The application compatibility lemma would fail:
 	it grafts different reduction traces to the leaves of a
 	potentially infinitely branching reduction trace,
@@ -1092,18 +1096,45 @@ A handler for this effect would have to pattern match on a value of type $e\;α$
 to refine the type variable $α$.
 % TODO: GADT width subtyping?
 
-Nevertheless, we consider a direct extension to support grouping operations into one effect.
-Effects now are sets of distinct operation names together with their types.
+Nevertheless, we can sketch how a direct extension to support grouping operations into one effect would look like.
+We fix a set of operation names ranged over by $op$.
+Effects are now sets of distinct operation names together with their types.
 $$
 	\inferrule
 	{\textrm{for each }i ∈ \{1…n\} \\ Δ,Δ'_i ⊢ τ_i ∷ \kT \\ Δ,Δ'_i ⊢ σ_i ∷ \kT}
 	{Δ ⊢ \{op_i : Δ'_i.\, τ_i \Rightarrow σ_i │ i ∈ \{1…n\}\} ∷ \kE }
 $$
+Handlers would take on the form $\Handle e\;\{op_1\;x\;r.\,e_1; …; op_n\;x\;r.\,e_n; x.\,e_r \}$
+and we would have $op\;v$ instead of $\Do v$.
+The typing rule for operations would also have to ``guess'' the other operations in an effect
+(in the original rule it already guesses the types in the operation and a type-level substitution).
+The rule for $\Handle\!\!$ would naturally need a suitable premise for each operation clause.
 
+When we have both features and identify labels with effects (groups of operations),%
+\footnote{
+	Technically, effects are formed in type contexts. Therefore,
+	we also forbid effects to have free type variables, so that they can be formed
+	at the ``top level'', where the set of labels is also fixed.
+	This is similar to effects in \cite{hwc}.
+	We also note that with this restriction, effect rows could be represented
+	simply as mappings from labels to natural numbers.
+}
+we arrive at a calculus very similar to the one in \cite{hwc}.
+A crucial difference that remains is our effect types are still structural.
+In particular, effects cannot be recursive.
+In the work cited it is conjectured that a restriction on recursive occurrences of effects would
+make their calculus terminating.
+Therefore, we claim that our method settles this conjecture positively.
+We refrain from expounding the details, as the interpretations
+of effects would be essentially the same as in the cited work (but unary)
+and the definitions of $\E$ and $\S$ would be inductive as in this work.
+As is usual with logical relations, once the definitions are reasonable,
+the proofs are straightforward, so we omit them too.
 
 We consider the type system in \cite{hwc} to be powerful enough to represent
 a large portion of languages with algebraic effects.
-
+In particular, it features polymorphism and allows duplicate instances of effects,
+both of which are sometimes omitted in the literature.
 
 \section{Related work}
 
@@ -1142,7 +1173,7 @@ The compatibility lemmas can be proven using strong coinduction\footnote{
 	at the type in the rule conclusion,
 except the one for $\Handle\!\!$.
 The problem is that we substitute a resumption
-which contains the handler for $r$,
+(which contains a handler) for $r$,
 but to show that it is in $⟦τ_2 →_ρ τ_r⟧_η$
 we would need exactly the claim we are trying to prove in the first place.
 The failure of $\Handle\!\!$ compatibility should not be very surprising,
@@ -1177,6 +1208,15 @@ A mechanized proof of strong normalization for the calculus defined in \cite{exp
 is reported in \cite{sol}.
 A tool for proof search is used and the proof is not spelled out in detail,
 but it also relies on combinatorial arguments and strikes us as more elaborate than ours.
+
+We did not consider recursive effects, as they are known to introduce nontermination \cite{hwc}.
+Likely, we could allow effects where all recursive occurrences are positive
+– but note that
+the left side of an effect arrow ($\Rightarrow$) is positive and the right is negative,
+as opposed to function arrows ($→$).
+Needless to say, a least fixed point construction would have to be used in the interpretation of effects.
+This is discussed from the perspective of a translation into a System F-like calculus in
+\cite{xie2020effect}.
 
 The possibility of defining logical relations by solving fixed-point equations
 has been known for a long time.
