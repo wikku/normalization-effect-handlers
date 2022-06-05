@@ -174,7 +174,7 @@ but also nontrivially affect the execution of surrounding code.
 This is what we call computational effects, the typical examples of which are:
 input/output, mutable state, exceptions, nondeterminism, and coroutines.
 
-Today, we are at the mercy of programming language designers,
+Today, we are at the mercy of programming language designers
 and we can only hope they include the
 effects we would like to use and make sure that they all interact with
 each other well.
@@ -212,7 +212,7 @@ Type-and-effect systems allow us to deduce some basic information about programs
 for example that a pure expression cannot evaluate to two different values,
 or, in some systems, that it will {\em always} evaluate to a value.
 
-In this work we demonstrate a (to our knowledge) novel proof
+In this work we demonstrate a (to our knowledge) novel proof of
 termination of evaluation (also known as normalization) for a
  language equipped with algebraic effects.
 We obtain soundness as a corollary.
@@ -1069,6 +1069,8 @@ the technique of progress and preservation in \cite{fscd19}.
 
 The calculus considered so far is fairly simple.
 We will discuss extensions that bring it closer to other calculi with algebraic effects.
+Adapting the proofs to the changes poses no difficulty and is not interesting,
+so we will omit that.
 
 A simple extension we can make is analogous to multiple prompts for delimited continuations:
 annotate each operation ($\keyword{do}_l \;v$), handler
@@ -1076,14 +1078,13 @@ annotate each operation ($\keyword{do}_l \;v$), handler
 fixed set of labels $\mathcal{L}$.
 As a result, we obtain sets of completely independent effectful operators for each label.
 We would also need a notion of freeness per label,
-which would naturally be reflected in the type system as having different rows of effect per label,\footnote{
+which would naturally be reflected in the type system as having different rows of effect per label.\footnote{
 	Alternatively: one row in which effects are tagged with labels and consecutive effects with different tags can be swapped using subsumption rules.
 }
-and an effectful operation with label $l$ would only look at the row for $l$.
+The typing rule for an effectful operation with label $l$ would only look at the row for $l$.
 The numbers representing freeness in the logical relations would also have to be indexed by labels,
 i.e.\ changed into
 functions from labels to natural numbers.
-The proofs do not change significantly.
 
 A common feature in languages with algebraic effects is grouping
 multiple operations into one effect.
@@ -1097,7 +1098,7 @@ A handler for this effect would have to pattern match on a value of type $e\;α$
 to refine the type variable $α$.
 % TODO: GADT width subtyping?
 
-Nevertheless, we can sketch how we could accomodate grouping operations into one effect natively.
+Nevertheless, we can sketch how we could accommodate grouping operations into one effect natively.
 We fix a set of operation names ranged over by $op$.
 Effects are now sets of distinct operation names together with their types:
 $$
@@ -1106,7 +1107,7 @@ $$
 	{Δ ⊢ \{op_i : Δ'_i.\, τ_i \Rightarrow σ_i │ i ∈ \{1…n\}\} ∷ \kE }
 $$
 Handlers would take on the form $\Handle e\;\{op_1\;x\;r.\,e_1; …; op_n\;x\;r.\,e_n; x.\,e_r \}$
-and we would have $op\;v$ instead of $\Do v$.
+and $\Do v$ would be generalized to $op\;v$.
 The typing rule for operations would also have to ``guess'' the other operations in an effect
 (in the original rule it already guesses the types in the operation and a type-level substitution).
 The rule for $\Handle\!\!$ would naturally need a suitable premise for each operation clause.
@@ -1115,7 +1116,7 @@ When we have both features and identify labels with effects (groups of operation
 \footnote{
 	Technically, effects are formed in type contexts. Therefore,
 	we also forbid effects to have free type variables, so that they can be formed
-	at the ``top level'', where the set of labels is also fixed.
+	at the ``top-level'', where the set of labels is also fixed.
 	This is similar to effects in \cite{hwc}.
 	We also note that with this restriction, effect rows could be represented
 	simply as mappings from labels to natural numbers.
@@ -1126,11 +1127,9 @@ In particular, effects cannot be recursive.
 In the work cited it is conjectured that a restriction on recursive occurrences of effects would
 make their calculus terminating.
 Therefore, we claim that our method settles this conjecture positively.
-We refrain from presenting the details, as the interpretations
+The interpretations
 of effects would be essentially the same as in the cited work (but unary)
 and the definitions of $\E$ and $\S$ would be inductive as in this work.
-As is usual with logical relations, once the definitions are reasonable,
-the proofs are straightforward, so we omit them too.
 
 We consider the language in \cite{hwc} to be a good representative
 calculus for algebraic effects,
