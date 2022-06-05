@@ -198,7 +198,7 @@ The handler receives the value given at perform-point and also,
 unlike normal exception handlers,
 a \textit{resumption} – a first-class functional value representing the rest
 of the code to execute inside the handler from the perform-point.
-By calling the resumption with a value we can resume at the perform-point,
+By calling the resumption with a value we can resume at the perform-point
 as if performing the operation evaluated to the value.
 But more interestingly, we can resume multiple times, or never, or store the resumption for later use.
 
@@ -266,20 +266,14 @@ I would like to thank Dariusz Biernacki, Filip Sieczkowski, and Piotr Polesiuk
 for their help with this work.
 
 \chapter{The language}
-% TODO name the language?
-
 We will study the deep handler calculus and type-and-effect system formulated
 in \cite{fscd19}.
-% TODO: EM—DASH VS EN–DASH STYLE !!!
 It is a refreshingly minimal language – the call-by-value lambda calculus with a few extensions
 to be able to express the essence of algebraic effects.
 There is only the universal operation, performed $\Do v$.
 To be able to reach beyond the closest effect handler,
 the \textit{lift} operator, written $\Lift{e}$, is introduced,
 which makes operations in $e$ skip the nearest handler.
-%When operations are performed inside the expression $e$ enclosed by lift,
-%the nearest handler will be skipped and the operation will be handled by the next one instead.
-%Naturally, the operator composes, so multiple enclosing lifts means multiple handlers skipped.
 In contrast to most work on algebraic effects, the effect-tracking system here is structural –
 we do not have any concept of predefined or user-defined signatures of effects.
 Finally, the type system features polymorphic expressions and polymorphic operations.
@@ -657,7 +651,7 @@ throughout evaluation.
 
 \end{tikzpicture}
 \caption{
-	An illustration of the reduction trace for $\textit{times}\;(\Do ())\,\textit{tick} ∈
+	An illustration of the reduction trace for $\textit{times}\,({\Do ()})\,\textit{tick} ∈
 	\E⟦\textsf{unit}/ \textsf{askNat} · \textsf{tick} · ι⟧$,
 	where $\textsf{askNat} = \textsf{unit}\Rightarrow\textsf{nat}$
 	and $\textsf{tick} = \textsf{unit}\Rightarrow\textsf{unit}$.
@@ -669,7 +663,7 @@ throughout evaluation.
 	The semicolon is standard syntax sugar:
 	$e_1;e_2$ is expanded to $(λx.\,e_2)\;e_1$ with $x$ not free in $e_2$.
 	The normal arrow is the usual reduction, while the dashed one represents substituting
-	a value from the operation return type in a stuck term
+	a value for the operation in a stuck term
 	in $\S⟦\textsf{unit}/ \textsf{askNat} · \textsf{tick} · ι⟧$.
 	This tree is well-founded despite having infinite depth.
 }
@@ -856,7 +850,7 @@ then $K_1[e_1']\;e_2 ∈ \S⟦τ_2/ρ⟧_η$, since $n\Free(K_1\;e_2)$.
 By antireduction $e_1\;e_2 ∈ \E⟦τ_2/ρ⟧_η$.
 
 Now assume $e_1 →^* (λx.\,e) ∈ ⟦τ_1 →_ρ τ_2/ρ⟧_η$.
-We will show by induction on $e_2 ∈ \E⟦τ_1/ρ⟧_η$ that $(λx.\,e)\;e_2 ∈ \E⟦t_2/ρ⟧_η$
+We will show by induction on $e_2 ∈ \E⟦τ_1/ρ⟧_η$ that $(λx.\,e)\;e_2 ∈ \E⟦τ_2/ρ⟧_η$
 and the claim will follow by antireduction.
 
 If $e_2 →^* K_2[e_2']$ and
@@ -920,9 +914,15 @@ Again, the claim follows by antireduction.
 
 % Ahmed LR: "compositionality"
 \begin{lemma} \label{subst-comp}
-	If $Δ$ and $Δ'$ disjoint, $Δ ⊢ δ ∷ Δ'$, and $Δ,Δ' ⊢ τ ∷ κ$, $η∈⟦Δ⟧$, and
-	$η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$,
-	then $⟦τ⟧_{η'} = ⟦δ(τ)⟧_η$.
+	Syntactic type substitutions are compatible with semantic type environments: If
+	\begin{itemize}
+	\item $Δ$ and $Δ'$ have disjoint domains; and
+	\item $Δ ⊢ δ ∷ Δ'$; and
+	\item $Δ,Δ' ⊢ τ ∷ κ$; and
+	\item $η∈⟦Δ⟧$; and
+	\item $η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$;
+	\end{itemize}
+	then $⟦τ⟧_{η'} = ⟦δ(α)⟧_η$.
 \end{lemma}
 \begin{proof}
 	By induction on the kinding rules.
@@ -1068,7 +1068,7 @@ the technique of progress and preservation in \cite{fscd19}.
 \section{Extensions}
 
 The calculus considered so far is fairly simple.
-We will explain why the method we have shown scales to different calculi.
+We will discuss extensions that bring it closer to other calculi with algebraic effects.
 
 A simple extension we can make is analogous to multiple prompts for delimited continuations:
 annotate each operation ($\keyword{do}_l \;v$), handler
@@ -1076,9 +1076,10 @@ annotate each operation ($\keyword{do}_l \;v$), handler
 fixed set of labels $\mathcal{L}$.
 As a result, we obtain sets of completely independent effectful operators for each label.
 We would also need a notion of freeness per label,
-which would naturally be reflected in the type system as having different rows of effect per label.\footnote{
+which would naturally be reflected in the type system as having different rows of effect per label,\footnote{
 	Alternatively: one row in which effects are tagged with labels and consecutive effects with different tags can be swapped using subsumption rules.
 }
+and an effectful operation with label $l$ would only look at the row for $l$.
 The numbers representing freeness in the logical relations would also have to be indexed by labels,
 i.e.\ changed into
 functions from labels to natural numbers.
@@ -1096,9 +1097,9 @@ A handler for this effect would have to pattern match on a value of type $e\;α$
 to refine the type variable $α$.
 % TODO: GADT width subtyping?
 
-Nevertheless, we can sketch how a direct extension to support grouping operations into one effect would look like.
+Nevertheless, we can sketch how we could accomodate grouping operations into one effect natively.
 We fix a set of operation names ranged over by $op$.
-Effects are now sets of distinct operation names together with their types.
+Effects are now sets of distinct operation names together with their types:
 $$
 	\inferrule
 	{\textrm{for each }i ∈ \{1…n\} \\ Δ,Δ'_i ⊢ τ_i ∷ \kT \\ Δ,Δ'_i ⊢ σ_i ∷ \kT}
@@ -1125,14 +1126,15 @@ In particular, effects cannot be recursive.
 In the work cited it is conjectured that a restriction on recursive occurrences of effects would
 make their calculus terminating.
 Therefore, we claim that our method settles this conjecture positively.
-We refrain from expounding the details, as the interpretations
+We refrain from presenting the details, as the interpretations
 of effects would be essentially the same as in the cited work (but unary)
 and the definitions of $\E$ and $\S$ would be inductive as in this work.
 As is usual with logical relations, once the definitions are reasonable,
 the proofs are straightforward, so we omit them too.
 
-We consider the type system in \cite{hwc} to be powerful enough to represent
-a large portion of languages with algebraic effects.
+We consider the language in \cite{hwc} to be a good representative
+calculus for algebraic effects,
+so our normalization result is not just a peculiarity of the calculus chosen.
 In particular, it features polymorphism and allows duplicate instances of effects,
 both of which are sometimes omitted in the literature.
 
