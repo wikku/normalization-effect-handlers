@@ -175,7 +175,7 @@ This is what we call computational effects, the typical examples of which are:
 input/output, mutable state, exceptions, nondeterminism, and coroutines.
 
 Today, we are at the mercy of programming language designers
-and we can only hope they include the
+and we can only hope they provide the
 effects we would like to use and make sure that they all interact with
 each other well.
 A traditional way to remedy this is to (purely functionally) model effects using monads \cite{monads}.
@@ -241,7 +241,7 @@ looking through the lens of the Curry-Howard isomorphism.
 However, it is hard to give logical interpretations to effect annotations \cite{oleg}
 and it is unclear how useful it is to treat calculi with algebraic effects as logics.
 
-The primary tool for proving normalization (and many other properties) of % TODO to proving?
+The primary tool for proving normalization (and many other properties) of
 typed formal calculi is {\em logical relations}.
 Logical relations are
 type-indexed relations on terms that essentially help carry additional
@@ -259,7 +259,7 @@ A novelty of our approach
 is that the definition of the logical relations
 is recursive, in other words it is a solution to a fixed-point equation.
 %This is unlike any normalization proof we know of.
-The fixed-point construction replaces the use of step-indexing % TODO cite
+The fixed-point construction replaces the use of step-indexing
 which appears in the logical relation construction we are most directly inspired by \cite{hwc}.
 
 I would like to thank Dariusz Biernacki, Filip Sieczkowski, and Piotr Polesiuk
@@ -323,7 +323,7 @@ We can intuitively understand effect rows as follows:
  if $e : τ ╱ ρ$ and effect $ε$ appears at position $n$ in $ρ$, then
 subexpressions performing $ε$ are wrapped by $n$ lifts inside $e$.
 Clearly, the order of effects in the row matters.
-The type system enables {\em row polymorphism}, % TODO: CITE
+The type system enables {\em row polymorphism},
 since we can have a row ending in a polymorphic type variable.
 Such rows are usually called {\em open} (and {\em closed} otherwise). %, while monomorphic rows are called {\em closed}.
 
@@ -486,8 +486,6 @@ In particular, closed rows are subsumed by open rows. % TODO: trivial forall on 
 %\caption{Well-formedness of types, rows, and type substitution.}
 \caption{Well-formedness of types and rows.}
 \label{kinding}
-%TODO: inductive definition of well-formed type substitutions?
-%TODO: syntax of Γ and Δ
 \end{figure}
 \begin{figure}
 \begin{mathpar}
@@ -539,7 +537,6 @@ in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}:
 	⟦\kE⟧ &= \mathcal{P}(\textrm{CExp}×\{0\}×\mathsf{Type}) \\
 	⟦\kR⟧ &= \mathcal{P}(\textrm{CExp}×ℕ×\mathsf{Type})
 \end{align*}
-%TODO semantic types/effects are overapproximations of possible behaviors? or sth
 We write $\textrm{CVal}$ and $\textrm{CExp}$ for the sets of closed values and closed expressions respectively, so
 elements of $\mathsf{Type}$ are simply sets of closed values.
 Semantic effects are sets of triples that aim to describe a situation
@@ -671,7 +668,6 @@ throughout evaluation.
 
 More graphically,
 we can associate with an element in $\E⟦τ/ρ⟧_η$ what we will call a {\em reduction trace}
-% TODO: quotes?
 – a tree where nodes are expressions in $\E⟦τ/ρ⟧_η$,
 leaves are values in $⟦τ⟧_η$, and edges are either (maximal) multi-step reductions
 or branches from $\S⟦τ/ρ⟧_η$ for each element of $μ$,
@@ -1096,7 +1092,6 @@ we can define a GADT $e\;α$ with constructors $op_i : ∀Δ'_i.\,τ_i → e\;σ
 and set $ε = α::\kT.\, e\;α \Rightarrow α$.
 A handler for this effect would have to pattern match on a value of type $e\;α$
 to refine the type variable $α$.
-% TODO: GADT width subtyping?
 
 Nevertheless, we can sketch how we could accommodate grouping operations into one effect natively.
 We fix a set of operation names ranged over by $op$.
@@ -1133,7 +1128,7 @@ and the definitions of $\E$ and $\S$ would be inductive as in this work.
 
 We consider the language in \cite{hwc} to be a good representative
 calculus for algebraic effects,
-so our normalization result is not just a peculiarity of the calculus chosen.
+so our normalization result is not just a peculiarity of the calculus chosen. % TODO nonsense
 In particular, it features polymorphism and allows duplicate instances of effects,
 both of which are sometimes omitted in the literature.
 
@@ -1203,7 +1198,7 @@ It is feasible that such an argument could also work in our semantics by using
 a suitable term size function.
 
 A calculus with effect handlers appears and its termination proof is mentioned in \cite{expressive}.
-As it is even terser than the previous one, we cannot give any comment.
+As it is even terser than the previous one, we cannot give any comment. % TODO nonsense
 
 A mechanized proof of strong normalization for the calculus defined in \cite{expressive}
 is reported in \cite{sol}.
