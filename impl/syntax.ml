@@ -23,18 +23,17 @@ and ro =
 
 type typelike = Ty of ty | Ef of ef | Ro of ro
 
-type exp =
+type value =
+  | VVar of name
+  | VLam of name * exp
+and exp =
   | Var of name
   | Lam of name * exp
   | App of exp * exp
   | Do of value
   | Handle of exp * handler
   | Lift of exp
-and value =
-  | VVar of name
-  | VLam of name * exp
 and handler = name * name * exp * name * exp
-
 
 
 type command =
@@ -75,25 +74,15 @@ and pr_lambda ppf = function
   | e -> pr_app ppf e
 
 let rec subst s : exp -> exp = function
-  | Var(x) as e -> (try assoc x s with Not_found -> e)
-  | Lam(x,t) -> Lam(x, subst (deassoc x s) t)
-  | App(t1,t2) -> App(subst s t1, subst s t2)
-  | Lift(t) -> Lift(subst s t)
-  | Do(t) -> Do(voe @@ subst s @@ eov t)
-  | Handle(t1,(x,r,t2,y,t3)) ->
-    Handle(subst s t1,
+  | Var x as e -> (try assoc x s with Not_found -> e)
+  | Lam (x,t) -> Lam(x, subst (deassoc x s) t)
+  | App (t1,t2) -> App(subst s t1, subst s t2)
+  | Lift t -> Lift(subst s t)
+  | Do t -> Do(voe @@ subst s @@ eov t)
+  | Handle (t1,(x,r,t2,y,t3)) ->
+    Handle (subst s t1,
             (x, r, subst (deassoc x (deassoc r s)) t2,
              y, subst (deassoc y s) t3))
-
-(*
-let exp_info t = match t with
-  | Var(fi,_)
-  | Lam(fi,_,_)
-  | App(fi,_,_)
-  | Lift(fi,_)
-  | Do(fi,_)
-  | Handle(fi,_,_) -> fi
-*)
 
 type frame =
   | FArg of exp
@@ -103,37 +92,6 @@ type frame =
 
 type econt = frame list
 
-type redex =
-  | RBeta of name * exp * value
-  | RLift of value
-  | RReturn of value * handler
-  | RDo of econt * value * handler
-
-let ffree n = function
-  | FArg _ | FFun _ -> n
-  | FLift -> n + 1
-  | FHandle _ -> if n > 0 then n - 1 else failwith "nonfree"
-
-let free e = List.fold_left ffree 0 e
-
-let rec find_handler n rev_res = function
-  | FHandle h :: fs when n = 0 -> (List.rev rev_res, h, fs)
-  | f :: fs -> find_handler (ffree n f) (f :: rev_res) fs
-  | [] -> failwith "handler not found"
-
-let rec find_redex k = function
-  | App ((Lam (x1, e1)), (Lam _ as v)) -> RBeta (x1, e1, voe v), k
-  | App (Lam _ as l, e2) -> find_redex (FFun (voe l) :: k) e2
-  | App (e1, e2) -> find_redex (FArg e2 :: k) e1
-  | Lift (Lam _ as l) -> RLift (voe l), k
-  | Lift e -> find_redex (FLift :: k) (e :> exp)
-  | Lam _ | Var _ -> failwith "no redex"
-  | Do (VLam _ as l) ->
-    let r, h, k = find_handler 0 [] k in (RDo (r, l, h)), k
-  | Do (VVar x) -> failwith ("unbound variable " ^ x)
-  | Handle (Lam _ as v, h) -> RReturn (voe v, h), k
-  | Handle (e, h) -> find_redex (FHandle h :: k) e
-
 let frame e : frame -> exp = function
   | FArg e' -> App (e, e')
   | FFun l -> App (eov l, e)
@@ -141,6 +99,40 @@ let frame e : frame -> exp = function
   | FHandle h -> Handle (e, h)
 
 let plug e k = List.fold_left frame e k
+
+let ffree n = function
+  | FArg _ | FFun _ -> n
+  | FLift -> n+1
+  | FHandle _ -> if n > 0 then n-1 else failwith "nonfree"
+
+let free e = List.fold_left ffree 0 e
+
+type redex =
+  | RBeta of name * exp * value
+  | RLift of value
+  | RReturn of value * handler
+  | RDo of econt * value * handler
+
+
+let rec find_handler n rev_res = function
+  | FHandle h :: fs when n = 0 -> (List.rev rev_res, h, fs)
+  | f :: fs -> find_handler (ffree n f) (f :: rev_res) fs
+  | [] -> failwith "handler not found"
+
+let rec decomp k = function
+  | App (e1, e2) when is_value e1 && is_value e2 ->
+    (match e1 with
+    | Lam (x, e1) -> RBeta (x, e1, voe e2), k
+    | _ -> failwith "app nonvalue")
+  | App (e1, e2) when is_value e1 -> decomp (FFun (voe e1) :: k) e2
+  | App (e1, e2) -> decomp (FArg e2 :: k) e1
+  | Lift e when is_value e -> RLift (voe e), k
+  | Lift e -> decomp (FLift :: k) e
+  | Do v -> let r, h, k = find_handler 0 [] k in (RDo (r, v, h)), k
+  | Handle (e, h) when is_value e -> RReturn (voe e, h), k
+  | Handle (e, h) -> decomp (FHandle h :: k) e
+  | Lam _ | Var _ -> failwith "no redex"
+
 
 let reduce = function
   | RBeta (x, e, v) -> subst [x, eov v] e
@@ -150,9 +142,14 @@ let reduce = function
     subst [x, eov v; r, Lam ("z", Handle (plug (Var "z") k, h))] e
 
 let step e =
-  match find_redex [] e with
+  match decomp [] e with
   | r, k -> plug (reduce r) k
   | exception _ -> failwith "no step"
+
+let rec multistep e =
+  match step e with
+  | e' -> multistep e'
+  | exception _ -> e
 
 (***)
 
@@ -166,6 +163,12 @@ let fig31 = App (App (Do id, eov tick), eov id)
 let reader n = ("x", "r", App (eov @@ VVar "r", eov @@ church n), "x", eov @@ VVar "x")
 let id_handler = ("x", "r", App (eov @@ VVar "r", eov @@ VVar "x"), "x", eov @@ VVar "x")
 let fig31' = Handle (Handle (fig31, reader 5), id_handler)
+
+let w = VLam ("x", App (Var "x", Var "x"))
+let ww = App (eov w, eov w)
+
+let stk_ww = App (Do id, ww)
+let stk_ww' = Handle (stk_ww, ("_", "_", eov id, "y", Var "y"))
 
 (***)
 
@@ -214,9 +217,16 @@ let rec eval (e : exp) ctx : goodexp = match e with
       (fun v -> eval er ((y,v) :: ctx))
   | Lift e -> eval_lift (eval e ctx)
 
-(*
-let rec reify = function
-  | Val v -> 
-  | Stk (v, _, k) ->
-*)
 
+(*
+let gensym =
+  let n = ref 0 in
+  (fun () -> incr n; "x" ^ string_of_int (!n))
+
+let rec reify = function
+  | Val (Neut x) -> Var x
+  | Val (Fun f) -> let x = gensym() in Lam (x, reify (f (Neut x)))
+  | Stk (v, n, k) ->
+    let Lam (x, e) = reify (Val (Fun k)) in
+    subst [x, Do (voe (reify (Val v)))] e
+*)

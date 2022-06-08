@@ -20,6 +20,9 @@
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{tikz}
+\usepackage{listings}
+\lstset{basicstyle= \footnotesize \ttfamily}
+\lstset{language=ml}
 
 \addbibresource{refs.bib}
 
@@ -219,8 +222,8 @@ termination of evaluation (also known as normalization) for a
  language equipped with algebraic effects.
 We obtain soundness as a corollary.
 We also explain how the proof can carry over to other calculi.
-Further, we explore the computational content of the proofs –
-a normalization by evaluation algorithm for the calculus.
+Further, we provide an implementation of the computational content of the proof –
+a normalization algorithm for the calculus.
 
 Termination of evaluation might be of interest for many reasons,
 for example it simplifies formal semantics and reasoning.
@@ -264,10 +267,11 @@ is recursive, in other words it is a solution to a fixed-point equation.
 The fixed-point construction replaces the use of step-indexing
 which appears in the logical relation construction we are most directly inspired by \cite{hwc}.
 
+\section{Acknowledgements}
 I would like to thank Dariusz Biernacki, Filip Sieczkowski, and Piotr Polesiuk
 for their help with this work.
 
-\chapter{The language}
+\chapter{The language}\label{chap:language}
 We will study the deep handler calculus and type-and-effect system formulated
 in \cite{fscd19}.
 It is a refreshingly minimal language – the call-by-value lambda calculus with a few extensions
@@ -280,10 +284,13 @@ In contrast to most work on algebraic effects, the effect-tracking system here i
 we do not have any concept of predefined or user-defined signatures of effects.
 Finally, the type system features polymorphic expressions and polymorphic operations.
 
+\section{Formal definition}
+
 The syntax of the calculus is shown in \cref{syntax}.
 We use metavariables $x$ and $r$ to refer to expression variables.
 As is standard, we work modulo $α$-equivalence and distinguish separate instances
 of metavariables by using subscripts, superscripts, or adding primes.
+Capture-avoiding substitution of $e$ for $x$ is denoted $\subst{e}{x}$.
 
 Evaluation contexts are expressions with a hole ($□$) and
 encode a left-to-right evaluation order.
@@ -519,6 +526,10 @@ In particular, closed rows are subsumed by open rows. % TODO: trivial forall on 
 \caption{Subtyping.}
 \label{subtyping}
 \end{figure}
+
+\clearpage
+\section{Primer on notation}
+TODO? explain BNF, inductive definitions
 
 \chapter{The logical relation}
 The logical relation is inspired by \cite{hwc}.
@@ -1224,6 +1235,90 @@ concerning fixed points, such as (co)inductive types \cite{altenkirch, operfl}.
 In different settings, this technique appears rare, and our work is one example.
 
 % would the proof even work with biorthogonality?
+
+\chapter{Implementation}
+
+We will present an expository implementation of the language,
+including a rewriting-based evaluator, an evaluator extracted from the proof in the previous chapter,
+and a type-checker.
+
+One can see logical relations as interpreting the object language into a metalanguage.
+Indeed, we have not been using the words ``interpretation'' and ``semantic'' baselessly.
+In the previous chapter, our metalanguage was informal mathematics – set theory, we could say.
+Additionally, our proof is constructive and it should be readily formalizable in a dependent type theory.
+If we care only for the computational content of the proof, a simpler metalanguage will suffice –
+we no longer have to consider proof terms with complex types but which are operationally unit types.
+Here, we will use OCaml.
+
+\section{Syntax and rewriting-based evaluator}
+
+For simplicity and faithfulness to the presentation in \autoref{chap:language},
+we use a representation with named variables (rather than eg.\ de Bruijn indices
+or higher-order abstract syntax).
+The data types for the syntax are without surprises:
+
+\lstinputlisting[linerange={9-10,25-36}]{impl/syntax.ml}
+
+We also define evaluation contexts as lists of evaluation context frames
+and define a function for calculating freeness:
+
+\lstinputlisting[linerange={87-108}]{impl/syntax.ml}
+
+We implement decomposing terms into evaluation contexts and redexes:
+
+\lstinputlisting[linerange={110-134}]{impl/syntax.ml}
+
+Finally, we can implement reductions and multi-step reductions:
+
+\lstinputlisting[linerange={137-152}]{impl/syntax.ml}
+
+\section{Evaluator extracted from the proof of termination}
+
+Now we demonstrate the computational content of the proof of termination.
+The code is substantially shorter than the code performing multi-step reductions, in part because we can leverage
+the metalanguage's features to realize the object language's features.
+For instance, functions are realized as OCaml functions and
+we do no have to consider variable binding ourselves.
+
+First we define analogues of the interpretations
+of values and the relation $\E$.
+We can see that effect types do not play a role in computation.
+
+\lstinputlisting[linerange={175-178}]{impl/syntax.ml}
+
+Now, we define functions which closely follow the compatibility lemmas:
+
+\lstinputlisting[linerange={181-206}]{impl/syntax.ml}
+
+We finish by performing something akin to a fold on the syntax tree.
+
+\lstinputlisting[linerange={208-218}]{impl/syntax.ml}
+
+
+
+Our proof relied on the type system, yet here
+types (of the object language) are nowhere to be seen.
+This evaluator is only guaranteed to work if
+the term is typeable.
+It is not hard to find a term on which it disagrees with our
+operational semantics:
+$$\Handle (\Do v)\;Ω\;\{x,r.\,x;x.\,x\},$$
+where $Ω$ is a nonterminating term, for instance $(λx.\,x\;x)\;(λx.\,x\;x)$.
+(Such a term is untypeable, as we have proven.)
+The semantics are left-to-right, so in this program an effect will be performed
+and the handler will just return the value, ignoring the resumption.
+Evaluation will never reach the $Ω$.
+
+Contrarily,
+the evaluator extracted from proof will walk this term and try to recursively evaluate subterms.
+In particular, it will try to evaluate $Ω$, where it will loop forever.
+
+We leave it for future work to determine if this evaluator
+can form part of a normalization by evaluation algorithm,
+i.e.\ if there exists a function \texttt{reify : goodexp -> exp}
+that can reconstruct a term in normal form given
+its semantics.
+%Such that \texttt{eval (reify x) = x}.
 
 \printbibliography[heading=bibintoc]
 
