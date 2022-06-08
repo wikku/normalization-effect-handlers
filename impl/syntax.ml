@@ -23,16 +23,16 @@ and ro =
 
 type typelike = Ty of ty | Ef of ef | Ro of ro
 
-type value =
-  | Var of name
-  | Lam of name * exp
-and exp =
+type exp =
   | Var of name
   | Lam of name * exp
   | App of exp * exp
   | Do of value
   | Handle of exp * handler
   | Lift of exp
+and value =
+  | VVar of name
+  | VLam of name * exp
 and handler = name * name * exp * name * exp
 
 
@@ -40,13 +40,17 @@ and handler = name * name * exp * name * exp
 type command =
   | Typ of exp
 
+let is_value = function
+  | Var _ | Lam _ -> true
+  | App _ | Do _ | Handle _ | Lift _ -> false
+
 let eov : value -> exp = function
-  | Var x -> Var x
-  | Lam (x, e) -> Lam (x, e)
+  | VVar x -> Var x
+  | VLam (x, e) -> Lam (x, e)
 
 let voe : exp -> value = function
-  | Var x -> Var x
-  | Lam (x, e) -> Lam (x, e)
+  | Var x -> VVar x
+  | Lam (x, e) -> VLam (x, e)
   | _ -> failwith "not a value"
 
 let rec pr_exp0 ppf = function
@@ -124,9 +128,9 @@ let rec find_redex k = function
   | Lift (Lam _ as l) -> RLift (voe l), k
   | Lift e -> find_redex (FLift :: k) (e :> exp)
   | Lam _ | Var _ -> failwith "no redex"
-  | Do (Lam _ as l) ->
+  | Do (VLam _ as l) ->
     let r, h, k = find_handler 0 [] k in (RDo (r, l, h)), k
-  | Do _ -> failwith "Do nonval"
+  | Do (VVar x) -> failwith ("unbound variable " ^ x)
   | Handle (Lam _ as v, h) -> RReturn (voe v, h), k
   | Handle (e, h) -> find_redex (FHandle h :: k) e
 
@@ -152,15 +156,15 @@ let step e =
 
 (***)
 
-let church n =
+let church n : value =
   let rec aux n exp = if n = 0 then exp else App (Var "f", aux (n-1) exp) in
-  Lam ("f", (Lam ("x", aux n (Var "x"))))
+  VLam ("f", (Lam ("x", aux n (Var "x"))))
 
-let tick = Lam ("x", Lift (Do (Var "x")))
-let id = Lam ("x", Var "x")
+let tick = VLam ("x", Lift (Do (VVar "x")))
+let id = VLam ("x", Var "x")
 let fig31 = App (App (Do id, eov tick), eov id)
-let reader n = ("x", "r", App (eov @@ Var "r", eov @@ church n), "x", eov @@ Var "x")
-let id_handler = ("x", "r", App (eov @@ Var "r", eov @@ Var "x"), "x", eov @@ Var "x")
+let reader n = ("x", "r", App (eov @@ VVar "r", eov @@ church n), "x", eov @@ VVar "x")
+let id_handler = ("x", "r", App (eov @@ VVar "r", eov @@ VVar "x"), "x", eov @@ VVar "x")
 let fig31' = Handle (Handle (fig31, reader 5), id_handler)
 
 (***)
@@ -210,7 +214,9 @@ let rec eval (e : exp) ctx : goodexp = match e with
       (fun v -> eval er ((y,v) :: ctx))
   | Lift e -> eval_lift (eval e ctx)
 
+(*
 let rec reify = function
   | Val v -> 
   | Stk (v, _, k) ->
+*)
 
