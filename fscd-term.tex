@@ -24,6 +24,9 @@
 \lstset{basicstyle= \footnotesize \ttfamily}
 \lstset{language=ml}
 
+\usepackage[nodisplayskipstretch]{setspace}
+\setlength{\parskip}{0pt}
+
 \addbibresource{refs.bib}
 
 \title{Normalization for algebraic effect handlers}
@@ -209,8 +212,8 @@ But more interestingly, we can resume multiple times, or never, or store the res
 
 To prevent crashes because of unhandled operations and aid understanding of effectful code,
 languages with algebraic effects typically have powerful
-\textit{type-and-effect systems}\footnote{
-We will often say just ``type'' when referring to both types and effects.},
+\textit{type-and-effect systems},\footnote{
+We will often say just ``type'' when referring to both types and effects.}
 not only tracking the type of value an expression might evaluate to, but also
 what kind of effects it may perform along the way.
 Type-and-effect systems allow us to deduce some basic information about programs,
@@ -220,14 +223,15 @@ or, in some systems, that it will {\em always} evaluate to a value.
 In this work we demonstrate a (to our knowledge) novel proof of
 termination of evaluation (also known as normalization) for a
  language equipped with algebraic effects.
-We obtain soundness as a corollary.
+We obtain type soundness as a corollary.
 We also explain how the proof can carry over to other calculi.
 Further, we provide an implementation of the computational content of the proof –
 a normalization algorithm for the calculus.
 
 Termination of evaluation might be of interest for many reasons,
-for example it simplifies formal semantics and reasoning.
-It can also be considered as another safety property, just like ``never crashing''
+for example it can simplify formal semantics and reasoning, just by virtue of
+eliminating nontermination as a case to consider.
+It can also be regarded as another safety property, just like ``never crashing''
 (though in practice nonterminating programs are indistinguishable from very long-running ones).
 Although most programming languages support recursion, loops, and other
 features allowing for nontermination (eg. recursive types),
@@ -247,17 +251,17 @@ However, it is hard to give logical interpretations to effect annotations \cite{
 and it is unclear how useful it is to treat calculi with algebraic effects as logics.
 
 The primary tool for proving normalization (and many other properties) of
-typed formal calculi is {\em logical relations}.
+typed formal calculi is {\em logical relations}.\footnote{
+	In the context of normalization, logical relations have many names, including:
+	(Tait's) reducibility predicates, reducibility candidates, and saturated sets.
+}
 Logical relations are
 type-indexed relations on terms that essentially help carry additional
 information about {\em local} behavior of terms to make a type derivation-directed
 proof of the {\em global} property (such as normalization)
 have strong enough induction hypotheses and ultimately go through.
 
-In this work we define logical relations\footnote{
-	In the context of normalization, logical relations have many names, including:
-	(Tait's) reducibility predicates, reducibility candidates, and saturated sets.
-}
+In this work we define logical relations
 to prove termination
 of evaluation in our language.
 A novelty of our approach
@@ -290,7 +294,7 @@ The syntax of the calculus is shown in \cref{syntax}.
 We use metavariables $x$ and $r$ to refer to expression variables.
 As is standard, we work modulo $α$-equivalence and distinguish separate instances
 of metavariables by using subscripts, superscripts, or adding primes.
-Capture-avoiding substitution of $e$ for $x$ is denoted $\subst{e}{x}$.
+Capture-avoiding substitution of $v$ for $x$ in $e$ is denoted $e\subst{v}{x}$.
 
 Evaluation contexts are expressions with a hole ($□$) and
 encode a left-to-right evaluation order.
@@ -402,7 +406,7 @@ In particular, closed rows are subsumed by open rows. % TODO: trivial forall on 
 
 	\Handle v\,\{x,r.\,e_h;\,x.\,e_r\} ↦ e_r\subst{v}{x} % SUBST
 \end{mathpar}
-\caption{Single-step reduction.} % TODO "Contraction"???
+\caption{Contraction ($↦$) and reduction ($→$).} % TODO "Contraction"???
 \label{reduction}
 \end{figure}
 
@@ -527,10 +531,6 @@ In particular, closed rows are subsumed by open rows. % TODO: trivial forall on 
 \label{subtyping}
 \end{figure}
 
-\clearpage
-\section{Primer on notation}
-TODO? explain BNF, inductive definitions
-
 \chapter{The logical relation}
 The logical relation is inspired by \cite{hwc}.
 Some changes are due to language differences:
@@ -547,8 +547,7 @@ We call them the spaces of \textit{semantic types} or,
 in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}:
 \begin{align*}
 	⟦\kT⟧ &= \mathcal{P}(\textrm{CVal}) = \mathsf{Type}\\
-	⟦\kE⟧ &= \mathcal{P}(\textrm{CExp}×\{0\}×\mathsf{Type}) \\
-	⟦\kR⟧ &= \mathcal{P}(\textrm{CExp}×ℕ×\mathsf{Type})
+	⟦\kE⟧ = ⟦\kR⟧ &= \mathcal{P}(\textrm{CExp}×ℕ×\mathsf{Type})
 \end{align*}
 We write $\textrm{CVal}$ and $\textrm{CExp}$ for the sets of closed values and closed expressions respectively, so
 elements of $\mathsf{Type}$ are simply sets of closed values.
@@ -559,23 +558,25 @@ the operation with its argument,
 the freeness of the enclosing context beyond which the operation can be handled,
 and the semantic type of values we can call the resumption with.
 
-We interpret type contexts as mappings from type variables to semantic types:
+Generalizing the preceding,
+type contexts are interpreted as mappings from type variables to semantic types:%
 $$⟦Δ⟧ = \{ η │ \dom(η) = \dom(Δ) ∧ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}.$$
 
-We define the interpretations of types and effects as well as
-relations $\E$ on expressions and $\S$ on control-stuck terms by structural induction.
-We parameterize the definitions by a mapping $η$ from type variables to
+The logical relations, defined by (mutual) structural induction, appear in \cref{logrel}.
+They are parameterized by a mapping $η$ from type variables to
 semantic types.
 
-The interpretations of types are mostly standard,
-but we additionally have to consider effect annotations,
-as we can see in the case of the function type.
-
+The interpretation of a type variable
+is directly retrieved from the environment $η$.
+The treatment of function types is mostly standard,
+though effect annotations also have to be taken into account.
+The definition may not look structurally recursive at first,
+but we can consider $τ_2/ρ$ to be a subterm of $τ_1 →_ρ τ_2$,
+just rearranged to a different notation.
 A polymorphic type is interpreted, as usual,
 as the intersection of the interpretations
 for all possible choices of the semantic type for the type variable.
-Interestingly, we can see that a polymorphic effect is interpreted as the {\em union} of the interpretations
-of the effect for all possible choices of the semantic types for the type variables.
+\begin{figure}
 \begin{align*}
 	⟦α⟧_η &= η(α) \\
 	%\\
@@ -583,7 +584,6 @@ of the effect for all possible choices of the semantic types for the type variab
 	 &= \{ λx.\,e \mid ∀v∈⟦τ_1⟧_η.\, e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_η \} \\
 	⟦∀α::κ.\,τ⟧_η
 	&= \{ v \mid ∀μ∈⟦κ⟧.\, v ∈ ⟦τ⟧_{[α↦μ]η} \} \\
-	%\\
 	⟦Δ.\,τ_1 \Rightarrow τ_2⟧_η &= \{(\Do v,0,⟦τ_2⟧_{ηη'}) \mid η'∈⟦Δ⟧ ∧ v∈⟦τ_1⟧_{ηη'} \} \\
 	⟦ε · ρ⟧_η &= ⟦ε⟧_η ∪ \{(e, n+1, μ) \mid (e, n, μ)∈⟦ρ⟧_η \} \\
 	⟦ι⟧_η &= ∅
@@ -592,8 +592,22 @@ of the effect for all possible choices of the semantic types for the type variab
 	\E⟦τ/ρ⟧_η &=
 	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η.\, e →^* e' \} \\
 	\S⟦τ/ρ⟧_η &= \{ K[e] \mid ∃n,μ.\, (e,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈ \E⟦τ/ρ⟧_η \}
-\end{align*} \indent
-The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively.
+\end{align*}
+\caption{Interpretation of types and effects.
+Relations on expressions and stuck terms.}
+\label{logrel}
+\end{figure}
+
+Dually, we can see that a polymorphic effect is interpreted as the {\em union} of the interpretations
+of the effect for all possible choices of the semantic types for the type variables.
+The interpretation of a single operation is implicitly treated as if it were
+at the beginning of a row, so the freeness is $0$.
+When we prepend to a row, we increase this freeness for every element of its semantic effect
+and combine with the interpretation of the prepended effect.
+Naturally, the semantic effect of the empty row is empty.
+
+The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively,
+i.e.\ as the least solution to the system of equations (we will elaborate on that soon).
 Note the similarities to the interpretation of function types in the definition of
 $\S⟦τ/ρ⟧_η$.
 The intuition is that an element of $\E⟦τ/ρ⟧_η$
@@ -677,9 +691,10 @@ throughout evaluation.
 	in $\S⟦\textsf{unit}/ \textsf{askNat} · \textsf{tick} · ι⟧$.
 	This tree is well-founded despite having infinite depth.
 }
+\label{trace}
 \end{figure}
 
-More graphically,
+More graphically (see \cref{trace}),
 we can associate with an element in $\E⟦τ/ρ⟧_η$ what we will call a {\em reduction trace}
 – a tree where nodes are expressions in $\E⟦τ/ρ⟧_η$,
 leaves are values in $⟦τ⟧_η$, and edges are either (maximal) multi-step reductions
@@ -693,15 +708,14 @@ Note that different choices of values to resume with could
 theoretically lead to getting stuck a different number of times,
 so the depth of the tree is not uniform, and it could even be infinite.
 Still, these trees are well-founded thanks to the choice of the inductive interpretation.
+
+To describe the construction in more detail, we temporarily overload notation and define
+operators $\S⟦τ/ρ⟧_η$ and $\E⟦τ/ρ⟧_η$ on sets of expressions (denoted by $X$).
 \begin{align*}
 	\E⟦τ/ρ⟧_η(X) &=
 	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η(X).\, e →^* e' \} \\
-	\S⟦τ/ρ⟧_η(X) &= \{ K[e] \mid ∃n,μ.\, (e,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X \} \\
-	\E⟦τ/ρ⟧_η &= \bigcap \{ X │ \E⟦τ/ρ⟧_η(X) ⊆ X \} \\
-	\S⟦τ/ρ⟧_η &= \S⟦τ/ρ⟧_η(\E⟦τ/ρ⟧_η)
-\end{align*} \indent
-To describe the construction in more detail, we temporarily overload notation and define
-operators $\S⟦τ/ρ⟧_η$ and $\E⟦τ/ρ⟧_η$ on sets of expressions (denoted by $X$).
+	\S⟦τ/ρ⟧_η(X) &= \{ K[e] \mid ∃n,μ.\, (e,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈X \}
+\end{align*}%
 They are clearly monotone,
 so by the Knaster-Tarski theorem % citation
 the fixed-point equation $\E⟦τ/ρ⟧_η(X) = X$ has a least solution.\footnote{
@@ -717,7 +731,11 @@ the fixed-point equation $\E⟦τ/ρ⟧_η(X) = X$ has a least solution.\footnot
 	so the bounded depth is not preserved.
 }
 Moreover, it can be characterized as the intersection of all
-$\E⟦τ/ρ⟧_η$-closed sets.
+$\E⟦τ/ρ⟧_η$-closed sets:
+\begin{align*}
+	\E⟦τ/ρ⟧_η &= \bigcap \{ X │ \E⟦τ/ρ⟧_η(X) ⊆ X \} \\
+	\S⟦τ/ρ⟧_η &= \S⟦τ/ρ⟧_η(\E⟦τ/ρ⟧_η)
+\end{align*}
 We immediately obtain the following principle:
 
 \begin{lemma}[Tarski induction principle]\label{tarski-induction}
@@ -1071,7 +1089,8 @@ Therefore $e$ has to terminate to a value, since
 $⟦ι⟧$ is empty and hence $\S⟦τ/ι⟧$ is empty.
 \end{proof}
 
-This is also an alternative proof of soundness (``well-typed programs do not go wrong''), which was already shown by
+This is also an alternative proof of soundness (``well-typed programs do not go wrong''),
+which was already shown using
 the technique of progress and preservation in \cite{fscd19}.
 
 \section{Extensions}
@@ -1130,7 +1149,7 @@ When we have both features and identify labels with effects (groups of operation
 	simply as mappings from labels to natural numbers.
 }
 we arrive at a calculus very similar to the one in \cite{hwc}.
-A crucial difference that remains is our effect types are still structural.
+A crucial difference still remains: our effect types are structural.
 In particular, effects cannot be recursive.
 In the work cited it is conjectured that a restriction on recursive occurrences of effects would
 make their calculus terminating.
@@ -1178,7 +1197,7 @@ i.e.\ contain infinite paths.
 %i.e. some choices of operation return values would lead to nontermination.
 The compatibility lemmas can be proven using strong coinduction\footnote{
 	Strong coinduction is the principle that $X ⊆ F(X ∪ νF)$ implies $X ⊆ νF$,
-	where $F$ is an operator on a complete lattice and $νF$ is its greatest fixed point.
+	where $F$ is a monotone operator on a complete lattice and $νF$ is its greatest fixed point.
 }
 	at the type in the rule conclusion,
 except the one for $\Handle\!\!$.
