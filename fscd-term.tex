@@ -338,7 +338,7 @@ subexpressions performing $ε$ are wrapped by $n$ lifts inside $e$.
 Clearly, the order of effects in the row matters.
 The type system enables {\em row polymorphism},
 since we can have a row ending in a polymorphic type variable.
-Such rows are usually called {\em open} (and {\em closed} otherwise). %, while monomorphic rows are called {\em closed}.
+Such rows are usually called {\em open} (and {\em closed} otherwise).
 
 In \cref{subtyping} the subtyping rules are introduced.
 Their main purpose is to allow
@@ -346,8 +346,6 @@ effect rows to be subsumed by rows with more effects at the end.
 For that to be of use in more places,
 we also have subsumption rules for polymorphic types and function types. % polymorphic?
 In particular, closed rows are subsumed by open rows.
-
-% ORDER! polymorphism
 
 \begin{figure}
 \begin{align*}
@@ -396,15 +394,15 @@ In particular, closed rows are subsumed by open rows.
 		{e_1 ↦ e_2}
 		{K[e_1] → K[e_2]}
 
-	(λx.\,e)\;v ↦ e\subst{v}{x} % SUBST
+	(λx.\,e)\;v ↦ e\subst{v}{x}
 
 	\Lift{v} ↦ v
 
 	\inferrule
 		{0\Free(K) \\ v_c = λz.\,\Handle K[z]\,\{x,r.\,e_h;\,x.\,e_r\}}
-		{\Handle K[\Do v]\,\{x, r.\,e_h;\,x.\,e_r\} ↦ e_h\subst{v}{x}\subst{v_c}{r}} % SUBST
+		{\Handle K[\Do v]\,\{x, r.\,e_h;\,x.\,e_r\} ↦ e_h\subst{v}{x}\subst{v_c}{r}}
 
-	\Handle v\,\{x,r.\,e_h;\,x.\,e_r\} ↦ e_r\subst{v}{x} % SUBST
+	\Handle v\,\{x,r.\,e_h;\,x.\,e_r\} ↦ e_r\subst{v}{x}
 \end{mathpar}
 \caption{Contraction ($↦$) and single-step reduction ($→$).}
 \label{reduction}
@@ -626,7 +624,6 @@ performing the operation and it finally returning.
 Nevertheless, this local view suffices for our purposes and
 accurately reflects how much of the computation remains in the scope of a handler
 throughout evaluation.
-% in parallel but finitely many times? ;/
 
 \begin{figure}
 \begin{tikzpicture}
@@ -931,15 +928,12 @@ Therefore, $e_h\subst{v}{x}\subst{v_c}{r}$ is in $\E⟦τ_r/ρ⟧_η$ and so is 
 If $n>0$, then
 $\Handle K[e']\,h ∈ \S⟦τ_r/ρ⟧_η$,
 since $n-1\Free(\Handle K\,h)$, $(e',n-1,μ) ∈ ⟦ρ⟧_η$,
-% gdyby przestrzeń efektów pozwalała na niezerowe indeksy to by się to psuło!
 and $∀u∈μ.\,\Handle K[u]\,h ∈ \E⟦τ_r/ρ⟧_η$.
 Again, the claim follows by antireduction.
 
 \end{proof}
 
-% Lemma: type substitution preserves well-kinding?
 
-% Ahmed LR: "compositionality"
 \begin{lemma} \label{subst-comp}
 	Syntactic type substitutions are compatible with semantic type environments: If
 	\begin{itemize}
