@@ -330,7 +330,7 @@ We assume that all types are well-formed (well-kinded) in the appropriate contex
 Type-level substitutions are used only in the rule for $\Do\!\!\!$
 to instantiate the polymorphic variables $Δ'$ of effect $Δ'.\,τ_1 \Rightarrow τ_2$.
 Complementarily, the rule for $\Handle\!\!$ states that the effect handler clause $e_h$
-has to be essentially polymorphic in $Δ'$.
+has to be essentially polymorphic in $Δ'$. % TODO: parametric in?
 
 We can intuitively understand effect rows as follows:
  if $e : τ ╱ ρ$ and effect $ε$ appears at position $n$ in $ρ$, then
@@ -547,7 +547,7 @@ We call them the spaces of \textit{semantic types} or,
 in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}:
 \begin{align*}
 	⟦\kT⟧ &= \mathcal{P}(\textrm{CVal}) = \mathsf{Type}\\
-	⟦\kE⟧ = ⟦\kR⟧ &= \mathcal{P}(\textrm{CExp}×ℕ×\mathsf{Type})
+	⟦\kE⟧ = ⟦\kR⟧ &= \mathcal{P}(\textrm{CExp}×ℕ×\mathsf{Type}) = \mathsf{Eff}
 \end{align*}
 We write $\textrm{CVal}$ and $\textrm{CExp}$ for the sets of closed values and closed expressions respectively, so
 elements of $\mathsf{Type}$ are simply sets of closed values.
@@ -560,7 +560,7 @@ and the semantic type of values we can call the resumption with.
 
 Generalizing the preceding,
 type contexts are interpreted as mappings from type variables to semantic types:%
-$$⟦Δ⟧ = \{ η │ \dom(η) = \dom(Δ) ∧ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}.$$
+$$⟦Δ⟧ = \{ η │ \dom(η) = \dom(Δ) ∧ ∀α∷κ∈Δ.\,η(α) ∈ ⟦κ⟧ \}$$
 
 The logical relations, defined by (mutual) structural induction, appear in \cref{logrel}.
 They are parameterized by a mapping $η$ from type variables to
@@ -593,7 +593,7 @@ for all possible choices of the semantic type for the type variable.
 	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η.\, e →^* e' \} \\
 	\S⟦τ/ρ⟧_η &= \{ K[e] \mid ∃n,μ.\, (e,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈ \E⟦τ/ρ⟧_η \}
 \end{align*}
-\caption{Interpretation of types and effects.
+\caption{Interpretation of types.
 Relations on expressions and stuck terms.}
 \label{logrel}
 \end{figure}
@@ -607,7 +607,7 @@ and combine with the interpretation of the prepended effect.
 Naturally, the semantic effect of the empty row is empty.
 
 The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively,
-i.e.\ as the least solution to the system of equations (we will elaborate on that soon).
+i.e.\ as the least solution to the equations (we will elaborate on that soon).
 Note the similarities to the interpretation of function types in the definition of
 $\S⟦τ/ρ⟧_η$.
 The intuition is that an element of $\E⟦τ/ρ⟧_η$
