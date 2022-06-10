@@ -1114,11 +1114,11 @@ The numbers representing freeness in the logical relations would also have to be
 i.e.\ changed into
 functions from labels to natural numbers.
 
-A common feature in languages with algebraic effects is grouping
+Another common feature in languages with algebraic effects is grouping
 multiple operations into one effect.
 We argue that this is not a significant change and is not deeply related
 to effects,
-as it could be simulated if the language featured GADTs with pattern matching.
+as it could be simulated if the language featured generalized algebraic data types (GADTs) with pattern matching.
 If we want an effect $ε$ with operations $Δ'_i.\,op_i : τ_i \Rightarrow σ_i$,
 we can define a GADT $e\;α$ with constructors $op_i : ∀Δ'_i.\,τ_i → e\;σ_i$
 and set $ε = α::\kT.\, e\;α \Rightarrow α$.
