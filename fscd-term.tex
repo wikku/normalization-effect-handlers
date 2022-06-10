@@ -222,7 +222,7 @@ or, in some systems, that it will {\em always} evaluate to a value.
 
 In this work we demonstrate a (to our knowledge) novel proof of
 termination of evaluation (also known as normalization) for a
- language equipped with algebraic effects.
+language \cite{fscd19} equipped with algebraic effects.
 We obtain type soundness as a corollary.
 We also explain how the proof can carry over to other calculi.
 Further, we provide an implementation of the computational content of the proof –
@@ -245,7 +245,7 @@ the effect system, provided that we have sufficiently identified possible source
 of nontermination.
 This is done, for example, in the Koka programming language \cite{koka}.
 
-Normalization also implies that the calculus is sound as a logic, % TODO: what semantics? normal forms?
+Normalization also implies that the calculus is sound as a logic,
 looking through the lens of the Curry-Howard isomorphism.
 However, it is hard to give logical interpretations to effect annotations \cite{oleg}
 and it is unclear how useful it is to treat calculi with algebraic effects as logics.
@@ -261,12 +261,12 @@ information about {\em local} behavior of terms to make a type derivation-direct
 proof of the {\em global} property (such as normalization)
 have strong enough induction hypotheses and ultimately go through.
 
-In this work we define logical relations
+In this work we define direct-style logical relations
 to prove termination
 of evaluation in our language.
 A novelty of our approach
 is that the definition of the logical relations
-is recursive, in other words it is a solution to a fixed-point equation.
+is recursive, more concretely, it is a solution to a fixed-point equation.
 %This is unlike any normalization proof we know of.
 The fixed-point construction replaces the use of step-indexing
 which appears in the logical relation construction we are most directly inspired by \cite{hwc}.
@@ -330,7 +330,7 @@ We assume that all types are well-formed (well-kinded) in the appropriate contex
 Type-level substitutions are used only in the rule for $\Do\!\!\!$
 to instantiate the polymorphic variables $Δ'$ of effect $Δ'.\,τ_1 \Rightarrow τ_2$.
 Complementarily, the rule for $\Handle\!\!$ states that the effect handler clause $e_h$
-has to be essentially polymorphic in $Δ'$. % TODO: parametric in?
+has to be essentially polymorphic in $Δ'$.
 
 We can intuitively understand effect rows as follows:
  if $e : τ ╱ ρ$ and effect $ε$ appears at position $n$ in $ρ$, then
@@ -345,7 +345,7 @@ Their main purpose is to allow
 effect rows to be subsumed by rows with more effects at the end.
 For that to be of use in more places,
 we also have subsumption rules for polymorphic types and function types. % polymorphic?
-In particular, closed rows are subsumed by open rows. % TODO: trivial forall on the left
+In particular, closed rows are subsumed by open rows.
 
 % ORDER! polymorphism
 
@@ -406,7 +406,7 @@ In particular, closed rows are subsumed by open rows. % TODO: trivial forall on 
 
 	\Handle v\,\{x,r.\,e_h;\,x.\,e_r\} ↦ e_r\subst{v}{x} % SUBST
 \end{mathpar}
-\caption{Contraction ($↦$) and reduction ($→$).} % TODO "Contraction"???
+\caption{Contraction ($↦$) and single-step reduction ($→$).}
 \label{reduction}
 \end{figure}
 
