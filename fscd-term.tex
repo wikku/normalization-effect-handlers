@@ -628,8 +628,11 @@ for all possible choices of the semantic type for the type variable.
 	\{ e \mid ∃v∈⟦τ⟧_η.\, e →^* v ∨ ∃e'∈\S⟦τ/ρ⟧_η.\, e →^* e' \} \\
 	\S⟦τ/ρ⟧_η &= \{ K[e] \mid ∃n,μ.\, (e,n,μ)∈⟦ρ⟧_η  ∧ n\Free(K) ∧ ∀u∈μ.\, K[u]∈ \E⟦τ/ρ⟧_η \}
 \end{align*}
-\caption{Interpretation of types.
-Relations on expressions and control-stuck terms.}
+\caption{
+	Interpretation of types.
+	Relations on expressions and stuck terms.%
+	\protect\footnotemark
+}
 \label{logrel}
 \end{figure}
 
@@ -640,6 +643,15 @@ at the beginning of a row, so the freeness is $0$.
 When we prepend to a row, we increase this freeness for every element of its semantic effect
 and combine with the interpretation of the prepended effect.
 Naturally, the semantic effect for the empty row is empty.
+
+\footnotetext{
+	Technically, the terms in $\S⟦τ/ρ⟧_η$ do not have to be control-stuck, since
+	the $(e,n,μ)$ could come from the interpretation of an effect or row variable,
+	and the space of semantic effects allows for any $e$.
+	They have to be stuck if the triple comes from the interpretation of an operation.
+	We leave it that way to make adding multiple operations easier later.
+	The same definition appears in \cite{hwc}.
+}
 
 The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively,
 i.e.\ as the least solution to the equations (we will elaborate on that soon).
