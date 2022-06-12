@@ -812,6 +812,23 @@ If $e →^* e' ∈ \E⟦τ/ρ⟧_η$, then $e∈\E⟦τ/ρ⟧_η$.
 	then $\S⟦τ_1/ρ_1⟧_η ⊆ \S⟦τ_2/ρ_2⟧_η$
 	and $\E⟦τ_1/ρ_1⟧_η ⊆ \E⟦τ_2/ρ_2⟧_η$.
 \end{lemma}
+%\begin{proof}
+%We will show by induction on $e ∈ \E⟦τ_1/ρ_1⟧_η$ that $e ∈ \E⟦τ_2/ρ_2⟧_η$.
+%
+%If $e →^* v ∈ ⟦τ_1⟧_η$, then $v ∈ ⟦τ_2⟧_η$ and by \cref{value-inclusion} we have $v ∈ \E⟦τ_2/ρ_2⟧_η$.
+%By \cref{antireduction} we conclude $e ∈ \E⟦τ_2/ρ_2⟧_η$.
+%
+%If $e →^* K[e']$ such that there exist $(e', n, μ) ∈ ⟦ρ_1⟧_η$ such that
+%$n\Free(K)$ and $K[u] ∈ \E⟦τ_2/ρ_2⟧_η$ for all $u$ in $μ$,
+%then, since $⟦ρ_1⟧_η ⊆ ⟦ρ_2⟧_η$, by definition we have $K[e'] ∈ \S⟦τ_2/ρ_2⟧_η$.
+%By \cref{stuck-inclusion} and \cref{antireduction} we have $e∈\E⟦τ_2/ρ_2⟧_η$.
+%
+%Finally, since the operator $\S⟦τ/ρ⟧_η$ ignores $τ$ and is monotone in $⟦ρ⟧_η$,
+%\begin{align*}
+%\S⟦τ_1/ρ_1⟧_η = \S⟦τ_1/ρ_1⟧_η(\E⟦τ_1/ρ_1⟧_η) &⊆ \S⟦τ_1/ρ_1⟧_η(\E⟦τ_2/ρ_2⟧_η)\\
+%&⊆ \S⟦τ_2/ρ_1⟧_η(\E⟦τ_2/ρ_2⟧_η) = \S⟦τ_2/ρ_2⟧_η.
+%\end{align*}
+%\end{proof}
 
 \section{Compatibility lemmas}
 We want to establish that $⊢ e : τ ╱ ι$ implies $e ∈ \E⟦τ/ι⟧$.
