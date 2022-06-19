@@ -204,7 +204,7 @@
 \begin{abstract}
 	Algebraic effects and handlers are gaining popularity in the theory and practice
 	of programming languages as they provide unparalleled ability to define and combine computational effects.
-	As a contribution to this area,
+	In this work,
 	we demonstrate a novel proof of termination of evaluation and type soundness for
 	a $λ$-calculus with deep effect handlers and a type-and-effect system that
 	disallows recursive effects.
@@ -214,7 +214,7 @@
 
 	Efekty algebraiczne i ich handlery zyskują na popularności w teorii i praktyce
 	języków programowania dzięki ich niezrównanym możliwościom definiowania i łączenia efektów obliczeniowych.
-	Jako wkład w tę dziedzinę
+	W niniejszej pracy
 	prezentujemy nowy dowód terminacji ewaluacji i poprawności typów
 	dla rachunku $λ$ z głębokimi handlerami oraz systemem typów i efektów zabraniającym
 	rekurencyjnych efektów.
@@ -299,12 +299,12 @@ of nontermination.
 This is done, for example, in the Koka programming language \cite{koka}.
 
 Normalization also implies that the calculus is sound as a logic,
-looking through the lens of the Curry-Howard isomorphism.
+looking through the lens of the Curry-Howard isomorphism \cite{ch}.
 However, it is hard to give logical interpretations to effect annotations \cite{oleg}
 and it is unclear how useful it is to treat calculi with algebraic effects as logics.
 
 The primary tool for proving normalization (and many other properties) of
-typed formal calculi is {\em logical relations}.\footnote{
+typed formal calculi is {\em logical relations} \cite{lr}.\footnote{
 	In the context of normalization, logical relations have many names, including:
 	(Tait's) reducibility predicates, reducibility candidates, and saturated sets.
 }
