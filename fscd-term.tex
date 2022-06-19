@@ -397,7 +397,7 @@ In \cref{subtyping} the subtyping rules are introduced.
 Their main purpose is to allow
 effect rows to be subsumed by rows with more effects at the end.
 For that to be of use in more places,
-we also have subsumption rules for polymorphic types and function types. % polymorphic?
+we also have subsumption rules for universal types and function types. % polymorphic?
 In particular, closed rows are subsumed by open rows.
 
 \begin{figure}
@@ -624,7 +624,7 @@ except effect annotations also have to be taken into account.
 The definition may not look structurally recursive at first,
 but we can consider $τ_2/ρ$ to be a subterm of $τ_1 →_ρ τ_2$,
 just rearranged to a different notation.
-A polymorphic type is interpreted, as usual,
+A universal type is interpreted, as usual,
 as the intersection of the interpretations
 for all possible choices of the semantic type for the type variable.
 \begin{figure}
