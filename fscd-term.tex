@@ -1,5 +1,6 @@
 \documentclass[a4paper, 11pt,titlepage, openright, twoside]{report}
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{silence}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{mathtools}
@@ -197,17 +198,33 @@
 
 \maketitle
 
+
+\thispagestyle{empty}
+\cleardoublepage
 \begin{abstract}
 	Algebraic effects and handlers are gaining popularity in the theory and practice
 	of programming languages as they provide unparalleled ability to define and combine computational effects.
-	We demonstrate a novel proof of termination of evaluation and type soundness for
+	As a contribution to this area,
+	we demonstrate a novel proof of termination of evaluation and type soundness for
 	a $λ$-calculus with deep effect handlers and a type-and-effect system that
 	disallows recursive effects.
 	The key idea is a fixed-point construction of logical relations for the language.
+
+	\begin{center} \rule[3pt]{300pt}{1pt} \end{center}
+
+	Efekty algebraiczne i ich handlery zyskują na popularności w teorii i praktyce
+	języków programowania dzięki ich niezrównanym możliwościom definiowania i łączenia efektów obliczeniowych.
+	Jako wkład w tę dziedzinę
+	prezentujemy nowy dowód terminacji ewaluacji i poprawności typów
+	dla rachunku $λ$ z głębokimi handlerami oraz systemem typów i efektów zabraniającym
+	rekurencyjnych efektów.
+	Kluczowym pomysłem jest stałopunktowa konstrukcja relacji logicznych dla języka.
 \end{abstract}
 
-\setcounter{page}{3}
 
+\thispagestyle{empty}
+\cleardoublepage
+\setcounter{page}{5}
 \tableofcontents
 
 \chapter{Introduction}
