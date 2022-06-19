@@ -1284,14 +1284,14 @@ The compatibility lemmas can be proven using strong coinduction\footnote{
 	where $F$ is a monotone operator on a complete lattice and $νF$ is its greatest fixed point.
 }
 	at the type in the rule conclusion,
-except the one for $\Handle\!\!$.
+except for the one for $\Handle\!\!$.
 The problem is that we substitute a resumption
 (which contains a handler) for $r$,
 but to show that it is in $⟦τ_2 →_ρ τ_r⟧_η$
 we would need exactly the claim we are trying to prove in the first place.
 The failure of $\Handle\!\!$ compatibility should not be very surprising,
 as this is the rule responsible for eliminating effects –
-in particular it should be able to take
+in particular, it should be able to take
 any expression in $\E⟦τ/τ_1 \Rightarrow τ_2 · ι⟧_η$ and show that wrapping it in a
 suitable handler produces an expression in $\E⟦τ/ι⟧_η$, which cannot get
 stuck and simply evaluates to a value of type $τ$.
