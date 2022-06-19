@@ -236,6 +236,7 @@ but also nontrivially affect the execution of surrounding code.
 This is what we call computational effects, the typical examples of which are:
 input/output, mutable state, exceptions, nondeterminism, and coroutines.
 
+
 Today, we are at the mercy of programming language designers
 and we can only hope they provide the
 effects we would like to use and make sure that they all interact with
@@ -245,6 +246,8 @@ This requires the use of monadic style, which among other things causes
 stratification of code into two styles and does not always cooperate well with
 the language's native facilities.
 Moreover, monads do not compose in general, so modular programming with monads has some overheads.
+
+\section{Algebraic effects}
 
 In recent years a new promising approach has emerged: \textit{algebraic effects and handlers} \cite{Plotkin_2013}.
 A language featuring algebraic effects lets programmers express all common computational effects as library code
@@ -273,6 +276,8 @@ what kind of effects it may perform along the way.
 Type-and-effect systems allow us to deduce some basic information about programs,
 for example that a pure expression cannot evaluate to two different values,
 or, in some systems, that it will {\em always} evaluate to a value.
+
+\section{Contributions}
 
 In this work we demonstrate a (to our knowledge) novel proof of
 termination of evaluation (also known as normalization) for a
@@ -324,7 +329,7 @@ is recursive, more concretely, it is a solution to a fixed-point equation.
 The fixed-point construction replaces the use of step-indexing
 which appears in the logical relation construction we are most directly inspired by \cite{hwc}.
 
-%\section{Acknowledgements}
+\section{Acknowledgements}
 I would like to thank Dariusz Biernacki, Filip Sieczkowski, and Piotr Polesiuk
 for their help with this work.
 
@@ -342,6 +347,7 @@ signatures of effects do not have to be separately defined and named before thei
 Finally, the type system features polymorphic expressions and polymorphic operations.
 
 %\section{Formal definition}
+\section{Untyped syntax and semantics}
 
 The syntax of the calculus is shown in \cref{syntax}.
 We use metavariables $x$ and $r$ to refer to expression variables.
@@ -368,6 +374,8 @@ The other rules are the standard $β$-reduction of the $λ$-calculus
 and reductions in cases where an (effect-free) value is wrapped by an effect-related construct.
 It is straightforward to see that reduction is deterministic
 and compatible with respect to evaluation contexts.
+
+\section{Type-and-effect system}
 
 In \cref{types} the type system is introduced.
 We have three kinds: types, effects, and rows.
