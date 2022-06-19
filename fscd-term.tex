@@ -287,7 +287,7 @@ We also explain how the proof can carry over to other calculi.
 Further, we present code that mirrors the computational content of the proof.
 
 Termination of evaluation might be of interest for many reasons,
-for example it can simplify formal semantics and reasoning, just by virtue of
+for example, it can simplify formal semantics and reasoning, just by virtue of
 eliminating nontermination as a case to consider.
 It can also be regarded as another safety property, just like ``never crashing''
 (though in practice nonterminating programs are indistinguishable from {very long}-running ones).
@@ -369,7 +369,7 @@ where we can see that effect handling occurs if there
 is a $0\Free$ context between the operation and the handler.
 The resumption $v_c$ wraps the context $K$
 with the same handler, which is why the effect handlers are called {\em deep}
-– all operations are handled, not just the first one (as in so called {\em shallow} handlers).
+– all operations are handled, not just the first one (as in so-called {\em shallow} handlers).
 The other rules are the standard $β$-reduction of the $λ$-calculus
 and reductions in cases where an (effect-free) value is wrapped by an effect-related construct.
 It is straightforward to see that reduction is deterministic
@@ -397,7 +397,7 @@ We can intuitively understand effect rows as follows:
  if $e : τ ╱ ρ$ and effect $ε$ appears at position $n$ in $ρ$, then
 subexpressions performing $ε$ are wrapped by $n$ lifts inside $e$.
 Clearly, the order of effects in the row matters.
-The type system enables {\em row polymorphism},
+The type system enables {\em row polymorphism}
 since we can have a row ending in a polymorphic type variable.
 Such rows are usually called {\em open} (and {\em closed} otherwise).
 
