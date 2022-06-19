@@ -262,14 +262,13 @@ termination of evaluation (also known as normalization) for a
 language \cite{fscd19} equipped with algebraic effects.
 We obtain type soundness as a corollary.
 We also explain how the proof can carry over to other calculi.
-Further, we provide an implementation of the computational content of the proof –
-a normalization algorithm for the calculus.
+Further, we present code that mirrors the computational content of the proof.
 
 Termination of evaluation might be of interest for many reasons,
 for example it can simplify formal semantics and reasoning, just by virtue of
 eliminating nontermination as a case to consider.
 It can also be regarded as another safety property, just like ``never crashing''
-(though in practice nonterminating programs are indistinguishable from very long-running ones).
+(though in practice nonterminating programs are indistinguishable from {very long}-running ones).
 Although most programming languages support recursion, loops, and other
 features allowing for nontermination (eg. recursive types),
 it might be useful to know that fragments that do not use these features cannot be blamed
@@ -587,11 +586,11 @@ in the specific cases of $\kE$ and $\kR$, \textit{semantic effects}:
 We write $\textrm{CVal}$ and $\textrm{CExp}$ for the sets of closed values and closed expressions respectively, so
 elements of $\mathsf{Type}$ are simply sets of closed values.
 Semantic effects are sets of triples that aim to describe a situation
-in which an expression being evaluated performs an effect.
+in which an expression tries to perform an effect but there is no handler for it – it gets {\em control-stuck}.
 The components of such a triple are:
 the operation with its argument,
-the freeness of the enclosing context beyond which the operation can be handled,
-and the semantic type of values we can call the resumption with.
+the freeness of the enclosing context,
+and the semantic type of values we could resume with – the return type of the operation.
 
 Generalizing the preceding,
 type contexts are interpreted as mappings from type variables to semantic types:%
@@ -603,8 +602,8 @@ semantic types.
 
 The interpretation of a type variable
 is directly retrieved from the environment $η$.
-The treatment of function types is mostly standard,
-though effect annotations also have to be taken into account.
+The treatment of function types is standard,
+except effect annotations also have to be taken into account.
 The definition may not look structurally recursive at first,
 but we can consider $τ_2/ρ$ to be a subterm of $τ_1 →_ρ τ_2$,
 just rearranged to a different notation.
@@ -750,9 +749,9 @@ which substitute the value for the operation.%
 	This is also how we could view the structure of values of the inductive type $\E⟦τ/ρ⟧_η$,
 	had we formalized the definitions in a (dependent) type theory.
 }
-Note that different choices of values to resume with could
-theoretically lead to getting stuck a different number of times,
-so the depth of the tree is not uniform, and it could even be infinite.
+Different choices of values to resume with can
+lead to getting stuck a different number of times,
+so the depth of the tree is not uniform, and it can even be infinite.
 Still, these trees are well-founded thanks to the choice of the inductive interpretation.
 
 To describe the construction in more detail, we temporarily overload notation and define
