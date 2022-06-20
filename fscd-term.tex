@@ -286,7 +286,7 @@ We obtain type soundness as a corollary.
 We also explain how the proof can carry over to other calculi.
 Further, we present code that mirrors the computational content of the proof.
 
-Termination of evaluation might be of interest for many reasons,
+Termination of evaluation might be of interest for several reasons,
 for example, it can simplify formal semantics and reasoning, just by virtue of
 eliminating nontermination as a case to consider.
 It can also be regarded as another safety property, just like ``never crashing''
@@ -1342,16 +1342,16 @@ In different settings, this technique appears rare, and our work is one example.
 \chapter{Implementation}
 
 We will present an expository implementation of the language,
-including a rewriting-based evaluator, an evaluator extracted from the proof in the previous chapter,
+including a rewriting-based evaluator, an evaluator based on the proof in the previous chapter,
 and a type-checker.
 
 One can see logical relations as interpreting the object language into a metalanguage.
 Indeed, we have not been using the words ``interpretation'' and ``semantic'' baselessly.
 In the previous chapter, our metalanguage was informal mathematics – set theory, we could say.
-Additionally, our proof is constructive and it should be readily formalizable in a dependent type theory.
+The proof was constructive and it should also be readily formalizable in a dependent type theory.
 If we care only for the computational content of the proof, a simpler metalanguage will suffice –
 we no longer have to consider proof terms with complex types but which are operationally unit types.
-Here, we will use OCaml.
+Here, we will use the OCaml language.
 
 \section{Syntax and rewriting-based evaluator}
 
@@ -1375,10 +1375,11 @@ Finally, we can implement reductions and multi-step reductions:
 
 \lstinputlisting[linerange={137-152}]{impl/syntax.ml}
 
-\section{Evaluator extracted from the proof of termination}
+\section{Evaluator based on the proof of termination}
 
-Now we demonstrate the computational content of the proof of termination.
-The code is substantially shorter than the code performing multi-step reductions, in part because we can leverage
+Now, we demonstrate the computational content of the proof of termination.
+The code may appear simpler than the code performing multi-step reductions,
+in part because we leverage
 the metalanguage's features to realize the object language's features.
 For instance, functions are realized as OCaml functions and
 we do no have to consider variable binding ourselves.
@@ -1397,7 +1398,13 @@ We finish by performing something akin to a fold on the syntax tree.
 
 \lstinputlisting[linerange={208-218}]{impl/syntax.ml}
 
-
+Because OCaml functions are opaque,
+we cannot observe much using this function.
+To test that it is adequate,
+we can add integers to the language.
+Then, we will have an integer constructor of \texttt{goodval},
+and we can compare outputs with the rewriting-based evaluator.
+We omit these straightforward modifications.
 
 Our proof relied on the type system, yet here
 types (of the object language) are nowhere to be seen.
