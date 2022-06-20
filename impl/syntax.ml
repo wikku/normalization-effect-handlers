@@ -217,16 +217,4 @@ let rec eval (e : exp) ctx : goodexp = match e with
       (fun v -> eval er ((y,v) :: ctx))
   | Lift e -> eval_lift (eval e ctx)
 
-
-(*
-let gensym =
-  let n = ref 0 in
-  (fun () -> incr n; "x" ^ string_of_int (!n))
-
-let rec reify = function
-  | Val (Neut x) -> Var x
-  | Val (Fun f) -> let x = gensym() in Lam (x, reify (f (Neut x)))
-  | Stk (v, n, k) ->
-    let Lam (x, e) = reify (Val (Fun k)) in
-    subst [x, Do (voe (reify (Val v)))] e
-*)
+(***)
