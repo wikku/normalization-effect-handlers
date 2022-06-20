@@ -292,7 +292,7 @@ eliminating nontermination as a case to consider.
 It can also be regarded as another safety property, just like ``never crashing''
 (though in practice nonterminating programs are indistinguishable from {very long}-running ones).
 Although most programming languages support recursion, loops, and other
-features allowing for nontermination (eg. recursive types),
+features allowing for nontermination (e.g., recursive types),
 it might be useful to know that fragments that do not use these features cannot be blamed
 for it.
 
@@ -678,7 +678,7 @@ Naturally, the semantic effect for the empty row is empty.
 }
 
 The definition of the set $\E⟦τ/ρ⟧_η$ is recursive and we interpret it inductively,
-i.e.\ as the least solution to the equations (we will elaborate on that soon).
+i.e., as the least solution to the equations (we will elaborate on that soon).
 Note the similarity to the interpretation of function types in the definition of
 $\S⟦τ/ρ⟧_η$.
 The intuition is that an element of $\E⟦τ/ρ⟧_η$
@@ -1195,7 +1195,7 @@ which would naturally be reflected in the type system as having different rows o
 }
 The typing rule for an effectful operation with label $l$ would only look at the row for $l$.
 The numbers representing freeness in the logical relations would also have to be indexed by labels,
-i.e.\ changed into
+i.e., changed into
 functions from labels to natural numbers.
 
 Another common feature in languages with algebraic effects is grouping
@@ -1273,12 +1273,12 @@ But the terms are ``stuck'' for a different reason:
 they are applications to ``external'' functions about which we in a sense do not know enough,
 a situation reminiscent of normal form bisimulations.
 Furthermore, they interpret the recursive definition {\em coinductively},
-i.e. as the greatest fixed point.
+i.e., as the greatest fixed point.
 
 In our setting, a coinductive definition would theoretically allow
-expressions in $\E⟦τ/ρ⟧_η$ to have reduction traces that are ill-founded
-i.e.\ contain infinite paths.
-%i.e. some choices of operation return values would lead to nontermination.
+expressions in $\E⟦τ/ρ⟧_η$ to have reduction traces that are ill-founded,
+i.e., contain infinite paths.
+%i.e., some choices of operation return values would lead to nontermination.
 The compatibility lemmas can be proven using strong coinduction\footnote{
 	Strong coinduction is the principle that $X ⊆ F(X ∪ νF)$ implies $X ⊆ νF$,
 	where $F$ is a monotone operator on a complete lattice and $νF$ is its greatest fixed point.
@@ -1356,7 +1356,7 @@ Here, we will use the OCaml language.
 \section{Syntax and rewriting-based evaluator}
 
 To be faithful to the presentation in \autoref{chap:language},
-we use a representation with named variables (rather than eg.\ de Bruijn indices
+we use a representation with named variables (rather than de Bruijn indices
 or higher-order abstract syntax).
 For simplicity, we do not have a separate type for values.
 
@@ -1428,7 +1428,7 @@ In particular, it will try to evaluate $Ω$, where it will loop forever.
 
 We leave it for future work to determine if this evaluator
 can form part of a normalization by evaluation algorithm,
-i.e.\ if there exists a function \texttt{reify : goodexp -> exp}
+i.e., if there exists a function \texttt{reify : goodexp -> exp}
 that can reconstruct a term in normal form given
 its semantics.
 %Such that \texttt{eval (reify x) = x}.
