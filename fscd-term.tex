@@ -1355,25 +1355,28 @@ Here, we will use the OCaml language.
 
 \section{Syntax and rewriting-based evaluator}
 
-For simplicity and faithfulness to the presentation in \autoref{chap:language},
+To be faithful to the presentation in \autoref{chap:language},
 we use a representation with named variables (rather than eg.\ de Bruijn indices
 or higher-order abstract syntax).
-The data types for the syntax are without surprises:
+For simplicity, we do not have a separate type for values.
 
-\lstinputlisting[linerange={9-10,25-36}]{impl/syntax.ml}
+\lstinputlisting[linerange={9-10,23-36}]{impl/syntax.ml}
+
+\lstinputlisting[linerange={58-67}]{impl/syntax.ml}
 
 We also define evaluation contexts as lists of evaluation context frames
+(the hole is at the front)
 and define a function for calculating freeness:
 
-\lstinputlisting[linerange={87-108}]{impl/syntax.ml}
+\lstinputlisting[linerange={3-24}]{impl/step.ml}
 
 We implement decomposing terms into evaluation contexts and redexes:
 
-\lstinputlisting[linerange={110-134}]{impl/syntax.ml}
+\lstinputlisting[linerange={26-50}]{impl/step.ml}
 
 Finally, we can implement reductions and multi-step reductions:
 
-\lstinputlisting[linerange={137-152}]{impl/syntax.ml}
+\lstinputlisting[linerange={53-68}]{impl/step.ml}
 
 \section{Evaluator based on the proof of termination}
 
@@ -1382,21 +1385,21 @@ The code may appear simpler than the code performing multi-step reductions,
 in part because we leverage
 the metalanguage's features to realize the object language's features.
 For instance, functions are realized as OCaml functions and
-we do no have to consider variable binding ourselves.
+we do not have to consider variable binding ourselves.
 
-First we define analogues of the interpretations
+First, we define analogs of the interpretations
 of values and the relation $\E$.
 We can see that effect types do not play a role in computation.
 
-\lstinputlisting[linerange={175-178}]{impl/syntax.ml}
+\lstinputlisting[linerange={3-6}]{impl/eval.ml}
 
 Now, we define functions which closely follow the compatibility lemmas:
 
-\lstinputlisting[linerange={181-206}]{impl/syntax.ml}
+\lstinputlisting[linerange={9-34}]{impl/eval.ml}
 
 We finish by performing something akin to a fold on the syntax tree.
 
-\lstinputlisting[linerange={208-218}]{impl/syntax.ml}
+\lstinputlisting[linerange={36-46}]{impl/eval.ml}
 
 Because OCaml functions are opaque,
 we cannot observe much using this function.
