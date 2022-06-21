@@ -50,7 +50,7 @@ let rec decomp k = function
   | Lam _ | Var _ -> failwith "no redex"
 
 
-let reduce = function
+let contract = function
   | RBeta (x, e, v) -> subst [x, v] e
   | RLift v -> v
   | RReturn (v, (_, _, _, x, e)) -> subst [x, v] e
@@ -59,7 +59,7 @@ let reduce = function
 
 let step e =
   match decomp [] e with
-  | r, k -> plug (reduce r) k
+  | r, k -> plug (contract r) k
   | exception _ -> failwith "no step"
 
 let rec multistep e =
