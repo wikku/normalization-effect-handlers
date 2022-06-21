@@ -67,8 +67,10 @@
 %\newunicodechar{λ}{\lambda}
 \newunicodechar{λ}{\slambda}
 \newcommand{\keyword}[1]{\textsf{\textup{#1}}}
-\newcommand{\Do}{\keyword{do}\;}
-\newcommand{\Handle}{\keyword{handle}\;}
+\newcommand{\KwDo}{\keyword{do}}
+\newcommand{\Do}{\KwDo\;}
+\newcommand{\KwHandle}{\keyword{handle}}
+\newcommand{\Handle}{\KwHandle\;}
 \newcommand{\Lift}[1]{\boldsymbol{[}#1\boldsymbol{]}}
 \newcommand{\subst}[2]{\{#1/#2\}}
 \newcommand{\E}{\mathcal{E}}
@@ -388,9 +390,9 @@ well-formed in $Δ$.
 We assume that all types are well-formed (well-kinded) in the appropriate contexts in the sense of \cref{kinding}.
 
 
-Type-level substitutions are used only in the rule for $\Do\!\!\!$
+Type-level substitutions are used only in the rule for $\KwDo$
 to instantiate the polymorphic variables $Δ'$ of effect $Δ'.\,τ_1 \Rightarrow τ_2$.
-Complementarily, the rule for $\Handle\!\!$ states that the effect handler clause $e_h$
+Complementarily, the rule for $\KwHandle$ states that the effect handler clause $e_h$
 has to be essentially parametric in $Δ'$.
 
 We can intuitively understand effect rows as follows:
@@ -1221,7 +1223,7 @@ Handlers would take on the form $\Handle e\;\{op_1\;x\;r.\,e_1; …; op_n\;x\;r.
 and $\Do v$ would be generalized to $op\;v$.
 The typing rule for operations would also have to ``guess'' the other operations in an effect
 (in the original rule it already guesses the types in the operation and a type-level substitution).
-The rule for $\Handle\!\!$ would naturally need a suitable premise for each operation clause.
+The rule for $\KwHandle$ would naturally need a suitable premise for each operation clause.
 
 When we have both features and identify labels with effects (groups of operations),%
 \footnote{
@@ -1284,12 +1286,12 @@ The compatibility lemmas can be proven using strong coinduction\footnote{
 	where $F$ is a monotone operator on a complete lattice and $νF$ is its greatest fixed point.
 }
 	at the type in the rule conclusion,
-except for the one for $\Handle\!\!$.
+except for the one for $\KwHandle$.
 The problem is that we substitute a resumption
 (which contains a handler) for $r$,
 but to show that it is in $⟦τ_2 →_ρ τ_r⟧_η$
 we would need exactly the claim we are trying to prove in the first place.
-The failure of $\Handle\!\!$ compatibility should not be very surprising,
+The failure of $\KwHandle$ compatibility should not be very surprising,
 as this is the rule responsible for eliminating effects –
 in particular, it should be able to take
 any expression in $\E⟦τ/τ_1 \Rightarrow τ_2 · ι⟧_η$ and show that wrapping it in a
