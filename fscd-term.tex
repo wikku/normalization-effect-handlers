@@ -1159,8 +1159,9 @@ and by antireduction $e ∈ \E⟦∀α∷κ.\,τ/ι⟧_η$.
 \end{lemma}
 \begin{proof}
 Assume $Δ ⊢ σ ∷ κ$ and $Δ; ⊨ e : ∀α∷κ.\,τ╱ρ$.
+Take $η ∈ ⟦Δ⟧$.
 By \cref{subst-comp} we have $⟦τ\subst{σ}{α}⟧_η = ⟦τ⟧_{η[α↦⟦σ⟧_η]}$,
-which is a superset of $⟦∀α∷κ.\,τ⟧$.
+which is a superset of $⟦∀α∷κ.\,τ⟧_η$.
 So we have $Δ; ⊨ e : τ\subst{σ}{α} ╱ ρ$ by \cref{mono}.
 \end{proof}
 
