@@ -30,7 +30,7 @@ let rec eval_handle e eh er =
     else Stk (v, n-1, fun u -> eval_handle (k u) eh er)
 
 let eval_do = function
-  | Val v -> Stk (v, 0, fun u -> Val v)
+  | Val v -> Stk (v, 0, fun u -> Val u)
   | _ -> failwith "do nonval"
 
 let rec eval (e : exp) ctx : goodexp = match e with
