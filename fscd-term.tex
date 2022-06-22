@@ -1030,12 +1030,12 @@ Again, the claim follows by antireduction.
 	Syntactic type substitutions are compatible with semantic type environments: If
 	\begin{itemize}
 	\item $Δ$ and $Δ'$ have disjoint domains; and
-	\item $Δ ⊢ δ ∷ Δ'$; and
 	\item $Δ,Δ' ⊢ τ ∷ κ$; and
 	\item $η∈⟦Δ⟧$; and
-	\item $η'$ extends $η$ by mappings $α↦⟦δ(α)⟧_η$;
+	\item $Δ ⊢ δ ∷ Δ'$; and
+	\item $η'$ extends $η$ by $α↦⟦δ(α)⟧_η$ for each $α$ in the domain of $Δ'$;
 	\end{itemize}
-	then $⟦τ⟧_{η'} = ⟦δ(α)⟧_η$.
+	then $⟦τ⟧_{η'} = ⟦δ(τ)⟧_η$.
 \end{lemma}
 \begin{proof}
 	By induction on the kinding rules.
