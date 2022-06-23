@@ -1,25 +1,4 @@
-open Format
-
-type info = Lexing.position * Lexing.position
-
-let rec iter f n x = if n = 0 then x else iter f (n-1) (f x)
-
-type kind = T | E | R
-
 let assoc, deassoc = List.assoc, List.remove_assoc
-
-type ty =
-  | TVar of string
-  | TArr of ty * ro * ty
-  | TForall of string * kind * ty
-and ef =
-  | EVar of string
-  | Op of (string * kind) list * ty * ty
-and ro =
-  | RVar of string
-  | RRow of ef list
-
-type typelike = Ty of ty | Ef of ef | Ro of ro
 
 type exp =
   | Var of string
@@ -33,6 +12,23 @@ and handler = string * string * exp * string * exp
 let is_value = function
   | Var _ | Lam _ -> true
   | App _ | Do _ | Handle _ | Lift _ -> false
+
+let rec subst s : exp -> exp = function
+  | Var x as e -> (try assoc x s with Not_found -> e)
+  | Lam (x,t) -> Lam(x, subst (deassoc x s) t)
+  | App (t1,t2) -> App(subst s t1, subst s t2)
+  | Lift t -> Lift(subst s t)
+  | Do t -> Do(subst s t)
+  | Handle (t1,(x,r,t2,y,t3)) ->
+    Handle (subst s t1,
+            (x, r, subst (deassoc x (deassoc r s)) t2,
+             y, subst (deassoc y s) t3))
+
+(***)
+
+let rec iter f n x = if n = 0 then x else iter f (n-1) (f x)
+
+open Format
 
 let rec pr_exp0 ppf = function
   | Lift e -> fprintf ppf "[%a]" pr_exp0 e
@@ -54,19 +50,6 @@ and pr_lambda ppf = function
   | Lam (s, lam) ->
      fprintf ppf "@[<1>%s%a%s@ %a@]" "\\" pp_print_string s "." pr_lambda lam
   | e -> pr_app ppf e
-
-let rec subst s : exp -> exp = function
-  | Var x as e -> (try assoc x s with Not_found -> e)
-  | Lam (x,t) -> Lam(x, subst (deassoc x s) t)
-  | App (t1,t2) -> App(subst s t1, subst s t2)
-  | Lift t -> Lift(subst s t)
-  | Do t -> Do(subst s t)
-  | Handle (t1,(x,r,t2,y,t3)) ->
-    Handle (subst s t1,
-            (x, r, subst (deassoc x (deassoc r s)) t2,
-             y, subst (deassoc y s) t3))
-
-(***)
 
 let church n : exp =
   let rec aux n exp = if n = 0 then exp else App (Var "f", aux (n-1) exp) in

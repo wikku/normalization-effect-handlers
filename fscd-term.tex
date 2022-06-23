@@ -1369,9 +1369,9 @@ we use a representation with named variables (rather than de Bruijn indices
 or higher-order abstract syntax).
 For simplicity, we do not have a separate type for values.
 
-\lstinputlisting[linerange={9-10,23-36}]{impl/syntax.ml}
+\lstinputlisting[linerange={1-14}]{impl/syntax.ml}
 
-\lstinputlisting[linerange={58-67}]{impl/syntax.ml}
+\lstinputlisting[linerange={16-25}]{impl/syntax.ml}
 
 We define evaluation contexts as lists of evaluation context frames
 (the hole is at the front)
@@ -1381,11 +1381,13 @@ and define a function for calculating freeness:
 
 We implement decomposing terms into evaluation contexts and redexes:
 
-\lstinputlisting[linerange={26-50}]{impl/step.ml}
+\lstinputlisting[linerange={26-51}]{impl/step.ml}
 
 Finally, we can implement reductions and multi-step reductions:
 
-\lstinputlisting[linerange={53-68}]{impl/step.ml}
+\lstinputlisting[linerange={52-57}]{impl/step.ml}
+
+\lstinputlisting[linerange={59-67}]{impl/step.ml}
 
 \section{Evaluator based on the proof of termination}
 
@@ -1404,11 +1406,11 @@ We can see that effect types do not play a role in computation.
 
 Now, we define functions which closely follow the compatibility lemmas:
 
-\lstinputlisting[linerange={9-34}]{impl/eval.ml}
+\lstinputlisting[linerange={8-33}]{impl/eval.ml}
 
 We finish by performing something akin to a fold on the syntax tree.
 
-\lstinputlisting[linerange={36-46}]{impl/eval.ml}
+\lstinputlisting[linerange={35-45}]{impl/eval.ml}
 
 Because OCaml functions are opaque,
 we cannot observe much using this function.

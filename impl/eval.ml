@@ -5,7 +5,6 @@ and goodexp =
   | Val of goodval
   | Stk of goodval * int * (goodval -> goodexp)
 
-
 let eval_lam f = Val (Fun f)
 
 let rec eval_lift = function

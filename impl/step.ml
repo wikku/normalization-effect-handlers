@@ -29,7 +29,6 @@ type redex =
   | RReturn of exp * handler
   | RDo of econt * exp * handler
 
-
 let rec find_handler n rev_res = function
   | FHandle h :: fs when n = 0 -> (List.rev rev_res, h, fs)
   | f :: fs -> find_handler (ffree n f) (f :: rev_res) fs
