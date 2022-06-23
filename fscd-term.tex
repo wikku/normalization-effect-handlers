@@ -1052,6 +1052,12 @@ Again, the claim follows by antireduction.
 
 	If $τ=ι$, then both sides are empty.
 
+	If $τ=τ_1 →_ρ τ_2$, then
+	$⟦τ⟧_{η'} = \{λx.\,e │ ∀v ∈ ⟦τ_1⟧_{η'}.\,e\subst{v}{x} ∈ \E⟦τ_2/ρ⟧_{η'}\}$
+	and
+	$⟦δ(τ)⟧_η = \{λx.\,e │ ∀v ∈ ⟦δ(τ_1)⟧_η.\,e\subst{v}{x} ∈ \E⟦δ(τ_2)/δ(ρ)⟧_η\}$,
+	which are equal by the inductive hypothesis and definition of $\E$.
+
 	If $τ=∀α∷κ.\,τ'$, then
 	$⟦τ⟧_{η'} = \bigcap \{⟦τ'⟧_{η'[α↦μ]} │ μ∈⟦κ⟧\}$
 	and
