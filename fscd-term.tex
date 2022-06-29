@@ -34,7 +34,7 @@
 \title{\textbf{Normalization for algebraic effect handlers}}
 \author{Wiktor Kuchta}
 
-\date{23 czerwca 2022} %TODO
+\date{29 czerwca 2022} %TODO
 
 \usepackage{titling}
 
@@ -395,6 +395,11 @@ we write $Δ ⊢ δ ∷ Δ'$ if $δ$ maps type variables in $Δ'$ to types of th
 well-formed in $Δ$.
 We assume that all types are well-formed (well-kinded) in the appropriate contexts in the sense of \cref{kinding}.
 
+Types are either type variables, universal types, or function types.
+Effects consist of an operation argument type and return type,
+possibly with variables bound by the type context.
+Rows are lists of effects,
+with $ι$ denoting the empty row.
 
 Type-level substitutions are used only in the rule for $\KwDo$
 to instantiate the polymorphic variables $Δ'$ of effect $Δ'.\,τ_1 \Rightarrow τ_2$.
@@ -874,7 +879,7 @@ If $e →^* e' ∈ \E⟦τ/ρ⟧_η$, then $e∈\E⟦τ/ρ⟧_η$.
 %\end{align*}
 %\end{proof}
 
-\section{Compatibility lemmas}
+\section{Compatibility} % TODO only "Compatibility" or other word? Adequacy? Soundness?
 We want to establish that $⊢ e : τ ╱ ι$ implies $e ∈ \E⟦τ/ι⟧$.
 For this purpose we will prove a semantic counterpart of each typing rule.
 First, we need to define a counterpart to the typing judgment.
@@ -1421,7 +1426,7 @@ We finish by performing something akin to a fold on the syntax tree.
 Because OCaml functions are opaque,
 we cannot observe much using this function.
 To test that it is adequate,
-we can add integers to the language.
+we could add integers to the language.
 Then, we will have an integer constructor of \texttt{goodval},
 and we can compare outputs with the rewriting-based evaluator.
 We omit these straightforward modifications.
