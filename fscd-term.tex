@@ -522,10 +522,6 @@ In particular, closed rows are subsumed by open rows.
 		{Δ;Γ ⊢ e : τ\subst{σ}{α} ╱ ρ}
 
 	\inferrule
-		{Δ ⊢ τ_1 <: τ_2 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ;Γ ⊢ e : τ_1 ╱ ρ_1}
-		{Δ;Γ ⊢ e : τ_2 ╱ ρ_2}
-
-	\inferrule
 		{Δ;Γ ⊢ v : δ(τ_1) ╱ ι \\ Δ ⊢ δ ∷ Δ' \\ Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
 		{Δ;Γ ⊢ \Do v : δ(τ_2) ╱ (Δ'.\, τ_1 \Rightarrow τ_2)}
 
@@ -534,6 +530,10 @@ In particular, closed rows are subsumed by open rows.
 		Δ,Δ';Γ,x:τ_1,r:τ_2→_ρ τ_r ⊢ e_h : τ_r ╱ ρ \\
 		Δ;Γ, x:τ ⊢ e_r : τ_r ╱ ρ}
 		{Δ;Γ ⊢ \Handle e\;\{x,r.\,e_h;x.\,e_r\} : τ_r ╱ ρ}
+
+	\inferrule
+		{Δ ⊢ τ_1 <: τ_2 \\ Δ ⊢ ρ_1 <: ρ_2 \\ Δ;Γ ⊢ e : τ_1 ╱ ρ_1}
+		{Δ;Γ ⊢ e : τ_2 ╱ ρ_2}
 
 \end{mathpar}
 \caption{Type system.}
