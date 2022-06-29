@@ -386,16 +386,16 @@ and compatible with respect to evaluation contexts.
 \section{Type-and-effect system}
 
 In \cref{types} the type system is introduced.
-We have three kinds: types, effects, and rows.
+We have three kinds: types ($\kT$), effects ($\kE$), and rows ($\kR$).
 We use $α$ to range over type variables and
 $Δ$ to range over type contexts, which assign kinds to type variables.
 Similarly, contexts $Γ$ assign types to term-level variables.
 We furthermore have the concept of {\em type-level substitutions}:
 we write $Δ ⊢ δ ∷ Δ'$ if $δ$ maps type variables in $Δ'$ to types of the corresponding kinds,
 well-formed in $Δ$.
-We assume that all types are well-formed (well-kinded) in the appropriate contexts in the sense of \cref{kinding}.
 
-Types are either type variables, function types, or universal types.
+We assume that all types are well-formed (well-kinded) in the appropriate contexts in the sense of \cref{kinding}.
+Types can be function types or universal types.
 Effects consist of an operation argument type and return type,
 possibly with variables bound by the type context.
 Rows are lists of effects,
