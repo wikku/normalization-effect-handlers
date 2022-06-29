@@ -395,7 +395,7 @@ we write $Δ ⊢ δ ∷ Δ'$ if $δ$ maps type variables in $Δ'$ to types of th
 well-formed in $Δ$.
 We assume that all types are well-formed (well-kinded) in the appropriate contexts in the sense of \cref{kinding}.
 
-Types are either type variables, universal types, or function types.
+Types are either type variables, function types, or universal types.
 Effects consist of an operation argument type and return type,
 possibly with variables bound by the type context.
 Rows are lists of effects,
@@ -555,16 +555,16 @@ In particular, closed rows are subsumed by open rows.
 		{Δ ⊢ ∀α::κ.\, τ ∷ \kT}
 
 	\inferrule
+		{Δ,Δ' ⊢ τ_1 ∷ \kT \\ Δ,Δ' ⊢ τ_2 ∷ \kT}
+		{Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
+
+	\inferrule
 		{ }
 		{Δ ⊢ ι ∷ \kR}
 
 	\inferrule
 		{Δ ⊢ ε ∷ \kE \\ Δ ⊢ ρ ∷ \kR}
 		{Δ ⊢ ε · ρ ∷ \kR}
-
-	\inferrule
-		{Δ,Δ' ⊢ τ_1 ∷ \kT \\ Δ,Δ' ⊢ τ_2 ∷ \kT}
-		{Δ ⊢ Δ'.\, τ_1 \Rightarrow τ_2 ∷ \kE}
 
 	%Δ ⊢ δ ∷ Δ' ⇔ \dom(δ) = \dom(Δ') ∧ ∀α∈\dom(δ).\, Δ ⊢ δ(α) ∷ Δ'(α)
 \end{mathpar}
