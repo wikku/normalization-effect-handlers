@@ -6,7 +6,6 @@
 \usepackage{mathtools}
 \usepackage{enumitem}
 \usepackage{newunicodechar}
-\usepackage{etoolbox}
 \usepackage[margin=3cm,bindingoffset=1cm]{geometry}
 \usepackage{stmaryrd}
 \SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
@@ -60,11 +59,6 @@
 }
 
 
-%\newcommand{\textbsf}[1]{\textbf{\textsf{#1}}}
-%\newunicodechar{λ}{\mathsf{\lambda}}
-%\newunicodechar{λ}{\mathbf{\lambda}}
-%\newunicodechar{λ}{\boldsymbol{\lambda}}
-%\newunicodechar{λ}{\lambda}
 \newunicodechar{λ}{\slambda}
 \newcommand{\keyword}[1]{\textsf{\textup{#1}}}
 \newcommand{\KwDo}{\keyword{do}}
@@ -82,87 +76,38 @@
 \newcommand{\Free}{\textrm{-}\mathrm{free}}
 \newcommand{\Obs}{\mathrm{Obs}}
 \newcommand{\N}{\mathbb{N}}
-\newcommand{\Z}{\mathbb{Z}}
-\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
-\newcommand{\modulus}[1]{\left| #1 \right|}
-\newcommand{\abs}{\modulus}
-\newcommand{\ol}{\overline}
 \DeclareMathOperator{\dom}{dom}
 \newcommand{\+}{\enspace}
-\newcommand{\gr}{\textcolor{ForestGreen}}
 
 \newtheorem{corollary}{Corollary}
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
 
 \newunicodechar{│}{\mid} % Digr vv
-%\newunicodechar{╱}{/} % Digr FD
 \newunicodechar{╱}{\mathbin{/}} % Digr FD
 \newunicodechar{∷}{::} % Digr ::
 \newunicodechar{□}{\square} % Digr OS
 \newunicodechar{∅}{\emptyset} % Digr /0
-\newunicodechar{∞}{\infty} % Digr 00
-\newunicodechar{∂}{\partial} % Digr dP
 \newunicodechar{α}{\alpha}
 \newunicodechar{β}{\beta}
-\newunicodechar{ξ}{\xi} % Digr c*
 \newunicodechar{δ}{\delta} % Digr d*
 \newunicodechar{ε}{\varepsilon}
-\newunicodechar{φ}{\varphi}
 \newunicodechar{γ}{\gamma} % Digr g*
-\newunicodechar{θ}{\theta} % Digr h*
 \newunicodechar{ι}{\iota} % Digr i*
 \newunicodechar{κ}{\kappa}
 \newunicodechar{μ}{\mu}
 \newunicodechar{ν}{\nu}
-\newunicodechar{π}{\pi}
-\newunicodechar{ψ}{\psi}
 \newunicodechar{ρ}{\rho}
 \newunicodechar{σ}{\sigma}
 \newunicodechar{τ}{\tau}
-\newunicodechar{ω}{\omega}
 \newunicodechar{η}{\eta} % Digr y*
-\newunicodechar{ζ}{\zeta} % Digr z*
 \newunicodechar{Δ}{\Delta}
 \newunicodechar{Γ}{\Gamma}
-\newunicodechar{Λ}{\Lambda}
-\newunicodechar{Θ}{\Theta}
-\newunicodechar{Φ}{\Phi} % Digr F*
-\newunicodechar{Π}{\Pi}
-\newunicodechar{Ψ}{\Psi} % digr Q*
-\newunicodechar{Σ}{\Sigma} % digr S*
 \newunicodechar{Ω}{\Omega} % digr W*
 \newunicodechar{ℕ}{\N} % Digr NN 8469 nonstandard
-\newunicodechar{ℤ}{\Z} % Digr ZZ 8484 nonstandard
-\newunicodechar{∑}{\sum}
-\newunicodechar{∏}{\prod}
-\newunicodechar{∫}{\int}
-\newunicodechar{∓}{\mp}
-\newunicodechar{⌈}{\lceil} % Digr <7
-\newunicodechar{⌉}{\rceil} % Digr >7
-\newunicodechar{⌊}{\lfloor} % Digr 7<
-\newunicodechar{⌋}{\rfloor} % Digr 7>
-\newunicodechar{≅}{\cong} % Digr ?=
-\newunicodechar{≡}{\equiv} % Digr 3=
-\newunicodechar{◁}{\triangleleft} % Digr Tl
-\newunicodechar{▷}{\triangleright} % Digr Tr
-\newunicodechar{≤}{\le}
-\newunicodechar{≥}{\ge}
-\newunicodechar{≪}{\ll} % Digr <*
-\newunicodechar{≫}{\gg} % Digr *>
-\newunicodechar{≠}{\ne}
 \newunicodechar{⊆}{\subseteq} % Digr (_
-\newunicodechar{⊇}{\supseteq} % Digr _)
-\newunicodechar{⊂}{\subset} % Digr (C
-\newunicodechar{⊃}{\supset} % Digr C)
-\newunicodechar{∩}{\cap} % Digr (U
-\newunicodechar{∖}{\setminus} % Digr -\ 8726 nonstandard
 \newunicodechar{∪}{\cup} % Digr )U
-\newunicodechar{∼}{\sim} % Digr ?1
-\newunicodechar{≈}{\approx} % Digr ?2
 \newunicodechar{∈}{\in} % Digr (-
-\newunicodechar{∋}{\ni} % Digr -)
-\newunicodechar{∇}{\nabla} % Digr NB
 \newunicodechar{∃}{\exists} % Digr TE
 \newunicodechar{∀}{\forall} % Digr FA
 \newunicodechar{∧}{\wedge} % Digr AN
@@ -172,14 +117,8 @@
 \newunicodechar{⊨}{\models} % Digr \= 8872 nonstandard
 \newunicodechar{⊤}{\top} % Digr TO 8868 nonstandard
 \newunicodechar{⇒}{\implies} % Digr =>
-\newunicodechar{⊸}{\multimap} % Digr #> nonstandard
-\newunicodechar{⇐}{\impliedby} % Digr <=
 \newunicodechar{⇔}{\iff} % Digr ==
-\newunicodechar{↔}{\leftrightarrow} % Digr <>
 \newunicodechar{↦}{\mapsto} % Digr T> 8614 nonstandard
-\newunicodechar{∘}{\circ} % Digr Ob
-\newunicodechar{⊕}{\oplus} % Digr O+ 8853
-\newunicodechar{⊗}{\otimes} % Digr OX 8855
 \newunicodechar{⟦}{\llbracket} % Digr [[ 10214 nonstandard (needs pkg stmaryrd)
 \newunicodechar{⟧}{\rrbracket} % Digr ]] 10215 nonstandard
 
@@ -189,12 +128,7 @@
 \newunicodechar{·}{\ifmmode\cdot\else\textperiodcentered\fi} % Digr .M
 \newunicodechar{×}{\ifmmode\times\else\texttimes\fi} % Digr *X
 \newunicodechar{→}{\ifmmode\rightarrow\else\textrightarrow\fi} % Digr ->
-\newunicodechar{←}{\ifmmode\leftarrow\else\textleftarrow\fi} % Digr ->
-\newunicodechar{⟨}{\ifmmode\langle\else\textlangle\fi} % Digr LA 10216 nonstandard
-\newunicodechar{⟩}{\ifmmode\rangle\else\textrangle\fi} % Digr RA 10217 nonstandard
 \newunicodechar{…}{\ifmmode\dots\else\textellipsis\fi} % Digr .,
-\newunicodechar{±}{\ifmmode\pm\else\textpm\fi} % Digr +-
-\newunicodechar{¬}{\ifmmode\lnot\else\textlnot\fi} % Digr NO
 
 \begin{document}
 
